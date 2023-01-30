@@ -47,7 +47,7 @@ export default class GameScene extends Phaser.Scene {
   preload() {
     console.log("preload");
     this.load.image("player", "images/dino.png");
-    this.load.image("target", "images/dino1.png");
+    this.load.image("target", "images/dino.png");
     this.load.image("enemy", "images/asteroid.png");
     this.load.image("background", "images/grass.jpg");
 
@@ -77,7 +77,7 @@ export default class GameScene extends Phaser.Scene {
     playerSize = smallerSide / 10;
     targetSize = smallerSide / 10;
     enemySize = smallerSide / 10;
-    console.log(playerSize, targetSize, enemySize);
+    // console.log(playerSize, targetSize, enemySize);
   }
 
   create() {
@@ -120,7 +120,10 @@ export default class GameScene extends Phaser.Scene {
       alltime = parseInt(localStorage.getItem("alltime")!);
     }
 
-    const style = { font: "28px Courier", fill: "black", align: "center" };
+    const style: Phaser.Types.GameObjects.Text.TextStyle = {
+      font: "28px Arial",
+      align: "center",
+    };
     text = this.add
       .text(gameWidth / 2, gameHeight / 2, "", style)
       .setOrigin(0.5)
@@ -186,14 +189,20 @@ export default class GameScene extends Phaser.Scene {
 
     enemies.add(enemy);
     this.physics.world.enable(enemy, Phaser.Physics.Arcade.DYNAMIC_BODY);
-
-    enemy.body.setCircle(enemy.width / 2);
-    enemy.body.setVelocity(
+    let enemyBody = enemy.body as Phaser.Physics.Arcade.Body;
+    enemyBody.setCircle(enemy.width / 2);
+    enemyBody.setVelocity(
       Math.pow(-1, Phaser.Math.Between(0, 1)) * Phaser.Math.Between(60, 180),
       Math.pow(-1, Phaser.Math.Between(0, 1)) * Phaser.Math.Between(60, 180)
     );
-    enemy.body.setCollideWorldBounds(true);
-    enemy.body.setBounce(1, 1);
+    // console.log("enemyBody.velocity: ", enemyBody.velocity);
+    // console.log("this.scale.baseSize: ", this.scale.baseSize);
+    // console.log("this.scale.gameSize: ", this.scale.gameSize);
+    // console.log("this.scale.parentSize: ", this.scale.parentSize);
+    // console.log("this.scale.displaySize: ", this.scale.displaySize);
+
+    enemyBody.setCollideWorldBounds(true);
+    enemyBody.setBounce(1, 1);
   }
 
   private targetReached(
@@ -223,14 +232,16 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private collideWithEnemy(
-    player: any,
+    player: Phaser.Types.Physics.Arcade.GameObjectWithBody,
     _enemy: Phaser.Types.Physics.Arcade.GameObjectWithBody
   ) {
     console.log("CollideWithEnemy");
 
     this.physics.pause();
 
-    player.setTint(0xff0000);
+    (player as Phaser.Types.Physics.Arcade.ImageWithDynamicBody).setTint(
+      0xff0000
+    );
 
     this.gameOver = true;
     //ReloadButton
@@ -242,7 +253,7 @@ export default class GameScene extends Phaser.Scene {
       backgroundColor: "green",
     };
     text
-      .setText("New Game\n\n" + text.text)
+      .setText(text.text + "\n\nNew Game")
       .setPadding(10)
       .setStyle(textStyle)
       .setInteractive({ useHandCursor: true })
