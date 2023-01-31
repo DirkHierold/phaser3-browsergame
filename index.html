@@ -5,10 +5,64 @@
     <meta http-equiv="cache-control" content="no-cache" />
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
     <title>Di-No</title>
+    <meta name="theme-color" content="black" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="images/icon-192-dino.png" sizes="192x192" />
+    <link rel="icon" href="images/icon-256-dino.png" sizes="256x256" />
+    <link rel="icon" href="images/icon-512-dino.png" sizes="512x512" />
     <link href="game.css" rel="stylesheet" />
   </head>
   <body>
-    <div id="app"></div>
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <p>Add to home screen?</p>
+        <button onclick="offlinePrompt()">Install</button>
+      </div>
+    </div>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker.register("/sw.ts", { scope: "/" }).then(
+            function (registration) {
+              console.log(
+                "ServiceWorker registration successful with scope: ",
+                registration.scope
+              );
+            },
+            function (err) {
+              console.log("ServiceWorker registration failed: ", err);
+            }
+          );
+        });
+      }
+      let deferredPrompt;
+      window.addEventListener("beforeinstallprompt", function (e) {
+        console.log("beforeinstallprompt triggered");
+        e.preventDefault();
+        deferredPrompt = e;
+        modal.style.display = "block";
+      });
+      // Get the modal
+      var modal = document.getElementById("myModal");
+      // Get the <span> element that closes the modal
+      var span = document.getElementsByClassName("close")[0];
+      // When the user clicks anywhere outside of the modal, close it
+      window.onclick = function (event) {
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      };
+      // When the user clicks on <span> (x), close the modal
+      span.onclick = function () {
+        modal.style.display = "none";
+      };
+      function offlinePrompt() {
+        deferredPrompt.prompt();
+      }
+    </script>
     <script type="module" src="src/main.ts"></script>
   </body>
 </html>

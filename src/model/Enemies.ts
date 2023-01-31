@@ -1,0 +1,45 @@
+import TextureKeys from "../consts/TextureKeys";
+import Player from "./Player";
+
+export default class Enemies extends Phaser.Physics.Arcade.Group {
+  scene: Phaser.Scene;
+
+  constructor(scene: Phaser.Scene) {
+    super(scene.physics.world, scene);
+    this.scene = scene;
+    scene.physics.world.enable(this);
+    scene.add.existing(this);
+  }
+
+  addEnemy(player: Player, enemySize: number) {
+    const posX =
+      (player.x + this.scene.scale.width / 2) % this.scene.scale.width;
+    const posY =
+      (player.y + this.scene.scale.height / 2) % this.scene.scale.height;
+
+    let enemy: any = this.scene.add.image(posX, posY, TextureKeys.Enemy);
+    enemy.setDisplaySize(enemySize, enemySize);
+
+    this.add(enemy);
+
+    this.scene.physics.world.enable(enemy, Phaser.Physics.Arcade.DYNAMIC_BODY);
+    let enemyBody = enemy.body as Phaser.Physics.Arcade.Body;
+    enemyBody.setCircle(enemy.width / 2);
+    let velocity = new Phaser.Math.Vector2();
+    Phaser.Math.RandomXY(velocity);
+
+    enemyBody.setVelocity(
+      velocity.x * Phaser.Math.Between(60, 180),
+      velocity.y * Phaser.Math.Between(60, 180)
+    );
+
+    // console.log("enemyBody.velocity: ", enemyBody.velocity);
+    // console.log("this.scale.baseSize: ", this.scale.baseSize);
+    // console.log("this.scale.gameSize: ", this.scale.gameSize);
+    // console.log("this.scale.parentSize: ", this.scale.parentSize);
+    // console.log("this.scale.displaySize: ", this.scale.displaySize);
+
+    enemyBody.setCollideWorldBounds(true);
+    enemyBody.setBounce(1, 1);
+  }
+}

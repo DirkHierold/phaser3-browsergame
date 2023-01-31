@@ -1,0 +1,26 @@
+{
+  "name": "Di-No",
+  "short_name": "by Dirk Hierold",
+  "description": "Don't die dino!",
+  "start_url": "/",
+  "background_color": "#000000",
+  "theme_color": "#0f4a73",
+  "display": "fullscreen",
+  "icons": [
+    {
+      "src": "images/icon-192-dino.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icon-256-dino.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icon-512-dino.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
