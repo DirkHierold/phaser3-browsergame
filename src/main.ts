@@ -10,39 +10,15 @@ const config: Phaser.Types.Core.GameConfig = {
   physics: {
     default: "arcade",
     arcade: {
-      // gravity: { y: 200 },
       debug: false,
     },
   },
   scale: {
-    // parent: "phaser-example",
     mode: Phaser.Scale.FIT,
     // autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   scene: [Preloader, GameScene],
 };
-
-// {
-// 	type: Phaser.AUTO,
-// 	width: gameWidth,
-// 	height: gameHeight,
-// 	physics: {
-// 		default: 'arcade',
-// 		arcade: {
-// 			debug: true
-// 		}
-// 	},
-// 	scale: {
-// 		parent: 'phaser-example',
-// 		mode: Phaser.Scale.FIT,
-// 		// autoCenter: Phaser.Scale.CENTER_BOTH
-// 	},
-// 	scene: {
-// 		preload: preload,
-// 		create: create,
-// 		update: update
-// 	}
-// };
 
 const game = new Phaser.Game(config);
 export default game;

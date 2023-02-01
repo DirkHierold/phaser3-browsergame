@@ -63,11 +63,10 @@ export default class GameScene extends Phaser.Scene {
     if (smallerSide > gameHeight) {
       smallerSide = gameHeight;
     }
-    // console.log(smallerSide,gameWidth)
+
     playerSize = smallerSide / 10;
     targetSize = smallerSide / 10;
     enemySize = smallerSide / 10;
-    // console.log(playerSize, targetSize, enemySize);
   }
 
   create() {
@@ -163,15 +162,8 @@ export default class GameScene extends Phaser.Scene {
     this.score++;
     alltime++;
 
-    // localStorage.setItem(StorageKeys.Score, this.score.toString());
-    // localStorage.setItem(StorageKeys.Alltime, alltime.toString());
     highscore = localStorage.setHighscoreIfNew(this.score, highscore);
     localStorage.setAlltime(alltime);
-
-    // if (this.score > highscore) {
-    //   highscore = this.score;
-    //   localStorage.setItem(StorageKeys.Highscore, highscore.toString());
-    // }
 
     this.drawScores();
   }
@@ -209,54 +201,6 @@ export default class GameScene extends Phaser.Scene {
       .on(EventKeys.PointerOver, () => text.setStyle({ fill: "#f39c12" }))
       .on(EventKeys.PointerOut, () => text.setStyle({ fill: "#FFF" }));
   }
-
-  // private handleMouse() {
-  //   // console.log("handleMouse");
-  //   if (this.input.activePointer.isDown && !this.isDown) {
-  //     // console.log("this.input.activePointer.isDown && !isDown");
-
-  //     oldtouchX = this.input.activePointer.x;
-  //     oldtouchY = this.input.activePointer.y;
-  //     this.isDown = true;
-  //   } else if (this.input.activePointer.isDown && this.isDown) {
-  //     // console.log("this.input.activePointer.isDown && isDown");
-  //     actualtouchX = this.input.activePointer.x;
-  //     actualtouchY = this.input.activePointer.y;
-
-  //     player.x += actualtouchX - oldtouchX;
-  //     player.y += actualtouchY - oldtouchY;
-
-  //     // Player looks to the right and changes to left
-  //     if (actualtouchX - oldtouchX < 0 && player.flipX) {
-  //       player.toggleFlipX();
-  //       player.body.setOffset(player.width / 10, player.height / 8);
-  //       // Player looks to the left and changes to right
-  //     } else if (actualtouchX - oldtouchX > 0 && !player.flipX) {
-  //       // player.toggleFlipX();
-  //       player.toggleFlipX();
-  //       player.body.setOffset((player.width * 2) / 5, player.height / 8);
-  //     }
-
-  //     //Player is right from Target
-  //     if (player.body.x > target.body.x + target.body.width && !target.flipX) {
-  //       target.toggleFlipX();
-  //       target.body.setOffset((target.width * 2) / 5, target.height / 8);
-  //       //Player is left from Target
-  //     } else if (
-  //       player.body.x + player.body.width < target.body.x &&
-  //       target.flipX
-  //     ) {
-  //       target.toggleFlipX();
-  //       target.body.setOffset(target.width / 10, target.height / 8);
-  //     }
-
-  //     oldtouchX = actualtouchX;
-  //     oldtouchY = actualtouchY;
-  //   } else {
-  //     // console.log("else");
-  //     this.isDown = false;
-  //   }
-  // }
 
   render() {
     // debug helper

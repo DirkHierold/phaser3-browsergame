@@ -21,15 +21,11 @@ export default class Player extends Phaser.Physics.Arcade.Image {
   }
 
   move(activePointer: Phaser.Input.Pointer) {
-    // console.log("handleMouse");
     if (activePointer.isDown && !this.isDown) {
-      // console.log("this.input.activePointer.isDown && !isDown");
-
       this.oldTouchX = activePointer.x;
       this.oldTouchY = activePointer.y;
       this.isDown = true;
     } else if (activePointer.isDown && this.isDown) {
-      // console.log("this.input.activePointer.isDown && isDown");
       const actualtouchX = activePointer.x;
       const actualtouchY = activePointer.y;
 
@@ -42,7 +38,6 @@ export default class Player extends Phaser.Physics.Arcade.Image {
         this.body.setOffset(this.width / 10, this.height / 8);
         // Player looks to the left and changes to right
       } else if (actualtouchX - this.oldTouchX > 0 && !this.flipX) {
-        // player.toggleFlipX();
         this.toggleFlipX();
         this.body.setOffset((this.width * 2) / 5, this.height / 8);
       }
@@ -50,7 +45,6 @@ export default class Player extends Phaser.Physics.Arcade.Image {
       this.oldTouchX = actualtouchX;
       this.oldTouchY = actualtouchY;
     } else {
-      // console.log("else");
       this.isDown = false;
     }
   }
