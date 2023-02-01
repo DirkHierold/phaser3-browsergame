@@ -80,6 +80,8 @@ export default class GameScene extends Phaser.Scene {
     // Player
     player = new Player(this, 0, 0, playerSize);
 
+    this.cameras.main.startFollow(player);
+
     // Target
     target = new Target(this, 0, 0, targetSize);
 
