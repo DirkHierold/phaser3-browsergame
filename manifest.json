@@ -1,7 +1,7 @@
 {
-  "name": "Di-No",
-  "short_name": "by Dirk Hierold",
-  "description": "Don't die dino!",
+  "name": "Don't die dino!",
+  "short_name": "Di-No",
+  "description": "Phaser3 PWA Game about a little dino by Dirk Hierold",
   "start_url": "/",
   "background_color": "#000000",
   "theme_color": "#0f4a73",
