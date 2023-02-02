@@ -12,11 +12,12 @@ export default class Preloader extends Phaser.Scene {
     this.load.image(TextureKeys.Target, "images/dino.png");
     this.load.image(TextureKeys.Enemy, "images/asteroid.png");
     this.load.image(TextureKeys.Background, "images/grass.jpg");
+    this.load.audio("bgMusic", "audios/anomaly.mp3");
   }
 
   create() {
     console.log("preloader create");
 
-    this.scene.start(SceneKeys.Game);
+    this.scene.start(SceneKeys.MainMenu);
   }
 }

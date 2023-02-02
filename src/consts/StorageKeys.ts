@@ -1,7 +1,7 @@
 enum StorageKeys {
-  Score = "score",
-  Highscore = "highscore",
-  Alltime = "alltime",
+  EasyStorage = "EasyStorage",
+  NormalStorage = "NormalStorage",
+  HardStorage = "HardStorage",
 }
 
 export default StorageKeys;

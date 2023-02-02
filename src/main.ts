@@ -1,8 +1,14 @@
 import Phaser from "phaser";
-import GameScene from "./scenes/Game-scene";
+import GameScene from "./scenes/NormalGame-scene";
+import HelloWorldScene from "./scenes/HelloWorld-scene";
+import MainMenuScene from "./scenes/MainMenu-scene";
 import Preloader from "./scenes/Preloader-scene";
+import EasyGameScene from "./scenes/EasyGame-scene";
+import NormalGameScene from "./scenes/NormalGame-scene";
+import HardGameScene from "./scenes/HardGame-scene";
 
-const config: Phaser.Types.Core.GameConfig = {
+const config: any = {
+  //Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: "app",
   width: window.innerWidth,
@@ -17,8 +23,16 @@ const config: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT,
     // autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [Preloader, GameScene],
+  scene: [
+    Preloader,
+    EasyGameScene,
+    NormalGameScene,
+    HardGameScene,
+    MainMenuScene,
+  ],
+  spotOn: false,
 };
 
-const game = new Phaser.Game(config);
+let game = new Phaser.Game(config);
+
 export default game;

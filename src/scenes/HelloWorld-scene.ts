@@ -1,34 +1,31 @@
-import Phaser from 'phaser'
+import Phaser from "phaser";
+import SceneKeys from "../consts/SceneKeys";
+import TextureKeys from "../consts/TextureKeys";
+import Enemies from "../model/Enemies";
 
 export default class HelloWorldScene extends Phaser.Scene {
-	constructor() {
-		super('hello-world')
-	}
+  constructor() {
+    super(SceneKeys.HelloWorld);
+  }
 
-	preload() {
-		this.load.setBaseURL('https://labs.phaser.io')
+  create() {
+    this.add.image(400, 300, TextureKeys.Background);
 
-		this.load.image('sky', 'assets/skies/space3.png')
-		this.load.image('logo', 'assets/sprites/phaser3-logo.png')
-		this.load.image('red', 'assets/particles/red.png')
-	}
+    const particles = this.add.particles(TextureKeys.Player);
 
-	create() {
-		this.add.image(400, 300, 'sky')
+    const emitter = particles.createEmitter({
+      speed: 100,
+      scale: { start: 0, end: 0.5 },
+      blendMode: Phaser.BlendModes.EXCLUSION, //"ADD",
+    });
 
-		const particles = this.add.particles('red')
+    const logo: Phaser.Types.Physics.Arcade.ImageWithDynamicBody = new Enemies(
+      this
+    ).addEnemy(200, 300, 130);
 
-		const emitter = particles.createEmitter({
-			speed: 100,
-			scale: { start: 1, end: 0 },
-			blendMode: 'ADD',
-		})
-
-		const logo = this.physics.add.image(400, 100, 'logo')
-
-		logo.setVelocity(100, 200)
-		logo.setBounce(1, 1)
-		logo.setCollideWorldBounds(true)
-		emitter.startFollow(logo)
-	}
+    // logo.setVelocity(100, 200);
+    // logo.setBounce(1, 1);
+    // logo.setCollideWorldBounds(true);
+    emitter.startFollow(logo);
+  }
 }

@@ -1,33 +1,44 @@
+import StorageItemKeys from "../consts/StorageItemKeys";
 import StorageKeys from "../consts/StorageKeys";
 
 export default class LocalStorage {
   storage: Storage;
-  constructor(storage: Storage) {
+  storageKey: StorageKeys;
+  constructor(storage: Storage, storageKey: StorageKeys) {
     this.storage = storage;
+    this.storageKey = storageKey;
   }
 
   setHighscoreIfNew(score: number, highscore: number) {
     if (score > highscore) {
       highscore = score;
-      this.storage.setItem(StorageKeys.Highscore, highscore.toString());
+      this.storage.setItem(
+        this.storageKey + StorageItemKeys.Highscore,
+        highscore.toString()
+      );
     }
     return highscore;
   }
 
   setAlltime(alltime: number) {
-    this.storage.setItem(StorageKeys.Alltime, alltime.toString());
+    this.storage.setItem(
+      this.storageKey + StorageItemKeys.Alltime,
+      alltime.toString()
+    );
   }
 
   getHighscoreIfAvailable(): number {
-    return this.getItemIfAvailable(StorageKeys.Highscore);
+    return this.getItemIfAvailable(StorageItemKeys.Highscore);
   }
 
   getAlltimeIfAvailable(): number {
-    return this.getItemIfAvailable(StorageKeys.Alltime);
+    return this.getItemIfAvailable(StorageItemKeys.Alltime);
   }
 
-  private getItemIfAvailable(item: StorageKeys): number {
-    const storedItem: string | null = this.storage.getItem(item);
+  private getItemIfAvailable(item: StorageItemKeys): number {
+    const storedItem: string | null = this.storage.getItem(
+      this.storageKey + item
+    );
     let itemAsNumber: number = 0;
     if (storedItem) {
       itemAsNumber = parseInt(storedItem);

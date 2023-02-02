@@ -11,13 +11,24 @@ export default class Enemies extends Phaser.Physics.Arcade.Group {
     scene.add.existing(this);
   }
 
-  addEnemy(player: Player, enemySize: number) {
+  addEnemyFarAwayFromPlayer(
+    player: Player,
+    enemySize: number
+  ): Phaser.Physics.Arcade.Image {
     const posX =
       (player.x + this.scene.scale.width / 2) % this.scene.scale.width;
     const posY =
       (player.y + this.scene.scale.height / 2) % this.scene.scale.height;
 
-    let enemy: any = this.scene.add.image(posX, posY, TextureKeys.Enemy);
+    return this.addEnemy(posX, posY, enemySize);
+  }
+
+  addEnemy(
+    x: number,
+    y: number,
+    enemySize: number
+  ): Phaser.Types.Physics.Arcade.ImageWithDynamicBody {
+    let enemy: any = this.scene.add.image(x, y, TextureKeys.Enemy);
     enemy.setDisplaySize(enemySize, enemySize);
 
     this.add(enemy);
@@ -41,5 +52,7 @@ export default class Enemies extends Phaser.Physics.Arcade.Group {
 
     enemyBody.setCollideWorldBounds(true);
     enemyBody.setBounce(1, 1);
+
+    return enemy;
   }
 }

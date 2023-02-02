@@ -1,6 +1,10 @@
 enum SceneKeys {
-  Preloader = "preloader",
-  Game = "game",
+  Preloader = "Preloader",
+  HelloWorld = "HelloWorld",
+  MainMenu = "MainMenu",
+  EasyGame = "EasyGame",
+  NormalGame = "NormalGame",
+  HardGame = "HardGame",
 }
 
 export default SceneKeys;
