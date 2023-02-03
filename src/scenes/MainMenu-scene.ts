@@ -1,11 +1,9 @@
-import { Grid } from "matter";
 import EventKeys from "../consts/EventKeys";
 import SceneKeys from "../consts/SceneKeys";
 import StorageKeys from "../consts/StorageKeys";
 import TextureKeys from "../consts/TextureKeys";
 import { Button } from "../utils/Button";
 import LocalStorage from "../utils/LocalStorage";
-import GameScene from "./NormalGame-scene";
 
 export default class MainMenuScene extends Phaser.Scene {
   spotOn: boolean = false;
@@ -93,7 +91,7 @@ export default class MainMenuScene extends Phaser.Scene {
       window.localStorage,
       StorageKeys.EasyStorage
     );
-    const easyMode = new Button(
+    new Button(
       gamewidth / 4,
       (gameHeight * 3) / 4,
       "Easy\n\nHighscore: " +
@@ -110,7 +108,7 @@ export default class MainMenuScene extends Phaser.Scene {
       window.localStorage,
       StorageKeys.NormalStorage
     );
-    const normalMode = new Button(
+    new Button(
       gamewidth / 2,
       (gameHeight * 3) / 4,
       "Normal\n\nHighscore: " +
@@ -127,7 +125,7 @@ export default class MainMenuScene extends Phaser.Scene {
       window.localStorage,
       StorageKeys.HardStorage
     );
-    const hardMode = new Button(
+    new Button(
       (gamewidth * 3) / 4,
       (gameHeight * 3) / 4,
       "Hard\n\nHighscore: " +

@@ -1,6 +1,4 @@
 import Phaser from "phaser";
-import GameScene from "./scenes/NormalGame-scene";
-import HelloWorldScene from "./scenes/HelloWorld-scene";
 import MainMenuScene from "./scenes/MainMenu-scene";
 import Preloader from "./scenes/Preloader-scene";
 import EasyGameScene from "./scenes/EasyGame-scene";

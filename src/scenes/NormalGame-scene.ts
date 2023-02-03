@@ -28,7 +28,6 @@ let alltime = 0;
 export default class NormalGameScene extends Phaser.Scene {
   private score!: number;
   private gameOver!: boolean;
-  private cameraOn: boolean = false;
   private localStorage!: LocalStorage;
 
   constructor() {
