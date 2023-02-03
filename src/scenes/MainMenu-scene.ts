@@ -47,6 +47,14 @@ export default class MainMenuScene extends Phaser.Scene {
       )
       .setOrigin(0);
 
+    // Image Dinosaur
+    this.player = new Player(
+      this,
+      this.gamewidth / 2,
+      this.gameHeight / 2,
+      this.gamewidth / 4
+    );
+
     // Title
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       font: "128px Arial",
@@ -98,24 +106,6 @@ export default class MainMenuScene extends Phaser.Scene {
         this.bgMusic.pause();
       }
     });
-
-    // Image Dinosaur
-    this.player = new Player(
-      this,
-      this.gamewidth / 2,
-      this.gameHeight / 2,
-      this.gamewidth / 4
-    );
-    let velocity = new Phaser.Math.Vector2();
-    Phaser.Math.RandomXY(velocity);
-    this.player.setBounce(1, 1);
-    this.player.setVelocity(
-      velocity.x * Phaser.Math.Between(60, 180),
-      velocity.y * Phaser.Math.Between(60, 180)
-    );
-    // this.add
-    //   .image(gamewidth / 2, gameHeight / 2, TextureKeys.Player)
-    //   .setDisplaySize(gamewidth / 4, gamewidth / 4);
 
     const easyLocalStorage = new LocalStorage(
       window.localStorage,
@@ -177,6 +167,6 @@ export default class MainMenuScene extends Phaser.Scene {
       this.cameras.main.setScroll(0, 0);
     }
 
-    this.player.lookToPointer(this.input.activePointer);
+    this.player.move(this.input.activePointer);
   }
 }

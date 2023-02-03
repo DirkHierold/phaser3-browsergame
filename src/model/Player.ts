@@ -48,26 +48,4 @@ export default class Player extends Phaser.Physics.Arcade.Image {
       this.isDown = false;
     }
   }
-
-  lookToPointer(activePointer: Phaser.Input.Pointer) {
-    // Player looks to the right and Pointer is left
-    if (activePointer.x - this.x < 0 && this.flipX) {
-      console.log(
-        "Player looks to the right and Pointer is left",
-        this.x,
-        activePointer.x
-      );
-      this.toggleFlipX();
-      this.body.setOffset(this.width / 10, this.height / 8);
-      // Player looks to the left and Pointer is right
-    } else if (activePointer.x - this.x > 0 && !this.flipX) {
-      console.log(
-        "Player looks to the left and Pointer is right",
-        this.x,
-        activePointer.x
-      );
-      this.toggleFlipX();
-      this.body.setOffset((this.width * 2) / 5, this.height / 8);
-    }
-  }
 }
