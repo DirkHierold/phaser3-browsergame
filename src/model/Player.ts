@@ -11,7 +11,7 @@ export default class Player extends Phaser.Physics.Arcade.Image {
     scene.physics.world.enable(this);
     scene.add.existing(this);
 
-    this.setOrigin(0);
+    // this.setOrigin(0);
     this.setDisplaySize(playerSize, playerSize);
 
     this.setBodySize(this.width / 2, (this.height * 7) / 8);
@@ -46,6 +46,28 @@ export default class Player extends Phaser.Physics.Arcade.Image {
       this.oldTouchY = actualtouchY;
     } else {
       this.isDown = false;
+    }
+  }
+
+  lookToPointer(activePointer: Phaser.Input.Pointer) {
+    // Player looks to the right and Pointer is left
+    if (activePointer.x - this.x < 0 && this.flipX) {
+      console.log(
+        "Player looks to the right and Pointer is left",
+        this.x,
+        activePointer.x
+      );
+      this.toggleFlipX();
+      this.body.setOffset(this.width / 10, this.height / 8);
+      // Player looks to the left and Pointer is right
+    } else if (activePointer.x - this.x > 0 && !this.flipX) {
+      console.log(
+        "Player looks to the left and Pointer is right",
+        this.x,
+        activePointer.x
+      );
+      this.toggleFlipX();
+      this.body.setOffset((this.width * 2) / 5, this.height / 8);
     }
   }
 }

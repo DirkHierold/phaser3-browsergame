@@ -32,5 +32,4 @@ const config: any = {
 };
 
 let game = new Phaser.Game(config);
-
 export default game;
