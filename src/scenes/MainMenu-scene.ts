@@ -19,7 +19,7 @@ export default class MainMenuScene extends Phaser.Scene {
     super(SceneKeys.MainMenu);
   }
 
-  create() {
+  async create() {
     this.musicRegistered = this.registry.get("musicRegistered");
 
     if (!this.musicRegistered) {
@@ -61,8 +61,8 @@ export default class MainMenuScene extends Phaser.Scene {
     );
 
     // Title
-    let globalHighscore = 444;
-    easyLocalStorage
+    let globalHighscore = 445;
+    await easyLocalStorage
       .getGlobalHighscore()
       .then((value) => (globalHighscore = value));
 
