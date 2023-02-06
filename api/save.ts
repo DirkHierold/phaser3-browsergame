@@ -5,5 +5,5 @@ export default function handler(req, res) {
   // const stringified = readFileSync("/data/highscores.json", "utf8");
 
   res.setHeader("Content-Type", "application/json");
-  return 666; //res.end(stringified);
+  return res.end("666");
 }
