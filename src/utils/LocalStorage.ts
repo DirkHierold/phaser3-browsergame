@@ -53,8 +53,7 @@ export default class LocalStorage {
 
   getGlobalHighscore(): number {
     let returnValue = 333;
-    const hostname = process.env.NEXT_PUBLIC_SITE_URL;
-    fetch(`${hostname}/api/save`)
+    fetch(`/api/save`)
       .then((response) => response.json() as Promise<number>)
       .then((json /*: Todo[]*/) => {
         console.log(json);
