@@ -30,6 +30,7 @@ var filesToCache: Iterable<RequestInfo> = [
   "/src/main.ts",
   "/game.css",
   "/manifest.json",
+  "/api/save.ts",
 ];
 self.addEventListener("install", function (event: any) {
   console.log("sw install");
