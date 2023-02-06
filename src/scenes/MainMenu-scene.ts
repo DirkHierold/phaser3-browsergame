@@ -61,6 +61,11 @@ export default class MainMenuScene extends Phaser.Scene {
     );
 
     // Title
+    let globalHighscore = 444;
+    easyLocalStorage
+      .getGlobalHighscore()
+      .then((value) => (globalHighscore = value));
+
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       font: "128px Arial",
       backgroundColor: "#111",
@@ -70,7 +75,7 @@ export default class MainMenuScene extends Phaser.Scene {
       .text(
         this.gamewidth / 2,
         this.gameHeight / 4,
-        "Don't die dino! " + easyLocalStorage.getGlobalHighscore(),
+        "Don't die dino! " + globalHighscore,
         textStyle
       )
       .setOrigin(0.5);
