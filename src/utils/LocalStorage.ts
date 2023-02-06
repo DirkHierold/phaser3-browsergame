@@ -58,7 +58,10 @@ export default class LocalStorage {
       .then((json /*: Todo[]*/) => {
         console.log(json);
         const returnAsString = JSON.stringify(json);
+        console.log(returnAsString);
         returnValue = parseInt(returnAsString);
+        console.log(returnValue);
+        return returnValue;
       });
     return returnValue;
   }
