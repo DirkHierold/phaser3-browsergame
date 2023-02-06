@@ -1,5 +1,6 @@
 import StorageItemKeys from "../consts/StorageItemKeys";
 import StorageKeys from "../consts/StorageKeys";
+// import fs from "fs";
 
 export default class LocalStorage {
   storage: Storage;
@@ -16,7 +17,10 @@ export default class LocalStorage {
         this.storageKey + StorageItemKeys.Highscore,
         highscore.toString()
       );
+
+      // fs.writeFileSync("/public/highscoreList.txt", "New Highscore!");
     }
+    // fs.writeFileSync("/public/highscoreList.txt", "New Highscore?");
     return highscore;
   }
 
