@@ -47,6 +47,14 @@ export default class LocalStorage {
     if (storedItem) {
       itemAsNumber = parseInt(storedItem);
     }
+
     return itemAsNumber;
+  }
+
+  async getGlobalHighscore(): Promise<number> {
+    const hostname = process.env.NEXT_PUBLIC_SITE_URL;
+    const res = await fetch(`${hostname}/api/save`);
+    const json = await res.json();
+    return parseInt(json.toString());
   }
 }

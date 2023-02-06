@@ -55,6 +55,11 @@ export default class MainMenuScene extends Phaser.Scene {
       this.gamewidth / 4
     );
 
+    const easyLocalStorage = new LocalStorage(
+      window.localStorage,
+      StorageKeys.EasyStorage
+    );
+
     // Title
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       font: "128px Arial",
@@ -65,7 +70,7 @@ export default class MainMenuScene extends Phaser.Scene {
       .text(
         this.gamewidth / 2,
         this.gameHeight / 4,
-        "Don't die dino!",
+        "Don't die dino! " + easyLocalStorage.getGlobalHighscore(),
         textStyle
       )
       .setOrigin(0.5);
@@ -107,10 +112,6 @@ export default class MainMenuScene extends Phaser.Scene {
       }
     });
 
-    const easyLocalStorage = new LocalStorage(
-      window.localStorage,
-      StorageKeys.EasyStorage
-    );
     new Button(
       this.gamewidth / 4,
       (this.gameHeight * 3) / 4,
