@@ -1,16 +1,16 @@
 import faunadb from "faunadb";
-let q = faunadb.query;
-
-let client = new faunadb.Client({
-  secret: "fnAE8JSkkZACWlVtkt77Y10Ru2KOsK3DXHyoDIn",
-  // NOTE: Use the correct endpoint for your database's Region Group.
-  endpoint: "https://db.us.fauna.com/",
-});
 
 export default async function handler(req, res) {
   console.log("Save Api");
   let returnValue = "777";
 
+  let q = faunadb.query;
+
+  let client = new faunadb.Client({
+    secret: "fnAE8JSkkZACWlVtkt77Y10Ru2KOsK3DXHyoDIn",
+    // NOTE: Use the correct endpoint for your database's Region Group.
+    endpoint: "https://db.us.fauna.com/",
+  });
   const result = await client.query(q.Paginate(q.Collections()));
   console.log(result);
   returnValue = JSON.stringify(result);
