@@ -61,10 +61,8 @@ export default class MainMenuScene extends Phaser.Scene {
     );
 
     // Title
-    let globalHighscore = "445";
-    await easyLocalStorage
-      .getGlobalHighscore()
-      .then((value) => (globalHighscore = value));
+    let globalHighscore = 0;
+    globalHighscore = await easyLocalStorage.getGlobalHighscore();
 
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       font: "128px Arial",

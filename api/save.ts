@@ -2,7 +2,7 @@ import faunadb from "faunadb";
 
 export default async function handler(req, res) {
   console.log("Save Api\n");
-  let returnValue = "777";
+  let returnValue = 2;
 
   let q = faunadb.query;
   console.log("Query = \n\n" + q);
@@ -24,8 +24,7 @@ export default async function handler(req, res) {
   // const result = await client.query(
   //   q.Select("score", q.Collection("highscores"))
   // );
-  console.log("Result = \n\n" + result.score);
-  returnValue = JSON.stringify(result);
+  returnValue = result.score;
   console.log("ReturnValue = \n\n" + returnValue);
 
   // let createP = client.query(
