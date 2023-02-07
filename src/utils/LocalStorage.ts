@@ -59,7 +59,7 @@ export default class LocalStorage {
     return returnValue;
   }
 
-  async setGlobalHighscore(): Promise<void> {
+  async setGlobalHighscore(newHigh: number): Promise<void> {
     console.log("setGlobalHighscore");
     await fetch("/api/save", {
       headers: {
@@ -67,7 +67,7 @@ export default class LocalStorage {
         "Content-Type": "application/json",
       },
       method: "POST",
-      body: JSON.stringify({ score: this.highscore }),
+      body: JSON.stringify({ score: newHigh }),
     });
   }
 }
