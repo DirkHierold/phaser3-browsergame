@@ -1,10 +1,22 @@
-import { readFileSync } from "fs";
+let faunadb = require("faunadb");
+let q = faunadb.query;
+
+let client = new faunadb.Client({
+  secret: "fnAE8JSkkZACWlVtkt77Y10Ru2KOsK3DXHyoDIn",
+  // NOTE: Use the correct endpoint for your database's Region Group.
+  endpoint: "https://db.fauna.com/",
+});
 
 export default function handler(req, res) {
   console.log("Save Api");
-  const stringified = readFileSync("/data/highscores.json", "utf8");
+
+  let createP = client.query(
+    q.Create(q.Collection("test"), { data: { testField: "testValue" } })
+  );
+  createP.then(function (response) {
+    console.log(response.ref); // Logs the ref to the console.
+  });
 
   res.setHeader("Content-Type", "application/json");
-  console.log(stringified);
-  return res.end(stringified);
+  return res.end("666");
 }
