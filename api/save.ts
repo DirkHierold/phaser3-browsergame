@@ -11,7 +11,9 @@ export default async function handler(req, res) {
   console.log("Save Api");
   let returnValue = "777";
   const result = await client.paginate(faunadb.Collections());
+  console.log(result);
   result.each((page: object) => {
+    console.log(page);
     returnValue = JSON.stringify(page);
     console.log(returnValue);
   });
@@ -23,5 +25,6 @@ export default async function handler(req, res) {
   // });
 
   res.setHeader("Content-Type", "application/json");
+  console.log(returnValue);
   return res.end(returnValue);
 }
