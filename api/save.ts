@@ -1,4 +1,4 @@
-let faunadb = require("faunadb");
+import faunadb from "faunadb";
 let q = faunadb.query;
 
 let client = new faunadb.Client({
@@ -13,7 +13,7 @@ export default function handler(req, res) {
   let createP = client.query(
     q.Create(q.Collection("test"), { data: { testField: "testValue" } })
   );
-  createP.then(function (response) {
+  createP.then((response: any) => {
     console.log(response.ref); // Logs the ref to the console.
   });
 
