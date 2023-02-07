@@ -11,6 +11,8 @@
     <link rel="icon" href="images/icon-256-dino.png" sizes="256x256" />
     <link rel="icon" href="images/icon-512-dino.png" sizes="512x512" />
     <link href="game.css" rel="stylesheet" />
+    <link rel="apple-touch-icon" href="images/icon-192-dino.png" />
+    <meta name="apple-mobile-web-app-status-bar" content="#0f4a73" />
   </head>
   <body>
     <!-- The Modal -->
@@ -63,6 +65,17 @@
         deferredPrompt.prompt();
       }
     </script>
+
+    <!-- <script>
+      console.log("Fetch Save");
+      const response0 = fetch("/", {
+        method: "GET",
+      });
+      // const response1 = fetch("/api/saveHighscores", {
+      //   method: "POST",
+      //   body: [],
+      // });
+    </script> -->
     <script type="module" src="src/main.ts"></script>
   </body>
 </html>

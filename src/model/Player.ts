@@ -11,7 +11,7 @@ export default class Player extends Phaser.Physics.Arcade.Image {
     scene.physics.world.enable(this);
     scene.add.existing(this);
 
-    this.setOrigin(0);
+    // this.setOrigin(0);
     this.setDisplaySize(playerSize, playerSize);
 
     this.setBodySize(this.width / 2, (this.height * 7) / 8);

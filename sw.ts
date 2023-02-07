@@ -1,10 +1,9 @@
 // Even though our service worker is installed, it is not doing anything.
 // To fix this, we will update our service worker to cache all of the assets that are used by our game.
-var cacheName = "phaser-v1";
-var filesToCache = [
+var cacheName: string = "phaser-v1";
+var filesToCache: Iterable<RequestInfo> = [
   "/",
   "/index.html",
-  "/offline.html",
   "/images/asteroid.png",
   "/images/dino.png",
   "/images/grass.png",
@@ -13,16 +12,25 @@ var filesToCache = [
   "/images/icon-512-dino.png",
   "/src/consts/EventKeys.ts",
   "/src/consts/SceneKeys.ts",
+  "/src/consts/StorageItemKeys.ts",
   "/src/consts/StorageKeys.ts",
   "/src/consts/TextureKeys.ts",
   "/src/model/Player.ts",
-  "/src/scenes/Game-scene.ts",
+  "/src/model/Enemies.ts",
+  "/src/model/Target.ts",
+  "/src/scenes/EasyGame-scene.ts",
+  "/src/scenes/NormalGame-scene.ts",
+  "/src/scenes/HardGame-scene.ts",
+  "/src/scenes/MainMenu-scene.ts",
   "/src/scenes/HelloWorld-scene.ts",
   "/src/scenes/Preloader-scene.ts",
   "/src/scenes/SceneBase.ts",
   "/src/utils/Button.ts",
+  "/src/utils/LocalStorage.ts",
   "/src/main.ts",
   "/game.css",
+  "/manifest.json",
+  "/api/save.ts",
 ];
 self.addEventListener("install", function (event: any) {
   console.log("sw install");

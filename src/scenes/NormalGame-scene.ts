@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import EventKeys from "../consts/EventKeys";
 import SceneKeys from "../consts/SceneKeys";
+import StorageKeys from "../consts/StorageKeys";
 import TextureKeys from "../consts/TextureKeys";
 import Enemies from "../model/Enemies";
 import Player from "../model/Player";
@@ -21,18 +22,17 @@ let enemySize: number;
 
 let text: Phaser.GameObjects.Text;
 
-const localStorage = new LocalStorage(window.localStorage); //window.localStorage;
-
 let highscore = 0;
 let alltime = 0;
 
-export default class GameScene extends Phaser.Scene {
+export default class NormalGameScene extends Phaser.Scene {
   private score!: number;
   private gameOver!: boolean;
+  private localStorage!: LocalStorage;
 
   constructor() {
     console.log("constructor");
-    super(SceneKeys.Game);
+    super(SceneKeys.NormalGame);
 
     this.resizeCanvas();
     window.addEventListener(EventKeys.Resize, this.resizeCanvas, false);
@@ -42,6 +42,10 @@ export default class GameScene extends Phaser.Scene {
     console.log("init");
     this.score = 0;
     this.gameOver = false;
+    this.localStorage = new LocalStorage(
+      window.localStorage,
+      StorageKeys.NormalStorage
+    );
   }
 
   //  Load the Google WebFont Loader script
@@ -78,18 +82,20 @@ export default class GameScene extends Phaser.Scene {
       .setOrigin(0);
 
     // Player
-    player = new Player(this, 0, 0, playerSize);
+    player = new Player(this, gameWidth / 2, gameHeight / 2, playerSize);
+
+    if (this.registry.get("spotOn")) this.cameras.main.startFollow(player);
 
     // Target
     target = new Target(this, 0, 0, targetSize);
 
     // Enemies
     enemies = new Enemies(this);
-    enemies.addEnemy(player, enemySize);
+    enemies.addEnemyFarAwayFromPlayer(player, enemySize);
 
     // Score
-    highscore = localStorage.getHighscoreIfAvailable();
-    alltime = localStorage.getAlltimeIfAvailable();
+    highscore = this.localStorage.getHighscoreIfAvailable();
+    alltime = this.localStorage.getAlltimeIfAvailable();
 
     const style: Phaser.Types.GameObjects.Text.TextStyle = {
       font: "28px Arial",
@@ -156,14 +162,16 @@ export default class GameScene extends Phaser.Scene {
     //neues Ziel erzeugen
     this.getNewTarget();
 
-    // neuen Gegner erzeugen
-    enemies.addEnemy(player, enemySize);
+    // neuen Gegner erzeugen nur alle 2 Targets bis maximal 20
+    if (this.score % 2 == 0 && enemies.getLength() < 20)
+      // neuen Gegner erzeugen
+      enemies.addEnemyFarAwayFromPlayer(player, enemySize);
 
     this.score++;
     alltime++;
 
-    highscore = localStorage.setHighscoreIfNew(this.score, highscore);
-    localStorage.setAlltime(alltime);
+    highscore = this.localStorage.setHighscoreIfNew(this.score, highscore);
+    this.localStorage.setAlltime(alltime);
 
     this.drawScores();
   }
@@ -187,16 +195,16 @@ export default class GameScene extends Phaser.Scene {
 
   private restart() {
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
-      backgroundColor: "green",
+      backgroundColor: "black",
     };
     text
-      .setText(text.text + "\n\nNew Game")
+      .setText("Back\n\n" + text.text)
       .setPadding(10)
       .setStyle(textStyle)
       .setInteractive({ useHandCursor: true })
       .on(EventKeys.PointerDown, () => {
-        console.log("Game is restarted");
-        this.scene.restart();
+        console.log("Back to Main Menu");
+        this.scene.start(SceneKeys.MainMenu);
       })
       .on(EventKeys.PointerOver, () => text.setStyle({ fill: "#f39c12" }))
       .on(EventKeys.PointerOut, () => text.setStyle({ fill: "#FFF" }));
