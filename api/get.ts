@@ -1,7 +1,7 @@
 import faunadb from "faunadb";
 
 export default async function handler(req, res) {
-  console.log("Save Api\n");
+  console.log("Get Api\n");
   let returnValue = "2";
 
   let q = faunadb.query;
@@ -15,16 +15,16 @@ export default async function handler(req, res) {
   });
   console.log("Client = \n\n" + client);
   const result: any = await client.query(
-    q.Update(q.Ref(q.Collection("highscores"), "355998936929927254"), {
-      data: { score: 9 },
-    })
+    q.Select(
+      "data",
+      q.Get(q.Ref(q.Collection("highscores"), "355998936929927254"))
+    )
   );
-
   // const json = JSON.parse(result);
   // const result = await client.query(
   //   q.Select("score", q.Collection("highscores"))
   // );
-  returnValue = result.toString();
+  returnValue = result.score.toString();
   console.log("ReturnValue = \n\n" + returnValue, typeof returnValue);
 
   // let createP = client.query(
