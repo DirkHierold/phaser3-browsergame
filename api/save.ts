@@ -2,7 +2,7 @@ import faunadb from "faunadb";
 
 export default async function handler(req, res) {
   console.log("Save Api\n");
-  let returnValue = 2;
+  let returnValue = "2";
 
   let q = faunadb.query;
   console.log("Query = \n\n" + q);
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   //   q.Select("score", q.Collection("highscores"))
   // );
   returnValue = result.score;
-  console.log("ReturnValue = \n\n" + returnValue);
+  console.log("ReturnValue = \n\n" + returnValue, typeof returnValue);
 
   // let createP = client.query(
   //   q.Create(q.Collection("test"), { data: { testField: "testValue" } })
