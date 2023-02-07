@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     secret: "fnAE8JSkkZACWlVtkt77Y10Ru2KOsK3DXHyoDIn",
     // NOTE: Use the correct endpoint for your database's Region Group.
     scheme: "https",
-    endpoint: "db.us.fauna.com/",
+    domain: "db.us.fauna.com",
     keepAlive: true,
   });
   const result = await client.query(q.Paginate(q.Collections()));
