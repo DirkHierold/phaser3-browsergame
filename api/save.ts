@@ -1,4 +1,4 @@
-import faunadb, { Collections } from "faunadb";
+import faunadb from "faunadb";
 let q = faunadb.query;
 
 let client = new faunadb.Client({
@@ -10,7 +10,7 @@ let client = new faunadb.Client({
 export default function handler(req, res) {
   console.log("Save Api");
   let returnValue = "777";
-  const result = client.paginate(Collections());
+  const result = client.paginate(faunadb.Collections());
   result.each((page: object) => {
     returnValue = JSON.stringify(page);
     console.log(returnValue);
