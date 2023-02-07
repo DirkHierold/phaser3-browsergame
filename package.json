@@ -17,6 +17,7 @@
     "vite": "^3.2.5"
   },
   "dependencies": {
+    "esbuild": "^0.17.6",
     "faunadb": "^4.7.1",
     "node": "^19.6.0",
     "phaser": "^3.55.2"
