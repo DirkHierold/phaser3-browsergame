@@ -5,23 +5,23 @@ import StorageKeys from "../consts/StorageKeys";
 export default class LocalStorage {
   storage: Storage;
   storageKey: StorageKeys;
+  highscore: number;
+
   constructor(storage: Storage, storageKey: StorageKeys) {
     this.storage = storage;
     this.storageKey = storageKey;
+    this.highscore = this.getHighscoreIfAvailable();
   }
 
-  setHighscoreIfNew(score: number, highscore: number) {
-    if (score > highscore) {
-      highscore = score;
+  setHighscoreIfNew(score: number) {
+    if (score > this.highscore) {
+      this.highscore = score;
       this.storage.setItem(
         this.storageKey + StorageItemKeys.Highscore,
-        highscore.toString()
+        this.highscore.toString()
       );
-
-      // fs.writeFileSync("/public/highscoreList.txt", "New Highscore!");
     }
-    // fs.writeFileSync("/public/highscoreList.txt", "New Highscore?");
-    return highscore;
+    return this.highscore;
   }
 
   setAlltime(alltime: number) {
@@ -31,7 +31,7 @@ export default class LocalStorage {
     );
   }
 
-  getHighscoreIfAvailable(): number {
+  private getHighscoreIfAvailable(): number {
     return this.getItemIfAvailable(StorageItemKeys.Highscore);
   }
 
@@ -56,17 +56,18 @@ export default class LocalStorage {
     returnValue = await fetch("/api/get").then(
       (response) => response.json() as Promise<number>
     );
-    // .then((json /*: Todo[]*/) => {
-    //   console.log(json);
-    //   returnValue = JSON.stringify(json);
-    //   console.log(returnValue);
-    // });
-    console.log(returnValue);
     return returnValue;
   }
 
   async setGlobalHighscore(): Promise<void> {
     console.log("setGlobalHighscore");
-    await fetch("/api/save");
+    await fetch("/api/save", {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({ score: this.highscore }),
+    });
   }
 }

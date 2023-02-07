@@ -1,8 +1,12 @@
 import faunadb from "faunadb";
 
-export default async function handler(req, res) {
+export default async function handler(req: any, res) {
   console.log("Save Api\n");
-  let returnValue = "2";
+
+  console.log("Request\n\n " + req);
+  console.log("Request body\n\n " + req.body);
+  let scoreToSet: number = JSON.parse(req.body);
+  console.log("scoreToSet\n\n " + scoreToSet);
 
   let q = faunadb.query;
   console.log("Query = \n\n" + q);
@@ -16,24 +20,11 @@ export default async function handler(req, res) {
   console.log("Client = \n\n" + client);
   const result: any = await client.query(
     q.Update(q.Ref(q.Collection("highscores"), "355998936929927254"), {
-      data: { score: 9 },
+      data: { score: scoreToSet },
     })
   );
-
-  // const json = JSON.parse(result);
-  // const result = await client.query(
-  //   q.Select("score", q.Collection("highscores"))
-  // );
-  returnValue = result.toString();
-  console.log("ReturnValue = \n\n" + returnValue, typeof returnValue);
-
-  // let createP = client.query(
-  //   q.Create(q.Collection("test"), { data: { testField: "testValue" } })
-  // );
-  // createP.then((response: any) => {
-  //   console.log(response.ref); // Logs the ref to the console.
-  // });
+  console.log("return scoreToSet = \n\n" + scoreToSet, typeof scoreToSet);
 
   res.setHeader("Content-Type", "application/json");
-  return res.end(returnValue);
+  return res.end(scoreToSet);
 }

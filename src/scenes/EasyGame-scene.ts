@@ -94,7 +94,7 @@ export default class EasyGameScene extends Phaser.Scene {
     enemies.addEnemyFarAwayFromPlayer(player, enemySize);
 
     // Score
-    highscore = this.localStorage.getHighscoreIfAvailable();
+    highscore = this.localStorage.highscore;
     alltime = this.localStorage.getAlltimeIfAvailable();
 
     const style: Phaser.Types.GameObjects.Text.TextStyle = {
@@ -169,7 +169,7 @@ export default class EasyGameScene extends Phaser.Scene {
 
     alltime++;
 
-    highscore = this.localStorage.setHighscoreIfNew(this.score, highscore);
+    highscore = this.localStorage.setHighscoreIfNew(this.score);
     this.localStorage.setAlltime(alltime);
 
     this.drawScores();

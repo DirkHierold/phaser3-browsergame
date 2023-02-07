@@ -124,7 +124,7 @@ export default class MainMenuScene extends Phaser.Scene {
       this.gamewidth / 4,
       (this.gameHeight * 3) / 4,
       "Easy\n\nHighscore: " +
-        easyLocalStorage.getHighscoreIfAvailable() +
+        easyLocalStorage.highscore +
         "\nAlltime: " +
         easyLocalStorage.getAlltimeIfAvailable(),
       this,
@@ -141,7 +141,7 @@ export default class MainMenuScene extends Phaser.Scene {
       this.gamewidth / 2,
       (this.gameHeight * 3) / 4,
       "Normal\n\nHighscore: " +
-        normalLocalStorage.getHighscoreIfAvailable() +
+        normalLocalStorage.highscore +
         "\nAlltime: " +
         normalLocalStorage.getAlltimeIfAvailable(),
       this,
@@ -158,7 +158,7 @@ export default class MainMenuScene extends Phaser.Scene {
       (this.gamewidth * 3) / 4,
       (this.gameHeight * 3) / 4,
       "Hard\n\nHighscore: " +
-        hardLocalStorage.getHighscoreIfAvailable() +
+        hardLocalStorage.highscore +
         "\nAlltime: " +
         hardLocalStorage.getAlltimeIfAvailable(),
       this,
