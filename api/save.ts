@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   // const result = await client.query(
   //   q.Select("score", q.Collection("highscores"))
   // );
-  returnValue = result.score;
+  returnValue = result.score.toString();
   console.log("ReturnValue = \n\n" + returnValue, typeof returnValue);
 
   // let createP = client.query(
