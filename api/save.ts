@@ -10,13 +10,14 @@ let client = new faunadb.Client({
 export default async function handler(req, res) {
   console.log("Save Api");
   let returnValue = "777";
-  const result = await client.paginate(faunadb.Collections());
-  console.log(result);
-  result.each((page: object) => {
-    console.log(page);
-    returnValue = JSON.stringify(page);
+  try {
+    const result = await client.query(q.Paginate(q.Collections()));
+    console.log(result);
+    returnValue = JSON.stringify(result);
     console.log(returnValue);
-  });
+  } catch (error) {
+    console.log(error);
+  }
   // let createP = client.query(
   //   q.Create(q.Collection("test"), { data: { testField: "testValue" } })
   // );
