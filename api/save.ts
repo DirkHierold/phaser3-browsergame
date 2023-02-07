@@ -7,10 +7,10 @@ let client = new faunadb.Client({
   endpoint: "https://db.us.fauna.com/",
 });
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   console.log("Save Api");
   let returnValue = "777";
-  const result = client.paginate(faunadb.Collections());
+  const result = await client.paginate(faunadb.Collections());
   result.each((page: object) => {
     returnValue = JSON.stringify(page);
     console.log(returnValue);
