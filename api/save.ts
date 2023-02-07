@@ -5,14 +5,16 @@ export default async function handler(req, res) {
   let returnValue = "777";
 
   let q = faunadb.query;
-
+  console.log(q);
   let client = new faunadb.Client({
     secret: "fnAE8JSkkZACWlVtkt77Y10Ru2KOsK3DXHyoDIn",
     // NOTE: Use the correct endpoint for your database's Region Group.
     scheme: "https",
     domain: "db.us.fauna.com",
+    endpoint: "https://db.us.fauna.com/",
     keepAlive: true,
   });
+  console.log(client);
   const result = await client.query(q.Paginate(q.Collections()));
   console.log(result);
   returnValue = JSON.stringify(result);
