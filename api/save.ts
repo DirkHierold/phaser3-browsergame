@@ -1,24 +1,23 @@
 import faunadb from "faunadb";
 
 export default async function handler(req, res) {
-  console.log("Save Api");
+  console.log("Save Api\n");
   let returnValue = "777";
 
   let q = faunadb.query;
-  console.log(q);
+  console.log("Query = \n\n" + q);
   let client = new faunadb.Client({
-    secret: "fnAE8JSkkZACWlVtkt77Y10Ru2KOsK3DXHyoDIn",
+    secret: "fnAE8MKXOoAAVzI4RyIljdQ2UXjDEwzXgc_Npllh",
     // NOTE: Use the correct endpoint for your database's Region Group.
     scheme: "https",
     domain: "db.us.fauna.com",
     endpoint: "https://db.us.fauna.com/",
-    keepAlive: true,
   });
-  console.log(client);
+  console.log("Client = \n\n" + client);
   const result = await client.query(q.Paginate(q.Collections()));
-  console.log(result);
+  console.log("Result = \n\n" + result);
   returnValue = JSON.stringify(result);
-  console.log(returnValue);
+  console.log("ReturnValue = \n\n" + returnValue);
 
   // let createP = client.query(
   //   q.Create(q.Collection("test"), { data: { testField: "testValue" } })
@@ -28,6 +27,5 @@ export default async function handler(req, res) {
   // });
 
   res.setHeader("Content-Type", "application/json");
-  console.log(returnValue);
   return res.end(returnValue);
 }
