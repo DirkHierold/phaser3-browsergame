@@ -9,7 +9,9 @@ export default async function handler(req, res) {
   let client = new faunadb.Client({
     secret: "fnAE8JSkkZACWlVtkt77Y10Ru2KOsK3DXHyoDIn",
     // NOTE: Use the correct endpoint for your database's Region Group.
-    endpoint: "https://db.us.fauna.com/",
+    scheme: "https",
+    endpoint: "db.us.fauna.com/",
+    keepAlive: true,
   });
   const result = await client.query(q.Paginate(q.Collections()));
   console.log(result);
