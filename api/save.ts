@@ -3,8 +3,8 @@ import faunadb from "faunadb";
 export default async function handler(req: any, res) {
   console.log("Save Api\n");
 
-  console.log("Request\n\n " + req);
-  console.log("Request body\n\n " + req.body);
+  console.log("Request\n\n " + req.toString());
+  console.log("Request body\n\n " + req.body.toString());
   let scoreToSet: number = JSON.parse(req.body);
   console.log("scoreToSet\n\n " + scoreToSet);
 
