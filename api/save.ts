@@ -14,7 +14,15 @@ export default async function handler(req, res) {
     endpoint: "https://db.us.fauna.com/",
   });
   console.log("Client = \n\n" + client);
-  const result = await client.query(q.Paginate(q.Collections()));
+  const result = await client.query(
+    q.Select(
+      "data",
+      q.Get(q.Ref(q.Collection("highscores"), "355998936929927254"))
+    )
+  );
+  // const result = await client.query(
+  //   q.Select("score", q.Collection("highscores"))
+  // );
   console.log("Result = \n\n" + result);
   returnValue = JSON.stringify(result);
   console.log("ReturnValue = \n\n" + returnValue);

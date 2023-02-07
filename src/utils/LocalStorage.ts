@@ -51,15 +51,13 @@ export default class LocalStorage {
     return itemAsNumber;
   }
 
-  async getGlobalHighscore(): Promise<number> {
-    let returnValue = 333;
+  async getGlobalHighscore(): Promise<string> {
+    let returnValue = "333";
     await fetch("/api/save")
       .then((response) => response.json() as Promise<number>)
       .then((json /*: Todo[]*/) => {
         console.log(json);
-        const returnAsString = JSON.stringify(json);
-        console.log(returnAsString);
-        returnValue = parseInt(returnAsString);
+        returnValue = JSON.stringify(json);
         console.log(returnValue);
       });
     console.log(returnValue);

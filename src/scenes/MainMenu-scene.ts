@@ -61,7 +61,7 @@ export default class MainMenuScene extends Phaser.Scene {
     );
 
     // Title
-    let globalHighscore = 445;
+    let globalHighscore = "445";
     await easyLocalStorage
       .getGlobalHighscore()
       .then((value) => (globalHighscore = value));
