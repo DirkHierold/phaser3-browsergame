@@ -6,30 +6,25 @@ export default class DataHandler {
   static localStorage: LocalStorage = new LocalStorage();
   static globalStorage: GlobalStorage = new GlobalStorage();
 
-  static easyLocalHighscore: number = 0;
+  static easyLocalHighscore: number =
+    DataHandler.localStorage.getHighscoreIfAvailable(StorageKeys.EasyStorage);
   static easyGlobalHighscore: number = 0;
 
-  static normalLocalHighscore: number = 0;
+  static normalLocalHighscore: number =
+    DataHandler.localStorage.getHighscoreIfAvailable(StorageKeys.NormalStorage);
   static normalGlobalHighscore: number = 0;
 
-  static hardLocalHighscore: number = 0;
+  static hardLocalHighscore: number =
+    DataHandler.localStorage.getHighscoreIfAvailable(StorageKeys.HardStorage);
   static hardGlobalHighscore: number = 0;
 
-  static async init() {
-    DataHandler.easyLocalHighscore =
-      DataHandler.localStorage.getHighscoreIfAvailable(StorageKeys.EasyStorage);
+  static async update() {
     DataHandler.easyGlobalHighscore =
       await DataHandler.globalStorage.getGlobalEasyHighscore();
 
-    DataHandler.normalLocalHighscore =
-      DataHandler.localStorage.getHighscoreIfAvailable(
-        StorageKeys.NormalStorage
-      );
     DataHandler.normalGlobalHighscore =
       await DataHandler.globalStorage.getGlobalNormalHighscore();
 
-    DataHandler.hardLocalHighscore =
-      DataHandler.localStorage.getHighscoreIfAvailable(StorageKeys.HardStorage);
     DataHandler.hardGlobalHighscore =
       await DataHandler.globalStorage.getGlobalHardHighscore();
   }

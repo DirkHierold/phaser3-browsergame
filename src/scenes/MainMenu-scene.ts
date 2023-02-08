@@ -19,9 +19,6 @@ export default class MainMenuScene extends Phaser.Scene {
   }
 
   async create() {
-    // Get actual Data
-    await DataHandler.init();
-
     this.musicRegistered = this.registry.get("musicRegistered");
 
     if (!this.musicRegistered) {
@@ -109,44 +106,47 @@ export default class MainMenuScene extends Phaser.Scene {
       }
     });
 
-    new Button(
-      this.gamewidth / 4,
-      (this.gameHeight * 3) / 4,
-      "Easy\n\nHighscore: " +
-        DataHandler.easyLocalHighscore +
-        "\nGlobal: " +
-        DataHandler.easyGlobalHighscore,
-      this,
-      () => {
-        this.scene.start(SceneKeys.EasyGame);
-      }
-    );
+    // Get actual Data
+    DataHandler.update().then(() => {
+      new Button(
+        this.gamewidth / 4,
+        (this.gameHeight * 3) / 4,
+        "Easy\n\nHighscore: " +
+          DataHandler.easyLocalHighscore +
+          "\nGlobal: " +
+          DataHandler.easyGlobalHighscore,
+        this,
+        () => {
+          this.scene.start(SceneKeys.EasyGame);
+        }
+      );
 
-    new Button(
-      this.gamewidth / 2,
-      (this.gameHeight * 3) / 4,
-      "Normal\n\nHighscore: " +
-        DataHandler.normalLocalHighscore +
-        "\nGlobal: " +
-        DataHandler.normalGlobalHighscore,
-      this,
-      () => {
-        this.scene.start(SceneKeys.NormalGame);
-      }
-    );
+      new Button(
+        this.gamewidth / 2,
+        (this.gameHeight * 3) / 4,
+        "Normal\n\nHighscore: " +
+          DataHandler.normalLocalHighscore +
+          "\nGlobal: " +
+          DataHandler.normalGlobalHighscore,
+        this,
+        () => {
+          this.scene.start(SceneKeys.NormalGame);
+        }
+      );
 
-    new Button(
-      (this.gamewidth * 3) / 4,
-      (this.gameHeight * 3) / 4,
-      "Hard\n\nHighscore: " +
-        DataHandler.hardLocalHighscore +
-        "\nGlobal: " +
-        DataHandler.hardGlobalHighscore,
-      this,
-      () => {
-        this.scene.start(SceneKeys.HardGame);
-      }
-    );
+      new Button(
+        (this.gamewidth * 3) / 4,
+        (this.gameHeight * 3) / 4,
+        "Hard\n\nHighscore: " +
+          DataHandler.hardLocalHighscore +
+          "\nGlobal: " +
+          DataHandler.hardGlobalHighscore,
+        this,
+        () => {
+          this.scene.start(SceneKeys.HardGame);
+        }
+      );
+    });
   }
 
   update(): void {
