@@ -67,7 +67,7 @@ export default class LocalStorage {
         "Content-Type": "application/json",
       },
       method: "POST",
-      body: JSON.stringify({ score: newHigh }),
+      body: "{ 'score': " + newHigh + " }",
     });
   }
 }
