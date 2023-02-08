@@ -142,7 +142,7 @@ export default class NormalGameScene extends Phaser.Scene {
         this.score +
         "\nHighscore: " +
         localHighscore +
-        "Global: " +
+        "\nGlobal: " +
         globalHighscore
     );
   }

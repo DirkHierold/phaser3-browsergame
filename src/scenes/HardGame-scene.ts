@@ -142,7 +142,7 @@ export default class HardGameScene extends Phaser.Scene {
         this.score +
         "\nHighscore: " +
         localHighscore +
-        "Global: " +
+        "\nGlobal: " +
         globalHighscore
     );
   }
