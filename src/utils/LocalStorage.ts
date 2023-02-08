@@ -61,7 +61,7 @@ export default class LocalStorage {
 
   async setGlobalHighscore(newHigh: number): Promise<void> {
     console.log("setGlobalHighscore");
-    const bodyInit: XMLHttpRequestBodyInit = "{ score: " + newHigh + " }";
+    const bodyInit = JSON.stringify({ score: newHigh });
     console.log("bodyInit ", bodyInit);
     await fetch("/api/save", {
       headers: {

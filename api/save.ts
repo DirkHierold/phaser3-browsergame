@@ -4,9 +4,12 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log("Save Api\n");
 
-  console.log("Request\n\n " + req.toString());
+  console.log("Request\n\n " + req);
+  console.log("Request to string\n\n " + req.toString());
   console.log("Request body\n\n " + req.body);
-  let scoreToSet: number = req.body.score;
+  const body = JSON.parse(req.body);
+  console.log("Request body json\n\n " + body);
+  let scoreToSet: number = body.score;
   console.log("scoreToSet\n\n " + scoreToSet);
 
   let q = faunadb.query;
