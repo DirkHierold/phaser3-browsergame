@@ -1,30 +1,42 @@
 import faunadb from "faunadb";
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import StorageKeys from "../src/consts/StorageKeys";
 
 export default async function handler(req, res) {
   console.log("Save Api\n");
   const { body } = req;
-  console.log("Request body\n\n " + body);
-  let scoreToSet: number = body.score;
-  console.log("scoreToSet\n\n " + scoreToSet);
 
-  let q = faunadb.query;
-  console.log("Query = \n\n" + q);
-  let client = new faunadb.Client({
+  const scoreToSet: number = body.score;
+  const storageKeyToSave: StorageKeys = body.storageKey;
+
+  const q = faunadb.query;
+
+  const client = new faunadb.Client({
     secret: "fnAE8MKXOoAAVzI4RyIljdQ2UXjDEwzXgc_Npllh",
     // NOTE: Use the correct endpoint for your database's Region Group.
     scheme: "https",
     domain: "db.us.fauna.com",
     endpoint: "https://db.us.fauna.com/",
   });
-  console.log("Client = \n\n" + client);
-  const result: any = await client.query(
-    q.Update(q.Ref(q.Collection("highscores"), "355998936929927254"), {
+  let documentId = "";
+  switch (storageKeyToSave) {
+    case StorageKeys.EasyStorage:
+      documentId = "355998936929927254";
+      break;
+    case StorageKeys.NormalStorage:
+      documentId = "355998936929927254";
+      break;
+    case StorageKeys.HardStorage:
+      documentId = "355998936929927254";
+      break;
+    default:
+      break;
+  }
+  await client.query(
+    q.Update(q.Ref(q.Collection("highscores"), documentId), {
       data: { score: scoreToSet },
     })
   );
-  console.log("return scoreToSet = \n\n" + scoreToSet, typeof scoreToSet);
 
   res.setHeader("Content-Type", "application/json");
-  return res.end(scoreToSet);
+  return res.end(scoreToSet.toString());
 }

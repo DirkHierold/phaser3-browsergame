@@ -1,10 +1,9 @@
 import EventKeys from "../consts/EventKeys";
 import SceneKeys from "../consts/SceneKeys";
-import StorageKeys from "../consts/StorageKeys";
 import TextureKeys from "../consts/TextureKeys";
 import Player from "../model/Player";
 import { Button } from "../utils/Button";
-import LocalStorage from "../utils/LocalStorage";
+import DataHandler from "../utils/DataHandler";
 
 export default class MainMenuScene extends Phaser.Scene {
   spotOn: boolean = false;
@@ -14,7 +13,6 @@ export default class MainMenuScene extends Phaser.Scene {
   player!: Player;
   gamewidth!: number;
   gameHeight!: number;
-  globalHighscore = 0;
 
   constructor() {
     super(SceneKeys.MainMenu);
@@ -56,15 +54,7 @@ export default class MainMenuScene extends Phaser.Scene {
       this.gamewidth / 4
     );
 
-    const easyLocalStorage = new LocalStorage(
-      window.localStorage,
-      StorageKeys.EasyStorage
-    );
-
     // Title
-    this.globalHighscore = await easyLocalStorage.getGlobalHighscore();
-    await easyLocalStorage.setGlobalHighscore(this.globalHighscore + 1);
-
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       font: "128px Arial",
       backgroundColor: "#111",
@@ -74,7 +64,7 @@ export default class MainMenuScene extends Phaser.Scene {
       .text(
         this.gamewidth / 2,
         this.gameHeight / 4,
-        "Don't die dino! " + this.globalHighscore,
+        "Don't die dino!",
         textStyle
       )
       .setOrigin(0.5);
@@ -116,47 +106,41 @@ export default class MainMenuScene extends Phaser.Scene {
       }
     });
 
+    const dataHandler = new DataHandler();
+
     new Button(
       this.gamewidth / 4,
       (this.gameHeight * 3) / 4,
       "Easy\n\nHighscore: " +
-        easyLocalStorage.highscore +
-        "\nAlltime: " +
-        easyLocalStorage.getAlltimeIfAvailable(),
+        dataHandler.easyLocalHighscore +
+        "\nGlobal: " +
+        dataHandler.easyGlobalHighscore,
       this,
       () => {
         this.scene.start(SceneKeys.EasyGame);
       }
     );
 
-    const normalLocalStorage = new LocalStorage(
-      window.localStorage,
-      StorageKeys.NormalStorage
-    );
     new Button(
       this.gamewidth / 2,
       (this.gameHeight * 3) / 4,
       "Normal\n\nHighscore: " +
-        normalLocalStorage.highscore +
-        "\nAlltime: " +
-        normalLocalStorage.getAlltimeIfAvailable(),
+        dataHandler.normalLocalHighscore +
+        "\nGlobal: " +
+        dataHandler.normalGlobalHighscore,
       this,
       () => {
         this.scene.start(SceneKeys.NormalGame);
       }
     );
 
-    const hardLocalStorage = new LocalStorage(
-      window.localStorage,
-      StorageKeys.HardStorage
-    );
     new Button(
       (this.gamewidth * 3) / 4,
       (this.gameHeight * 3) / 4,
       "Hard\n\nHighscore: " +
-        hardLocalStorage.highscore +
-        "\nAlltime: " +
-        hardLocalStorage.getAlltimeIfAvailable(),
+        dataHandler.hardLocalHighscore +
+        "\nGlobal: " +
+        dataHandler.hardLocalHighscore,
       this,
       () => {
         this.scene.start(SceneKeys.HardGame);

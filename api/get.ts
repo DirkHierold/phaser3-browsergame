@@ -1,39 +1,41 @@
 import faunadb from "faunadb";
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+import StorageKeys from "../src/consts/StorageKeys";
+export default async function handler(req, res) {
   console.log("Get Api\n");
-  let returnValue = "2";
+  let returnValue = "0";
 
-  let q = faunadb.query;
-  console.log("Query = \n\n" + q);
-  let client = new faunadb.Client({
+  const { body } = req;
+  const storageKeyToSave: StorageKeys = body.storageKey;
+
+  const q = faunadb.query;
+
+  const client = new faunadb.Client({
     secret: "fnAE8MKXOoAAVzI4RyIljdQ2UXjDEwzXgc_Npllh",
     // NOTE: Use the correct endpoint for your database's Region Group.
     scheme: "https",
     domain: "db.us.fauna.com",
     endpoint: "https://db.us.fauna.com/",
   });
-  console.log("Client = \n\n" + client);
-  const result: any = await client.query(
-    q.Select(
-      "data",
-      q.Get(q.Ref(q.Collection("highscores"), "355998936929927254"))
-    )
-  );
-  // const json = JSON.parse(result);
-  // const result = await client.query(
-  //   q.Select("score", q.Collection("highscores"))
-  // );
-  returnValue = result.score.toString();
-  console.log("ReturnValue = \n\n" + returnValue, typeof returnValue);
+  let documentId = "";
+  switch (storageKeyToSave) {
+    case StorageKeys.EasyStorage:
+      documentId = "355998936929927254";
+      break;
+    case StorageKeys.NormalStorage:
+      documentId = "355998936929927254";
+      break;
+    case StorageKeys.HardStorage:
+      documentId = "355998936929927254";
+      break;
+    default:
+      break;
+  }
 
-  // let createP = client.query(
-  //   q.Create(q.Collection("test"), { data: { testField: "testValue" } })
-  // );
-  // createP.then((response: any) => {
-  //   console.log(response.ref); // Logs the ref to the console.
-  // });
+  const result: any = await client.query(
+    q.Select("data", q.Get(q.Ref(q.Collection("highscores"), documentId)))
+  );
+
+  returnValue = result.score.toString();
 
   res.setHeader("Content-Type", "application/json");
   return res.end(returnValue);
