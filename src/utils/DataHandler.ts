@@ -3,43 +3,42 @@ import GlobalStorage from "./GlobalStorage";
 import LocalStorage from "./LocalStorage";
 
 export default class DataHandler {
-  localStorage: LocalStorage = new LocalStorage();
-  globalStorage: GlobalStorage = new GlobalStorage();
+  static localStorage: LocalStorage = new LocalStorage();
+  static globalStorage: GlobalStorage = new GlobalStorage();
 
-  easyLocalHighscore: number = 0;
-  easyGlobalHighscore: number = 0;
+  static easyLocalHighscore: number = 0;
+  static easyGlobalHighscore: number = 0;
 
-  normalLocalHighscore: number = 0;
-  normalGlobalHighscore: number = 0;
+  static normalLocalHighscore: number = 0;
+  static normalGlobalHighscore: number = 0;
 
-  hardLocalHighscore: number = 0;
-  hardGlobalHighscore: number = 0;
+  static hardLocalHighscore: number = 0;
+  static hardGlobalHighscore: number = 0;
 
   constructor() {
     this.init();
   }
 
   async init() {
-    this.easyLocalHighscore = this.localStorage.getHighscoreIfAvailable(
-      StorageKeys.EasyStorage
-    );
-    this.easyGlobalHighscore =
-      await this.globalStorage.getGlobalEasyHighscore();
+    DataHandler.easyLocalHighscore =
+      DataHandler.localStorage.getHighscoreIfAvailable(StorageKeys.EasyStorage);
+    DataHandler.easyGlobalHighscore =
+      await DataHandler.globalStorage.getGlobalEasyHighscore();
 
-    this.normalLocalHighscore = this.localStorage.getHighscoreIfAvailable(
-      StorageKeys.NormalStorage
-    );
-    this.normalGlobalHighscore =
-      await this.globalStorage.getGlobalNormalHighscore();
+    DataHandler.normalLocalHighscore =
+      DataHandler.localStorage.getHighscoreIfAvailable(
+        StorageKeys.NormalStorage
+      );
+    DataHandler.normalGlobalHighscore =
+      await DataHandler.globalStorage.getGlobalNormalHighscore();
 
-    this.hardLocalHighscore = this.localStorage.getHighscoreIfAvailable(
-      StorageKeys.HardStorage
-    );
-    this.hardGlobalHighscore =
-      await this.globalStorage.getGlobalHardHighscore();
+    DataHandler.hardLocalHighscore =
+      DataHandler.localStorage.getHighscoreIfAvailable(StorageKeys.HardStorage);
+    DataHandler.hardGlobalHighscore =
+      await DataHandler.globalStorage.getGlobalHardHighscore();
   }
 
-  handleNewEasyScore(newScore: number) {
+  static handleNewEasyScore(newScore: number) {
     if (newScore > this.easyLocalHighscore) {
       this.setNewEasyLocalHighscore(newScore);
     }
@@ -48,7 +47,7 @@ export default class DataHandler {
     }
   }
 
-  handleNewNormalScore(newScore: number) {
+  static handleNewNormalScore(newScore: number) {
     if (newScore > this.normalLocalHighscore) {
       this.setNewNormalLocalHighscore(newScore);
     }
@@ -57,7 +56,7 @@ export default class DataHandler {
     }
   }
 
-  handleNewHardScore(newScore: number) {
+  static handleNewHardScore(newScore: number) {
     if (newScore > this.hardLocalHighscore) {
       this.setNewHardLocalHighscore(newScore);
     }
@@ -66,17 +65,17 @@ export default class DataHandler {
     }
   }
 
-  private setNewEasyLocalHighscore(newLocalHighscore: number) {
+  private static setNewEasyLocalHighscore(newLocalHighscore: number) {
     this.easyLocalHighscore = newLocalHighscore;
     this.localStorage.setHighscore(newLocalHighscore, StorageKeys.EasyStorage);
   }
 
-  private setNewEasyGlobalHighscore(newGlobalHighscore: number) {
+  private static setNewEasyGlobalHighscore(newGlobalHighscore: number) {
     this.easyGlobalHighscore = newGlobalHighscore;
     this.globalStorage.setGlobalEasyHighscore(newGlobalHighscore);
   }
 
-  private setNewNormalLocalHighscore(newLocalHighscore: number) {
+  private static setNewNormalLocalHighscore(newLocalHighscore: number) {
     this.normalLocalHighscore = newLocalHighscore;
     this.localStorage.setHighscore(
       newLocalHighscore,
@@ -84,17 +83,17 @@ export default class DataHandler {
     );
   }
 
-  private setNewNormalGlobalHighscore(newGlobalHighscore: number) {
+  private static setNewNormalGlobalHighscore(newGlobalHighscore: number) {
     this.normalGlobalHighscore = newGlobalHighscore;
     this.globalStorage.setGlobalNormalHighscore(newGlobalHighscore);
   }
 
-  private setNewHardLocalHighscore(newLocalHighscore: number) {
+  private static setNewHardLocalHighscore(newLocalHighscore: number) {
     this.hardLocalHighscore = newLocalHighscore;
     this.localStorage.setHighscore(newLocalHighscore, StorageKeys.HardStorage);
   }
 
-  private setNewHardGlobalHighscore(newGlobalHighscore: number) {
+  private static setNewHardGlobalHighscore(newGlobalHighscore: number) {
     this.hardGlobalHighscore = newGlobalHighscore;
     this.globalStorage.setGlobalHardHighscore(newGlobalHighscore);
   }

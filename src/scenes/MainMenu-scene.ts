@@ -13,11 +13,9 @@ export default class MainMenuScene extends Phaser.Scene {
   player!: Player;
   gamewidth!: number;
   gameHeight!: number;
-  dataHandler: DataHandler;
 
   constructor() {
     super(SceneKeys.MainMenu);
-    this.dataHandler = new DataHandler();
   }
 
   async create() {
@@ -112,9 +110,9 @@ export default class MainMenuScene extends Phaser.Scene {
       this.gamewidth / 4,
       (this.gameHeight * 3) / 4,
       "Easy\n\nHighscore: " +
-        this.dataHandler.easyLocalHighscore +
+        DataHandler.easyLocalHighscore +
         "\nGlobal: " +
-        this.dataHandler.easyGlobalHighscore,
+        DataHandler.easyGlobalHighscore,
       this,
       () => {
         this.scene.start(SceneKeys.EasyGame);
@@ -125,9 +123,9 @@ export default class MainMenuScene extends Phaser.Scene {
       this.gamewidth / 2,
       (this.gameHeight * 3) / 4,
       "Normal\n\nHighscore: " +
-        this.dataHandler.normalLocalHighscore +
+        DataHandler.normalLocalHighscore +
         "\nGlobal: " +
-        this.dataHandler.normalGlobalHighscore,
+        DataHandler.normalGlobalHighscore,
       this,
       () => {
         this.scene.start(SceneKeys.NormalGame);
@@ -138,9 +136,9 @@ export default class MainMenuScene extends Phaser.Scene {
       (this.gamewidth * 3) / 4,
       (this.gameHeight * 3) / 4,
       "Hard\n\nHighscore: " +
-        this.dataHandler.hardLocalHighscore +
+        DataHandler.hardLocalHighscore +
         "\nGlobal: " +
-        this.dataHandler.hardLocalHighscore,
+        DataHandler.hardGlobalHighscore,
       this,
       () => {
         this.scene.start(SceneKeys.HardGame);

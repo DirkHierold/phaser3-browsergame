@@ -27,12 +27,11 @@ let globalHighscore = 0;
 export default class HardGameScene extends Phaser.Scene {
   private score!: number;
   private gameOver!: boolean;
-  private dataHandler: DataHandler;
 
   constructor() {
     console.log("constructor");
     super(SceneKeys.HardGame);
-    this.dataHandler = new DataHandler();
+
     this.resizeCanvas();
     window.addEventListener(EventKeys.Resize, this.resizeCanvas, false);
   }
@@ -89,8 +88,8 @@ export default class HardGameScene extends Phaser.Scene {
     enemies.addEnemyFarAwayFromPlayer(player, enemySize);
 
     // Score
-    localHighscore = this.dataHandler.hardLocalHighscore;
-    globalHighscore = this.dataHandler.hardGlobalHighscore;
+    localHighscore = DataHandler.hardLocalHighscore;
+    globalHighscore = DataHandler.hardGlobalHighscore;
 
     const style: Phaser.Types.GameObjects.Text.TextStyle = {
       font: "28px Arial",
@@ -184,7 +183,7 @@ export default class HardGameScene extends Phaser.Scene {
 
   private restart() {
     //Save Score if new local or global
-    this.dataHandler.handleNewHardScore(this.score);
+    DataHandler.handleNewHardScore(this.score);
 
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       backgroundColor: "black",
