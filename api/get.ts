@@ -1,6 +1,7 @@
 import faunadb from "faunadb";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-export default async function handler(req, res) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log("Get Api\n");
   let returnValue = "2";
 
