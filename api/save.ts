@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   const { body } = req;
 
   const scoreToSet: number = body.score;
-  const storageKeyToSave: StorageKeys = body.storageKey;
+  const storageKeyToSave: StorageKeys = body.storeKey;
 
   const q = faunadb.query;
 

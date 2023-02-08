@@ -14,10 +14,10 @@ export default class GlobalStorage {
   }
 
   private async getGlobalHighscore(storageKey: StorageKeys): Promise<number> {
-    console.log("setGlobalHighscore");
+    console.log("getGlobalHighscore");
     let returnValue = 1;
 
-    const bodyInit = JSON.stringify({ storageKey: storageKey });
+    const bodyInit = JSON.stringify({ storeKey: storageKey });
     returnValue = await fetch("/api/save", {
       headers: {
         Accept: "application/json",
@@ -50,7 +50,7 @@ export default class GlobalStorage {
     storageKey: StorageKeys
   ): Promise<void> {
     console.log("setGlobalHighscore");
-    const bodyInit = JSON.stringify({ score: newHigh, storageKey: storageKey });
+    const bodyInit = JSON.stringify({ score: newHigh, storeKey: storageKey });
     await fetch("/api/save", {
       headers: {
         Accept: "application/json",

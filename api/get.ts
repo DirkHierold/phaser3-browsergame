@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   let returnValue = "0";
 
   const { body } = req;
-  const storageKeyToSave: StorageKeys = body.storageKey;
+  const storageKeyToSave: StorageKeys = body.storeKey;
 
   const q = faunadb.query;
 
