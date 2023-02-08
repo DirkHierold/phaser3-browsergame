@@ -22,10 +22,10 @@ export default async function handler(req: any, res: any) {
       documentId = "355998936929927254";
       break;
     case 1:
-      documentId = "355998936929927254";
+      documentId = "356127674838548566";
       break;
     case 2:
-      documentId = "355998936929927254";
+      documentId = "356127717388714070";
       break;
     default:
       break;

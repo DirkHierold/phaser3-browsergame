@@ -15,11 +15,7 @@ export default class DataHandler {
   static hardLocalHighscore: number = 0;
   static hardGlobalHighscore: number = 0;
 
-  constructor() {
-    this.init();
-  }
-
-  async init() {
+  static async init() {
     DataHandler.easyLocalHighscore =
       DataHandler.localStorage.getHighscoreIfAvailable(StorageKeys.EasyStorage);
     DataHandler.easyGlobalHighscore =
