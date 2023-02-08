@@ -1,14 +1,10 @@
 import faunadb from "faunadb";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req, res) {
   console.log("Save Api\n");
-
-  console.log("Request\n\n " + req);
-  console.log("Request to string\n\n " + req.toString());
-  console.log("Request body\n\n " + req.body);
-  const body = JSON.parse(req.body);
-  console.log("Request body json\n\n " + body);
+  const { body } = req;
+  console.log("Request body\n\n " + body);
   let scoreToSet: number = body.score;
   console.log("scoreToSet\n\n " + scoreToSet);
 
