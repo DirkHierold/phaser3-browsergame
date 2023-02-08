@@ -1,10 +1,11 @@
 import faunadb from "faunadb";
-import StorageKeys from "../src/consts/StorageKeys";
-export default async function handler(req, res) {
-  console.log("Get Api\n");
-  let returnValue = "0";
+import StorageKeys from "../consts/StorageKeys";
 
+export default async function handler(req: any, res: any) {
+  console.log("Save Api\n");
   const { body } = req;
+
+  const scoreToSet: number = body.score;
   const storageKeyToSave: StorageKeys = body.storeKey;
 
   const q = faunadb.query;
@@ -30,13 +31,12 @@ export default async function handler(req, res) {
     default:
       break;
   }
-
-  const result: any = await client.query(
-    q.Select("data", q.Get(q.Ref(q.Collection("highscores"), documentId)))
+  await client.query(
+    q.Update(q.Ref(q.Collection("highscores"), documentId), {
+      data: { score: scoreToSet },
+    })
   );
 
-  returnValue = result.score.toString();
-
   res.setHeader("Content-Type", "application/json");
-  return res.end(returnValue);
+  return res.end(scoreToSet.toString());
 }
