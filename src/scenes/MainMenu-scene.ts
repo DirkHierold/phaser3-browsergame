@@ -20,7 +20,7 @@ export default class MainMenuScene extends Phaser.Scene {
 
   async create() {
     // Get actual Data
-    DataHandler.init();
+    await DataHandler.init();
 
     this.musicRegistered = this.registry.get("musicRegistered");
 
