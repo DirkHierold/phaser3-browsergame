@@ -1,12 +1,11 @@
 import faunadb from "faunadb";
-import StorageKeys from "../consts/StorageKeys";
 
 export default async function handler(req: any, res: any) {
   console.log("Save Api\n");
   const { body } = req;
 
   const scoreToSet: number = body.score;
-  const storageKeyToSave: StorageKeys = body.storeKey;
+  const storageKeyToSave: number = body.storeKey;
 
   const q = faunadb.query;
 
@@ -19,13 +18,13 @@ export default async function handler(req: any, res: any) {
   });
   let documentId = "";
   switch (storageKeyToSave) {
-    case StorageKeys.EasyStorage:
+    case 0:
       documentId = "355998936929927254";
       break;
-    case StorageKeys.NormalStorage:
+    case 1:
       documentId = "355998936929927254";
       break;
-    case StorageKeys.HardStorage:
+    case 2:
       documentId = "355998936929927254";
       break;
     default:

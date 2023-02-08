@@ -1,19 +1,17 @@
-import StorageKeys from "../consts/StorageKeys";
-
 export default class GlobalStorage {
   getGlobalEasyHighscore(): Promise<number> {
-    return this.getGlobalHighscore(StorageKeys.EasyStorage);
+    return this.getGlobalHighscore(0);
   }
 
   getGlobalNormalHighscore(): Promise<number> {
-    return this.getGlobalHighscore(StorageKeys.NormalStorage);
+    return this.getGlobalHighscore(1);
   }
 
   getGlobalHardHighscore(): Promise<number> {
-    return this.getGlobalHighscore(StorageKeys.HardStorage);
+    return this.getGlobalHighscore(2);
   }
 
-  private async getGlobalHighscore(storageKey: StorageKeys): Promise<number> {
+  private async getGlobalHighscore(storageKey: number): Promise<number> {
     console.log("getGlobalHighscore");
     let returnValue = 1;
 
@@ -34,20 +32,20 @@ export default class GlobalStorage {
   }
 
   async setGlobalEasyHighscore(newHigh: number): Promise<void> {
-    this.setGlobalHighscore(newHigh, StorageKeys.EasyStorage);
+    this.setGlobalHighscore(newHigh, 0);
   }
 
   async setGlobalNormalHighscore(newHigh: number): Promise<void> {
-    this.setGlobalHighscore(newHigh, StorageKeys.NormalStorage);
+    this.setGlobalHighscore(newHigh, 1);
   }
 
   async setGlobalHardHighscore(newHigh: number): Promise<void> {
-    this.setGlobalHighscore(newHigh, StorageKeys.HardStorage);
+    this.setGlobalHighscore(newHigh, 2);
   }
 
   private async setGlobalHighscore(
     newHigh: number,
-    storageKey: StorageKeys
+    storageKey: number
   ): Promise<void> {
     console.log("setGlobalHighscore");
     const bodyInit = JSON.stringify({ score: newHigh, storeKey: storageKey });
