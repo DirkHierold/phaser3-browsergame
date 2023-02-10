@@ -1,12 +1,11 @@
 import Phaser from "phaser";
 import EventKeys from "../consts/EventKeys";
 import SceneKeys from "../consts/SceneKeys";
-import StorageKeys from "../consts/StorageKeys";
 import TextureKeys from "../consts/TextureKeys";
 import Enemies from "../model/Enemies";
 import Player from "../model/Player";
 import Target from "../model/Target";
-import LocalStorage from "../utils/LocalStorage";
+import DataHandler from "../utils/DataHandler";
 
 let gameWidth = 0;
 let gameHeight = 0;
@@ -22,13 +21,12 @@ let enemySize: number;
 
 let text: Phaser.GameObjects.Text;
 
-let highscore = 0;
-let alltime = 0;
+let localHighscore = 0;
+let globalHighscore = 0;
 
 export default class HardGameScene extends Phaser.Scene {
   private score!: number;
   private gameOver!: boolean;
-  private localStorage!: LocalStorage;
 
   constructor() {
     console.log("constructor");
@@ -42,10 +40,6 @@ export default class HardGameScene extends Phaser.Scene {
     console.log("init");
     this.score = 0;
     this.gameOver = false;
-    this.localStorage = new LocalStorage(
-      window.localStorage,
-      StorageKeys.HardStorage
-    );
   }
 
   //  Load the Google WebFont Loader script
@@ -94,8 +88,8 @@ export default class HardGameScene extends Phaser.Scene {
     enemies.addEnemyFarAwayFromPlayer(player, enemySize);
 
     // Score
-    highscore = this.localStorage.getHighscoreIfAvailable();
-    alltime = this.localStorage.getAlltimeIfAvailable();
+    localHighscore = DataHandler.hardLocalHighscore;
+    globalHighscore = DataHandler.hardGlobalHighscore;
 
     const style: Phaser.Types.GameObjects.Text.TextStyle = {
       font: "28px Arial",
@@ -146,9 +140,9 @@ export default class HardGameScene extends Phaser.Scene {
       "Score: " +
         this.score +
         "\nHighscore: " +
-        highscore +
-        "\nAlltime: " +
-        alltime
+        localHighscore +
+        "\nGlobal: " +
+        globalHighscore
     );
   }
 
@@ -166,10 +160,6 @@ export default class HardGameScene extends Phaser.Scene {
     enemies.addEnemyFarAwayFromPlayer(player, enemySize);
 
     this.score++;
-    alltime++;
-
-    highscore = this.localStorage.setHighscoreIfNew(this.score, highscore);
-    this.localStorage.setAlltime(alltime);
 
     this.drawScores();
   }
@@ -192,6 +182,9 @@ export default class HardGameScene extends Phaser.Scene {
   }
 
   private restart() {
+    //Save Score if new local or global
+    DataHandler.handleNewHardScore(this.score);
+
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       backgroundColor: "black",
     };

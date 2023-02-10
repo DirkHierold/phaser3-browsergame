@@ -1,10 +1,10 @@
 import faunadb from "faunadb";
 
 export default async function handler(req: any, res: any) {
-  console.log("Save Api\n");
-  const { body } = req;
+  console.log("Get Api\n");
+  let returnValue = "0";
 
-  const scoreToSet: number = body.score;
+  const { body } = req;
   const storageKeyToSave: number = body.storeKey;
 
   const q = faunadb.query;
@@ -30,12 +30,13 @@ export default async function handler(req: any, res: any) {
     default:
       break;
   }
-  await client.query(
-    q.Update(q.Ref(q.Collection("highscores"), documentId), {
-      data: { score: scoreToSet },
-    })
+
+  const result: any = await client.query(
+    q.Select("data", q.Get(q.Ref(q.Collection("highscores"), documentId)))
   );
 
+  returnValue = result.score.toString();
+
   res.setHeader("Content-Type", "application/json");
-  return res.end(scoreToSet.toString());
+  return res.end(returnValue);
 }
