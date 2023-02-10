@@ -24,18 +24,18 @@ export default class DataHandler {
   static async update() {
     const easyGlobalData =
       await DataHandler.globalStorage.getGlobalEasyHighscore();
-    DataHandler.easyGlobalHighscore = easyGlobalData.score;
-    DataHandler.easyHighscoreName = easyGlobalData.name;
+    DataHandler.easyGlobalHighscore = parseInt(easyGlobalData[0]);
+    DataHandler.easyHighscoreName = easyGlobalData[1];
 
     const normalGlobalData =
       await DataHandler.globalStorage.getGlobalNormalHighscore();
-    DataHandler.normalGlobalHighscore = normalGlobalData.score;
-    DataHandler.normalHighscoreName = normalGlobalData.name;
+    DataHandler.normalGlobalHighscore = parseInt(normalGlobalData[0]);
+    DataHandler.normalHighscoreName = normalGlobalData[1];
 
     const hardGlobalData =
       await DataHandler.globalStorage.getGlobalHardHighscore();
-    DataHandler.hardGlobalHighscore = hardGlobalData.score;
-    DataHandler.hardHighscoreName = hardGlobalData.name;
+    DataHandler.hardGlobalHighscore = parseInt(hardGlobalData[0]);
+    DataHandler.hardHighscoreName = hardGlobalData[1];
   }
 
   static handleNewEasyScore(newScore: number) {
