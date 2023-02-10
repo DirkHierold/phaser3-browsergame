@@ -3,6 +3,7 @@ import faunadb from "faunadb";
 export default async function handler(req: any, res: any) {
   console.log("Get Api\n");
   let returnValue = "0";
+  let returnName = "Dirk";
 
   const { body } = req;
   const storageKeyToSave: number = body.storeKey;
@@ -36,7 +37,7 @@ export default async function handler(req: any, res: any) {
   );
 
   returnValue = result.score.toString();
-
+  returnName = result.name;
   res.setHeader("Content-Type", "application/json");
-  return res.end(returnValue);
+  return res.end({ score: returnValue, name: returnName });
 }

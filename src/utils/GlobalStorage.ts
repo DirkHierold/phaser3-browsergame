@@ -1,19 +1,19 @@
 export default class GlobalStorage {
-  getGlobalEasyHighscore(): Promise<number> {
+  getGlobalEasyHighscore(): Promise<any> {
     return this.getGlobalHighscore(0);
   }
 
-  getGlobalNormalHighscore(): Promise<number> {
+  getGlobalNormalHighscore(): Promise<any> {
     return this.getGlobalHighscore(1);
   }
 
-  getGlobalHardHighscore(): Promise<number> {
+  getGlobalHardHighscore(): Promise<any> {
     return this.getGlobalHighscore(2);
   }
 
-  private async getGlobalHighscore(storageKey: number): Promise<number> {
+  private async getGlobalHighscore(storageKey: number): Promise<any> {
     console.log("getGlobalHighscore");
-    let returnValue = 1;
+    let returnValue = { score: 1, name: "Rex" };
 
     const bodyInit = JSON.stringify({ storeKey: storageKey });
     returnValue = await fetch("/api/get", {
@@ -23,8 +23,8 @@ export default class GlobalStorage {
       },
       method: "POST",
       body: bodyInit,
-    }).then((response) => response.json() as Promise<number>);
-
+    }).then((response) => response.json() as Promise<any>);
+    console.log(returnValue);
     // returnValue = await fetch("/api/get").then(
     //   (response) => response.json() as Promise<number>
     // );

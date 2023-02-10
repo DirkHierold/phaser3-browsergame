@@ -9,24 +9,33 @@ export default class DataHandler {
   static easyLocalHighscore: number =
     DataHandler.localStorage.getHighscoreIfAvailable(StorageKeys.EasyStorage);
   static easyGlobalHighscore: number = 0;
+  static easyHighscoreName: string = "";
 
   static normalLocalHighscore: number =
     DataHandler.localStorage.getHighscoreIfAvailable(StorageKeys.NormalStorage);
   static normalGlobalHighscore: number = 0;
+  static normalHighscoreName: string = "";
 
   static hardLocalHighscore: number =
     DataHandler.localStorage.getHighscoreIfAvailable(StorageKeys.HardStorage);
   static hardGlobalHighscore: number = 0;
+  static hardHighscoreName: string = "";
 
   static async update() {
-    DataHandler.easyGlobalHighscore =
+    const easyGlobalData =
       await DataHandler.globalStorage.getGlobalEasyHighscore();
+    DataHandler.easyGlobalHighscore = easyGlobalData.score;
+    DataHandler.easyHighscoreName = easyGlobalData.name;
 
-    DataHandler.normalGlobalHighscore =
+    const normalGlobalData =
       await DataHandler.globalStorage.getGlobalNormalHighscore();
+    DataHandler.normalGlobalHighscore = normalGlobalData.score;
+    DataHandler.normalHighscoreName = normalGlobalData.name;
 
-    DataHandler.hardGlobalHighscore =
+    const hardGlobalData =
       await DataHandler.globalStorage.getGlobalHardHighscore();
+    DataHandler.hardGlobalHighscore = hardGlobalData.score;
+    DataHandler.hardHighscoreName = hardGlobalData.name;
   }
 
   static handleNewEasyScore(newScore: number) {

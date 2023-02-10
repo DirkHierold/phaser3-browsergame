@@ -150,19 +150,25 @@ export default class MainMenuScene extends Phaser.Scene {
         "Easy\n\nHighscore: " +
           DataHandler.easyLocalHighscore +
           "\nGlobal: " +
-          DataHandler.easyGlobalHighscore
+          DataHandler.easyGlobalHighscore +
+          "\nLeader: " +
+          DataHandler.easyHighscoreName
       );
       normalButton.setText(
         "Normal\n\nHighscore: " +
           DataHandler.normalLocalHighscore +
           "\nGlobal: " +
-          DataHandler.normalGlobalHighscore
+          DataHandler.normalGlobalHighscore +
+          "\nLeader: " +
+          DataHandler.normalHighscoreName
       );
       hardButton.setText(
         "Hard\n\nHighscore: " +
           DataHandler.hardLocalHighscore +
           "\nGlobal: " +
-          DataHandler.hardGlobalHighscore
+          DataHandler.hardGlobalHighscore +
+          "\nLeader: " +
+          DataHandler.hardHighscoreName
       );
     });
   }
