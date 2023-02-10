@@ -39,5 +39,5 @@ export default async function handler(req: any, res: any) {
   returnValue = result.score.toString();
   returnName = result.name;
   res.setHeader("Content-Type", "application/json");
-  return res.end({ score: returnValue, name: returnName });
+  return res.end(JSON.stringify({ score: returnValue, name: returnName }));
 }
