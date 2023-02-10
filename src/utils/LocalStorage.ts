@@ -1,6 +1,5 @@
 import StorageItemKeys from "../consts/StorageItemKeys";
 import StorageKeys from "../consts/StorageKeys";
-// import fs from "fs";
 
 export default class LocalStorage {
   storage: Storage = window.localStorage;

@@ -2,10 +2,10 @@
   "name": "Don't die dino!",
   "short_name": "Di-No",
   "description": "Phaser3 PWA Game about a little dino by Dirk Hierold",
-  "start_url": "https://phaser3-browsergame-git-new-camera-dirkhierold.vercel.app/",
-  "background_color": "#000000",
+  "start_url": "/",
+  "background_color": "white",
   "theme_color": "#0f4a73",
-  "display": "fullscreen",
+  "display": "standalone",
   "icons": [
     {
       "src": "images/icon-192-dino.png",

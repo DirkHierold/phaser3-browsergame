@@ -6,6 +6,7 @@ export default async function handler(req: any, res: any) {
 
   const scoreToSet: number = body.score;
   const storageKeyToSave: number = body.storeKey;
+  const nameToSave: string = body.name;
 
   const q = faunadb.query;
 
@@ -32,7 +33,7 @@ export default async function handler(req: any, res: any) {
   }
   await client.query(
     q.Update(q.Ref(q.Collection("highscores"), documentId), {
-      data: { score: scoreToSet },
+      data: { score: scoreToSet, name: nameToSave },
     })
   );
 

@@ -11,6 +11,9 @@ const config: any = {
   parent: "app",
   width: window.innerWidth,
   height: window.innerHeight,
+  dom: {
+    createContainer: true,
+  },
   physics: {
     default: "arcade",
     arcade: {

@@ -63,7 +63,11 @@ export default class DataHandler {
 
   private static setNewEasyGlobalHighscore(newGlobalHighscore: number) {
     this.easyGlobalHighscore = newGlobalHighscore;
-    this.globalStorage.setGlobalEasyHighscore(newGlobalHighscore);
+    const nameForHighscore = "Dino"; //InputHandler.getNameForHighscore(scene);
+    this.globalStorage.setGlobalEasyHighscore(
+      newGlobalHighscore,
+      nameForHighscore
+    );
   }
 
   private static setNewNormalLocalHighscore(newLocalHighscore: number) {
@@ -76,7 +80,11 @@ export default class DataHandler {
 
   private static setNewNormalGlobalHighscore(newGlobalHighscore: number) {
     this.normalGlobalHighscore = newGlobalHighscore;
-    this.globalStorage.setGlobalNormalHighscore(newGlobalHighscore);
+    const nameForHighscore = "Dino"; //InputHandler.getNameForHighscore(scene);
+    this.globalStorage.setGlobalNormalHighscore(
+      newGlobalHighscore,
+      nameForHighscore
+    );
   }
 
   private static setNewHardLocalHighscore(newLocalHighscore: number) {
@@ -86,6 +94,10 @@ export default class DataHandler {
 
   private static setNewHardGlobalHighscore(newGlobalHighscore: number) {
     this.hardGlobalHighscore = newGlobalHighscore;
-    this.globalStorage.setGlobalHardHighscore(newGlobalHighscore);
+    const nameForHighscore = "Dino"; //InputHandler.getNameForHighscore(scene);
+    this.globalStorage.setGlobalHardHighscore(
+      newGlobalHighscore,
+      nameForHighscore
+    );
   }
 }
