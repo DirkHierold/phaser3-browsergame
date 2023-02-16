@@ -23,13 +23,14 @@ export default class GlobalStorage {
       },
       method: "POST",
       body: bodyInit,
-    });
-    // .then((response) => response.json() as Promise<string[]>)
-    // .then((data) => {
-    //   returnValue = data;
-    // });
-    const { body } = response;
-    console.log(body);
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        returnValue = data;
+      });
+    console.log(returnValue);
     // returnValue = await fetch("/api/get").then(
     //   (response) => response.json() as Promise<number>
     // );

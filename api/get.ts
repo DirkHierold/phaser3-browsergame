@@ -1,6 +1,7 @@
 import faunadb from "faunadb";
+import { Http2ServerResponse } from "http2";
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: any, res: Http2ServerResponse) {
   console.log("Get Api\n");
   let returnValue = "0";
   let returnName = "Dirk";
