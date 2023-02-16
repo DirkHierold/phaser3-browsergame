@@ -16,7 +16,7 @@ export default class GlobalStorage {
     let returnValue = ["1", "Dino"];
 
     const bodyInit = JSON.stringify({ storeKey: storageKey });
-    const response = await fetch("/api/get", {
+    await fetch("/api/get", {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
