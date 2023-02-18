@@ -72,12 +72,12 @@ export default class DataHandler {
     this.localStorage.setHighscore(newLocalHighscore, StorageKeys.EasyStorage);
   }
 
-  static setNewEasyGlobalHighscore(
+  static async setNewEasyGlobalHighscore(
     newGlobalHighscore: number,
     nameForHighscore: string
   ) {
     this.easyGlobalHighscore = newGlobalHighscore;
-    this.globalStorage.setGlobalEasyHighscore(
+    await this.globalStorage.setGlobalEasyHighscore(
       newGlobalHighscore,
       nameForHighscore
     );
