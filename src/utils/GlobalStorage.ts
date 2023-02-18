@@ -16,22 +16,23 @@ export default class GlobalStorage {
     let returnValue = ["1", "Dino"];
 
     const bodyInit = JSON.stringify({ storeKey: storageKey });
-    await fetch("/api/get", {
+    const resp = await fetch("/api/get", {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
       method: "POST",
       body: bodyInit,
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        returnValue = data;
-        console.log("getGlobalHighscore then = ", returnValue);
-      });
-    console.log("getGlobalHighscore = ", returnValue);
+    });
+    returnValue = await resp.json();
+    //   .then((response) => {
+    //     return response.json();
+    //   })
+    //   .then((data) => {
+    //     returnValue = data;
+    //     console.log("getGlobalHighscore then = ", returnValue);
+    //   });
+    // console.log("getGlobalHighscore = ", returnValue);
     return returnValue;
   }
 
