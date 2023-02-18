@@ -24,6 +24,7 @@ export default class DataHandler {
   static async update() {
     const easyGlobalData =
       await DataHandler.globalStorage.getGlobalEasyHighscore();
+    console.log("update = ", easyGlobalData);
     DataHandler.easyGlobalHighscore = easyGlobalData.score;
     DataHandler.easyHighscoreName = easyGlobalData.name;
 

@@ -29,8 +29,9 @@ export default class GlobalStorage {
       })
       .then((data) => {
         returnValue = data;
+        console.log("getGlobalHighscore then = ", returnValue);
       });
-
+    console.log("getGlobalHighscore = ", returnValue);
     return returnValue;
   }
 
