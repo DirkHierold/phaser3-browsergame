@@ -145,7 +145,7 @@ export default class MainMenuScene extends Phaser.Scene {
       }
     );
     // Get actual Data and update Button Text
-    DataHandler.update().then(() => {
+    await DataHandler.update().then(() => {
       easyButton.setText(
         "Easy\n\nHighscore: " +
           DataHandler.easyLocalHighscore +
