@@ -6,6 +6,7 @@ import Enemies from "../model/Enemies";
 import Player from "../model/Player";
 import Target from "../model/Target";
 import DataHandler from "../utils/DataHandler";
+import InputHandler from "../utils/InputHandler";
 
 let gameWidth = 0;
 let gameHeight = 0;
@@ -23,6 +24,7 @@ let text: Phaser.GameObjects.Text;
 
 let localHighscore = 0;
 let globalHighscore = 0;
+let leader = "";
 
 export default class EasyGameScene extends Phaser.Scene {
   private score!: number;
@@ -90,6 +92,7 @@ export default class EasyGameScene extends Phaser.Scene {
     // Score
     localHighscore = DataHandler.easyLocalHighscore;
     globalHighscore = DataHandler.easyGlobalHighscore;
+    leader = DataHandler.easyHighscoreName;
 
     const style: Phaser.Types.GameObjects.Text.TextStyle = {
       font: "28px Arial",
@@ -141,8 +144,10 @@ export default class EasyGameScene extends Phaser.Scene {
         this.score +
         "\nHighscore: " +
         localHighscore +
-        "\nGlobal: " +
-        globalHighscore
+        "\n\nGlobal: " +
+        globalHighscore +
+        "\nLeader: " +
+        leader
     );
   }
 
@@ -182,18 +187,39 @@ export default class EasyGameScene extends Phaser.Scene {
   }
 
   private restart() {
+    let inputNameDOM: Phaser.GameObjects.DOMElement | null = null;
+    if (DataHandler.isNewEasyGlobalScore(this.score)) {
+      inputNameDOM = InputHandler.getNameForHighscore(this);
+      // let textField: any = inputNameDOM.getChildByName("text");
+      // textField.value = text.text;
+    }
     //Save Score if new local or global
-    DataHandler.handleNewEasyScore(this.score);
+    DataHandler.handleNewEasyLocalScore(this.score);
 
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       backgroundColor: "black",
     };
+    let isNameMissing: boolean = false;
     text
-      .setText("Back\n\n" + text.text)
+      .setText("Save and Back\n\n" + text.text)
       .setPadding(10)
       .setStyle(textStyle)
       .setInteractive({ useHandCursor: true })
       .on(EventKeys.PointerDown, () => {
+        if (inputNameDOM) {
+          let name: any = inputNameDOM.getChildByName("name");
+          if (name.value != "") {
+            const nameForHighscore = name.value;
+            DataHandler.setNewEasyGlobalHighscore(this.score, nameForHighscore);
+          } else if (!isNameMissing) {
+            isNameMissing = true;
+            text.setText(text.text + "\n\nYour Name is missing!");
+            return;
+          } else {
+            return;
+          }
+        }
+
         console.log("Back to Main Menu");
         this.scene.start(SceneKeys.MainMenu);
       })

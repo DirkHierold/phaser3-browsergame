@@ -30,10 +30,7 @@ export default class GlobalStorage {
       .then((data) => {
         returnValue = data;
       });
-    console.log(returnValue);
-    // returnValue = await fetch("/api/get").then(
-    //   (response) => response.json() as Promise<number>
-    // );
+
     return returnValue;
   }
 

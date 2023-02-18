@@ -38,12 +38,13 @@ export default class DataHandler {
     DataHandler.hardHighscoreName = hardGlobalData.name;
   }
 
-  static handleNewEasyScore(newScore: number) {
+  static isNewEasyGlobalScore(newScore: number): boolean {
+    return newScore > this.easyGlobalHighscore;
+  }
+
+  static handleNewEasyLocalScore(newScore: number) {
     if (newScore > this.easyLocalHighscore) {
       this.setNewEasyLocalHighscore(newScore);
-    }
-    if (newScore > this.easyGlobalHighscore) {
-      this.setNewEasyGlobalHighscore(newScore);
     }
   }
 
@@ -70,9 +71,11 @@ export default class DataHandler {
     this.localStorage.setHighscore(newLocalHighscore, StorageKeys.EasyStorage);
   }
 
-  private static setNewEasyGlobalHighscore(newGlobalHighscore: number) {
+  static setNewEasyGlobalHighscore(
+    newGlobalHighscore: number,
+    nameForHighscore: string
+  ) {
     this.easyGlobalHighscore = newGlobalHighscore;
-    const nameForHighscore = "Dino"; //InputHandler.getNameForHighscore(scene);
     this.globalStorage.setGlobalEasyHighscore(
       newGlobalHighscore,
       nameForHighscore

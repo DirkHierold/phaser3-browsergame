@@ -11,22 +11,22 @@ export default async function handler(req: any, res: any) {
   const q = faunadb.query;
 
   const client = new faunadb.Client({
-    secret: "fnAE8MKXOoAAVzI4RyIljdQ2UXjDEwzXgc_Npllh",
+    secret: "fnAE9FQQHjACWWXFwbdtaIAH4eyW6_XRdJ75kjQ_",
     // NOTE: Use the correct endpoint for your database's Region Group.
     scheme: "https",
-    domain: "db.us.fauna.com",
-    endpoint: "https://db.us.fauna.com/",
+    domain: "db.fauna.com",
+    endpoint: "https://db.fauna.com/",
   });
   let documentId = "";
   switch (storageKeyToSave) {
     case 0:
-      documentId = "355998936929927254";
+      documentId = "357002542602781274";
       break;
     case 1:
-      documentId = "356127674838548566";
+      documentId = "357002584934842970";
       break;
     case 2:
-      documentId = "356127717388714070";
+      documentId = "357002592516047450";
       break;
     default:
       break;
