@@ -32,7 +32,7 @@ export default class GlobalStorage {
     //     returnValue = data;
     //     console.log("getGlobalHighscore then = ", returnValue);
     //   });
-    // console.log("getGlobalHighscore = ", returnValue);
+    console.log("getGlobalHighscore = ", returnValue);
     return returnValue;
   }
 

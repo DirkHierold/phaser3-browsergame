@@ -39,6 +39,7 @@ export default async function handler(req: any, res: Http2ServerResponse) {
 
   returnValue = result.score.toString();
   returnName = result.name;
+  console.log("get API = ", returnName);
   res.setHeader("Content-Type", "application/json");
   return res.end(JSON.stringify({ score: returnValue, name: returnName }));
 }
