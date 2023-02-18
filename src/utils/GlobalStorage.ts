@@ -1,6 +1,6 @@
 export default class GlobalStorage {
-  getGlobalEasyHighscore(): Promise<any> {
-    return this.getGlobalHighscore(0);
+  async getGlobalEasyHighscore(): Promise<any> {
+    return await this.getGlobalHighscore(0);
   }
 
   getGlobalNormalHighscore(): Promise<any> {
