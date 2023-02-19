@@ -36,11 +36,11 @@ export default class GlobalStorage {
     return returnValue;
   }
 
-  async setGlobalEasyHighscore(
+  setGlobalEasyHighscore(
     newHigh: number,
     nameForHighscore: string
-  ): Promise<void> {
-    this.setGlobalHighscore(newHigh, 0, nameForHighscore);
+  ): Promise<Response> {
+    return this.setGlobalHighscore(newHigh, 0, nameForHighscore);
   }
 
   async setGlobalNormalHighscore(
@@ -57,18 +57,18 @@ export default class GlobalStorage {
     this.setGlobalHighscore(newHigh, 2, nameForHighscore);
   }
 
-  private async setGlobalHighscore(
+  private setGlobalHighscore(
     newHigh: number,
     storageKey: number,
     nameForHighscore: string
-  ): Promise<void> {
+  ): Promise<Response> {
     console.log("setGlobalHighscore");
     const bodyInit = JSON.stringify({
       score: newHigh,
       storeKey: storageKey,
       name: nameForHighscore,
     });
-    await fetch("/api/save", {
+    return fetch("/api/save", {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",

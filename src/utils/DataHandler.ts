@@ -20,8 +20,10 @@ export default class DataHandler {
     DataHandler.localStorage.getHighscoreIfAvailable(StorageKeys.HardStorage);
   static hardGlobalHighscore: number = 0;
   static hardHighscoreName: string = "";
+  static setGlobalEasyHighscorePromise: Promise<Response>;
 
   static async update() {
+    await this.setGlobalEasyHighscorePromise;
     const easyGlobalData =
       await DataHandler.globalStorage.getGlobalEasyHighscore();
     console.log("update = ", easyGlobalData);
@@ -72,15 +74,16 @@ export default class DataHandler {
     this.localStorage.setHighscore(newLocalHighscore, StorageKeys.EasyStorage);
   }
 
-  static async setNewEasyGlobalHighscore(
+  static setNewEasyGlobalHighscore(
     newGlobalHighscore: number,
     nameForHighscore: string
   ) {
     this.easyGlobalHighscore = newGlobalHighscore;
-    await this.globalStorage.setGlobalEasyHighscore(
-      newGlobalHighscore,
-      nameForHighscore
-    );
+    this.setGlobalEasyHighscorePromise =
+      this.globalStorage.setGlobalEasyHighscore(
+        newGlobalHighscore,
+        nameForHighscore
+      );
   }
 
   private static setNewNormalLocalHighscore(newLocalHighscore: number) {

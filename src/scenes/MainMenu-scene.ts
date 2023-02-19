@@ -145,33 +145,33 @@ export default class MainMenuScene extends Phaser.Scene {
       }
     );
     // Get actual Data and update Button Text
-    await DataHandler.update().then(() => {
-      console.log("MainMenu = ", DataHandler.easyHighscoreName);
-      easyButton.setText(
-        "Easy\n\nHighscore: " +
-          DataHandler.easyLocalHighscore +
-          "\nGlobal: " +
-          DataHandler.easyGlobalHighscore +
-          "\nLeader: " +
-          DataHandler.easyHighscoreName
-      );
-      normalButton.setText(
-        "Normal\n\nHighscore: " +
-          DataHandler.normalLocalHighscore +
-          "\nGlobal: " +
-          DataHandler.normalGlobalHighscore +
-          "\nLeader: " +
-          DataHandler.normalHighscoreName
-      );
-      hardButton.setText(
-        "Hard\n\nHighscore: " +
-          DataHandler.hardLocalHighscore +
-          "\nGlobal: " +
-          DataHandler.hardGlobalHighscore +
-          "\nLeader: " +
-          DataHandler.hardHighscoreName
-      );
-    });
+    await DataHandler.update();
+
+    console.log("MainMenu = ", DataHandler.easyHighscoreName);
+    easyButton.setText(
+      "Easy\n\nHighscore: " +
+        DataHandler.easyLocalHighscore +
+        "\nGlobal: " +
+        DataHandler.easyGlobalHighscore +
+        "\nLeader: " +
+        DataHandler.easyHighscoreName
+    );
+    normalButton.setText(
+      "Normal\n\nHighscore: " +
+        DataHandler.normalLocalHighscore +
+        "\nGlobal: " +
+        DataHandler.normalGlobalHighscore +
+        "\nLeader: " +
+        DataHandler.normalHighscoreName
+    );
+    hardButton.setText(
+      "Hard\n\nHighscore: " +
+        DataHandler.hardLocalHighscore +
+        "\nGlobal: " +
+        DataHandler.hardGlobalHighscore +
+        "\nLeader: " +
+        DataHandler.hardHighscoreName
+    );
   }
 
   update(): void {

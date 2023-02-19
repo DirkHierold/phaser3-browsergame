@@ -205,15 +205,12 @@ export default class EasyGameScene extends Phaser.Scene {
       .setPadding(10)
       .setStyle(textStyle)
       .setInteractive({ useHandCursor: true })
-      .on(EventKeys.PointerDown, async () => {
+      .on(EventKeys.PointerDown, () => {
         if (inputNameDOM) {
           let name: any = inputNameDOM.getChildByName("name");
           if (name.value != "") {
             const nameForHighscore = name.value;
-            await DataHandler.setNewEasyGlobalHighscore(
-              this.score,
-              nameForHighscore
-            );
+            DataHandler.setNewEasyGlobalHighscore(this.score, nameForHighscore);
           } else if (!isNameMissing) {
             isNameMissing = true;
             text.setText(text.text + "\n\nYour Name is missing!");
