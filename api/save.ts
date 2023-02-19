@@ -1,6 +1,6 @@
 import faunadb from "faunadb";
 
-export default async function handler(req: any, res: any) {
+export default function handler(req: any, res: any) {
   console.log("Save Api\n");
   const { body } = req;
 
@@ -31,7 +31,7 @@ export default async function handler(req: any, res: any) {
     default:
       break;
   }
-  await client.query(
+  client.query(
     q.Update(q.Ref(q.Collection("highscores"), documentId), {
       data: { score: scoreToSet, name: nameToSave },
     })
