@@ -37,7 +37,7 @@ export default async function handler(req: any, res: Http2ServerResponse) {
     q.Select("data", q.Get(q.Ref(q.Collection("highscores"), documentId)))
   );
 
-  returnValue = result.score.toString();
+  returnValue = result.score;
   returnName = result.name;
   console.log("get API = ", storageKeyToSave, " = ", returnName);
   res.setHeader("Content-Type", "application/json");
