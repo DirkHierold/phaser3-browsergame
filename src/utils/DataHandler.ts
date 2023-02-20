@@ -21,6 +21,8 @@ export default class DataHandler {
   static hardGlobalHighscore: number = 0;
   static hardHighscoreName: string = "";
   static setGlobalEasyHighscorePromise: Promise<Response>;
+  static setGlobalNormalHighscorePromise: Promise<Response>;
+  static setGlobalHardHighscorePromise: Promise<Response>;
 
   static async update() {
     await this.setGlobalEasyHighscorePromise;
@@ -30,11 +32,13 @@ export default class DataHandler {
     DataHandler.easyGlobalHighscore = easyGlobalData.score;
     DataHandler.easyHighscoreName = easyGlobalData.name;
 
+    await this.setGlobalNormalHighscorePromise;
     const normalGlobalData =
       await DataHandler.globalStorage.getGlobalNormalHighscore();
     DataHandler.normalGlobalHighscore = normalGlobalData.score;
     DataHandler.normalHighscoreName = normalGlobalData.name;
 
+    await this.setGlobalHardHighscorePromise;
     const hardGlobalData =
       await DataHandler.globalStorage.getGlobalHardHighscore();
     DataHandler.hardGlobalHighscore = hardGlobalData.score;
@@ -44,6 +48,12 @@ export default class DataHandler {
   static isNewEasyGlobalScore(newScore: number): boolean {
     return newScore > this.easyGlobalHighscore;
   }
+  static isNewNormalGlobalScore(newScore: number): boolean {
+    return newScore > this.normalGlobalHighscore;
+  }
+  static isNewHardGlobalScore(newScore: number): boolean {
+    return newScore > this.hardGlobalHighscore;
+  }
 
   static handleNewEasyLocalScore(newScore: number) {
     if (newScore > this.easyLocalHighscore) {
@@ -51,21 +61,15 @@ export default class DataHandler {
     }
   }
 
-  static handleNewNormalScore(newScore: number) {
+  static handleNewNormalLocalScore(newScore: number) {
     if (newScore > this.normalLocalHighscore) {
       this.setNewNormalLocalHighscore(newScore);
     }
-    if (newScore > this.normalGlobalHighscore) {
-      this.setNewNormalGlobalHighscore(newScore);
-    }
   }
 
-  static handleNewHardScore(newScore: number) {
+  static handleNewHardLocalScore(newScore: number) {
     if (newScore > this.hardLocalHighscore) {
       this.setNewHardLocalHighscore(newScore);
-    }
-    if (newScore > this.hardGlobalHighscore) {
-      this.setNewHardGlobalHighscore(newScore);
     }
   }
 
@@ -94,13 +98,16 @@ export default class DataHandler {
     );
   }
 
-  private static setNewNormalGlobalHighscore(newGlobalHighscore: number) {
+  static setNewNormalGlobalHighscore(
+    newGlobalHighscore: number,
+    nameForHighscore: string
+  ) {
     this.normalGlobalHighscore = newGlobalHighscore;
-    const nameForHighscore = "Dino"; //InputHandler.getNameForHighscore(scene);
-    this.globalStorage.setGlobalNormalHighscore(
-      newGlobalHighscore,
-      nameForHighscore
-    );
+    this.setGlobalNormalHighscorePromise =
+      this.globalStorage.setGlobalNormalHighscore(
+        newGlobalHighscore,
+        nameForHighscore
+      );
   }
 
   private static setNewHardLocalHighscore(newLocalHighscore: number) {
@@ -108,12 +115,15 @@ export default class DataHandler {
     this.localStorage.setHighscore(newLocalHighscore, StorageKeys.HardStorage);
   }
 
-  private static setNewHardGlobalHighscore(newGlobalHighscore: number) {
+  static setNewHardGlobalHighscore(
+    newGlobalHighscore: number,
+    nameForHighscore: string
+  ) {
     this.hardGlobalHighscore = newGlobalHighscore;
-    const nameForHighscore = "Dino"; //InputHandler.getNameForHighscore(scene);
-    this.globalStorage.setGlobalHardHighscore(
-      newGlobalHighscore,
-      nameForHighscore
-    );
+    this.setGlobalHardHighscorePromise =
+      this.globalStorage.setGlobalHardHighscore(
+        newGlobalHighscore,
+        nameForHighscore
+      );
   }
 }

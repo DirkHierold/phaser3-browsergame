@@ -6,25 +6,26 @@ import Enemies from "../model/Enemies";
 import Player from "../model/Player";
 import Target from "../model/Target";
 import DataHandler from "../utils/DataHandler";
-
-let gameWidth = 0;
-let gameHeight = 0;
-
-let target: Target;
-
-let enemies: Enemies;
-let player: Player;
-
-let playerSize: number;
-let targetSize: number;
-let enemySize: number;
-
-let text: Phaser.GameObjects.Text;
-
-let localHighscore = 0;
-let globalHighscore = 0;
+import InputHandler from "../utils/InputHandler";
 
 export default class HardGameScene extends Phaser.Scene {
+  private gameWidth = 0;
+  private gameHeight = 0;
+
+  private target!: Target;
+
+  private enemies!: Enemies;
+  private player!: Player;
+
+  private playerSize: number = 0;
+  private targetSize: number = 0;
+  private enemySize: number = 0;
+
+  private text!: Phaser.GameObjects.Text;
+
+  private localHighscore = 0;
+  private globalHighscore = 0;
+
   private score!: number;
   private gameOver!: boolean;
 
@@ -48,23 +49,23 @@ export default class HardGameScene extends Phaser.Scene {
     console.log("resizeCanvas");
     if (window.orientation !== undefined) {
       // if mobile
-      gameWidth = document.documentElement.clientWidth;
-      gameHeight = document.documentElement.clientHeight;
+      this.gameWidth = document.documentElement.clientWidth;
+      this.gameHeight = document.documentElement.clientHeight;
     } else {
       // if pc
-      gameWidth = window.innerWidth;
-      gameHeight = window.innerHeight;
+      this.gameWidth = window.innerWidth;
+      this.gameHeight = window.innerHeight;
     }
 
     console.log("setSizes");
-    let smallerSide = gameWidth;
-    if (smallerSide > gameHeight) {
-      smallerSide = gameHeight;
+    let smallerSide = this.gameWidth;
+    if (smallerSide > this.gameHeight) {
+      smallerSide = this.gameHeight;
     }
 
-    playerSize = smallerSide / 10;
-    targetSize = smallerSide / 10;
-    enemySize = smallerSide / 10;
+    this.playerSize = smallerSide / 10;
+    this.targetSize = smallerSide / 10;
+    this.enemySize = smallerSide / 10;
   }
 
   create() {
@@ -72,39 +73,44 @@ export default class HardGameScene extends Phaser.Scene {
 
     // Background
     this.add
-      .tileSprite(0, 0, gameWidth, gameHeight, TextureKeys.Background)
+      .tileSprite(0, 0, this.gameWidth, this.gameHeight, TextureKeys.Background)
       .setOrigin(0);
 
     // Player
-    player = new Player(this, gameWidth / 2, gameHeight / 2, playerSize);
+    this.player = new Player(
+      this,
+      this.gameWidth / 2,
+      this.gameHeight / 2,
+      this.playerSize
+    );
 
-    if (this.registry.get("spotOn")) this.cameras.main.startFollow(player);
+    if (this.registry.get("spotOn")) this.cameras.main.startFollow(this.player);
 
     // Target
-    target = new Target(this, 0, 0, targetSize);
+    this.target = new Target(this, 0, 0, this.targetSize);
 
     // Enemies
-    enemies = new Enemies(this);
-    enemies.addEnemyFarAwayFromPlayer(player, enemySize);
+    this.enemies = new Enemies(this);
+    this.enemies.addEnemyFarAwayFromPlayer(this.player, this.enemySize);
 
     // Score
-    localHighscore = DataHandler.hardLocalHighscore;
-    globalHighscore = DataHandler.hardGlobalHighscore;
+    this.localHighscore = DataHandler.hardLocalHighscore;
+    this.globalHighscore = DataHandler.hardGlobalHighscore;
 
     const style: Phaser.Types.GameObjects.Text.TextStyle = {
       font: "28px Arial",
       align: "center",
     };
-    text = this.add
-      .text(gameWidth / 2, gameHeight / 2, "", style)
+    this.text = this.add
+      .text(this.gameWidth / 2, this.gameHeight / 2, "", style)
       .setOrigin(0.5)
       .setDepth(1);
     this.drawScores();
 
     //Gegner getroffen?
     this.physics.add.overlap(
-      player,
-      enemies,
+      this.player,
+      this.enemies,
       this.collideWithEnemy,
       undefined,
       this
@@ -112,37 +118,37 @@ export default class HardGameScene extends Phaser.Scene {
 
     //Ziel erreicht?
     this.physics.add.overlap(
-      player,
-      target,
+      this.player,
+      this.target,
       this.targetReached,
       undefined,
       this
     );
 
-    this.physics.add.collider(enemies, enemies);
+    this.physics.add.collider(this.enemies, this.enemies);
   }
 
   update() {
     if (this.gameOver) return;
 
     //Steuerung
-    player.move(this.input.activePointer);
+    this.player.move(this.input.activePointer);
 
-    target.changeDirection(player);
+    this.target.changeDirection(this.player);
   }
 
   private getNewTarget() {
-    target.setRandomPosition();
+    this.target.setRandomPosition();
   }
 
   private drawScores() {
-    text.setText(
+    this.text.setText(
       "Score: " +
         this.score +
         "\nHighscore: " +
-        localHighscore +
+        this.localHighscore +
         "\nGlobal: " +
-        globalHighscore
+        this.globalHighscore
     );
   }
 
@@ -157,7 +163,7 @@ export default class HardGameScene extends Phaser.Scene {
     this.getNewTarget();
 
     // neuen Gegner erzeugen
-    enemies.addEnemyFarAwayFromPlayer(player, enemySize);
+    this.enemies.addEnemyFarAwayFromPlayer(this.player, this.enemySize);
 
     this.score++;
 
@@ -182,23 +188,42 @@ export default class HardGameScene extends Phaser.Scene {
   }
 
   private restart() {
+    let inputNameDOM: Phaser.GameObjects.DOMElement | null = null;
+    if (DataHandler.isNewHardGlobalScore(this.score)) {
+      inputNameDOM = InputHandler.getNameForHighscore(this);
+    }
     //Save Score if new local or global
-    DataHandler.handleNewHardScore(this.score);
+    DataHandler.handleNewHardLocalScore(this.score);
 
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       backgroundColor: "black",
     };
-    text
-      .setText("Back\n\n" + text.text)
+    let isNameMissing: boolean = false;
+    this.text
+      .setText("Save and Back\n\n" + this.text.text)
       .setPadding(10)
       .setStyle(textStyle)
       .setInteractive({ useHandCursor: true })
       .on(EventKeys.PointerDown, () => {
+        if (inputNameDOM) {
+          let name: any = inputNameDOM.getChildByName("name");
+          if (name.value != "") {
+            const nameForHighscore = name.value;
+            DataHandler.setNewHardGlobalHighscore(this.score, nameForHighscore);
+          } else if (!isNameMissing) {
+            isNameMissing = true;
+            this.text.setText(this.text.text + "\n\nYour Name is missing!");
+            return;
+          } else {
+            return;
+          }
+        }
+
         console.log("Back to Main Menu");
         this.scene.start(SceneKeys.MainMenu);
       })
-      .on(EventKeys.PointerOver, () => text.setStyle({ fill: "#f39c12" }))
-      .on(EventKeys.PointerOut, () => text.setStyle({ fill: "#FFF" }));
+      .on(EventKeys.PointerOver, () => this.text.setStyle({ fill: "#f39c12" }))
+      .on(EventKeys.PointerOut, () => this.text.setStyle({ fill: "#FFF" }));
   }
 
   render() {

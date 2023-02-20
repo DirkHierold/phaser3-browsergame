@@ -43,18 +43,18 @@ export default class GlobalStorage {
     return this.setGlobalHighscore(newHigh, 0, nameForHighscore);
   }
 
-  async setGlobalNormalHighscore(
+  setGlobalNormalHighscore(
     newHigh: number,
     nameForHighscore: string
-  ): Promise<void> {
-    this.setGlobalHighscore(newHigh, 1, nameForHighscore);
+  ): Promise<Response> {
+    return this.setGlobalHighscore(newHigh, 1, nameForHighscore);
   }
 
-  async setGlobalHardHighscore(
+  setGlobalHardHighscore(
     newHigh: number,
     nameForHighscore: string
-  ): Promise<void> {
-    this.setGlobalHighscore(newHigh, 2, nameForHighscore);
+  ): Promise<Response> {
+    return this.setGlobalHighscore(newHigh, 2, nameForHighscore);
   }
 
   private setGlobalHighscore(
