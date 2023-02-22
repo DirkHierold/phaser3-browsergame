@@ -32,34 +32,18 @@ export default class HardGameScene extends Phaser.Scene {
   constructor() {
     console.log("constructor");
     super(SceneKeys.HardGame);
-
-    this.resizeCanvas();
-    window.addEventListener(EventKeys.Resize, this.resizeCanvas, false);
   }
 
   init() {
     console.log("init");
     this.score = 0;
     this.gameOver = false;
-  }
 
-  //  Load the Google WebFont Loader script
-  // game.load.script('webfont', '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js');
-  private resizeCanvas() {
-    console.log("resizeCanvas");
-    if (window.orientation !== undefined) {
-      // if mobile
-      this.gameWidth = document.documentElement.clientWidth;
-      this.gameHeight = document.documentElement.clientHeight;
-    } else {
-      // if pc
-      this.gameWidth = window.innerWidth;
-      this.gameHeight = window.innerHeight;
-    }
+    this.gameWidth = this.game.scale.width;
+    this.gameHeight = this.game.scale.height;
 
-    console.log("setSizes");
     let smallerSide = this.gameWidth;
-    if (smallerSide > this.gameHeight) {
+    if (this.gameWidth > this.gameHeight) {
       smallerSide = this.gameHeight;
     }
 

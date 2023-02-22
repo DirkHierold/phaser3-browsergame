@@ -16,14 +16,18 @@ export default class GlobalStorage {
     let returnValue = [1, "Dino"];
 
     const bodyInit = JSON.stringify({ storeKey: storageKey });
-    const resp = await fetch("/api/get", {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: bodyInit,
-    });
+    const resp = await fetch(
+      "https://phaser3-browsergame-git-highscore-names-dirkhierold.vercel.app/api/get", //api/get"
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "http://localhost:8000",
+        },
+        method: "POST",
+        body: bodyInit,
+      }
+    );
     returnValue = await resp.json();
     //   .then((response) => {
     //     return response.json();
@@ -68,13 +72,17 @@ export default class GlobalStorage {
       storeKey: storageKey,
       name: nameForHighscore,
     });
-    return fetch("/api/save", {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: bodyInit,
-    });
+    return fetch(
+      "https://phaser3-browsergame-git-highscore-names-dirkhierold.vercel.app/api/save", //api/save"
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "http://localhost:8000",
+        },
+        method: "POST",
+        body: bodyInit,
+      }
+    );
   }
 }

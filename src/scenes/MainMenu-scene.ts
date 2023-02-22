@@ -31,19 +31,13 @@ export default class MainMenuScene extends Phaser.Scene {
     this.musicOn = this.registry.get("musicOn");
     this.spotOn = this.registry.get("spotOn");
 
-    this.gamewidth = window.innerWidth;
-    this.gameHeight = window.innerHeight;
+    this.gamewidth = this.game.scale.width;
+    this.gameHeight = this.game.scale.height;
 
     console.log("MainMenuScene create");
     // Background
     this.add
-      .tileSprite(
-        0,
-        0,
-        this.gamewidth,
-        window.innerHeight,
-        TextureKeys.Background
-      )
+      .tileSprite(0, 0, this.gamewidth, this.gameHeight, TextureKeys.Background)
       .setOrigin(0);
 
     // Image Dinosaur

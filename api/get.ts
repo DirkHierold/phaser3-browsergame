@@ -41,5 +41,6 @@ export default async function handler(req: any, res: Http2ServerResponse) {
   returnName = result.name;
   console.log("get API = ", storageKeyToSave, " = ", returnName);
   res.setHeader("Content-Type", "application/json");
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:8000");
   return res.end(JSON.stringify({ score: returnValue, name: returnName }));
 }
