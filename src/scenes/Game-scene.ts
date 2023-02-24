@@ -6,9 +6,8 @@ import Enemies from "../model/Enemies";
 import Player from "../model/Player";
 import Target from "../model/Target";
 import DataHandler from "../utils/DataHandler";
-import InputHandler from "../utils/InputHandler";
 
-export default class NormalGameScene extends Phaser.Scene {
+export default class GameScene extends Phaser.Scene {
   private gameWidth = 0;
   private gameHeight = 0;
 
@@ -24,14 +23,13 @@ export default class NormalGameScene extends Phaser.Scene {
   private text!: Phaser.GameObjects.Text;
 
   private localHighscore = 0;
-  private globalHighscore = 0;
 
   private score!: number;
   private gameOver!: boolean;
 
   constructor() {
     console.log("constructor");
-    super(SceneKeys.NormalGame);
+    super(SceneKeys.Game);
   }
 
   init() {
@@ -51,6 +49,9 @@ export default class NormalGameScene extends Phaser.Scene {
     this.targetSize = smallerSide / 10;
     this.enemySize = smallerSide / 10;
   }
+
+  //  Load the Google WebFont Loader script
+  // game.load.script('webfont', '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js');
 
   create() {
     console.log("create");
@@ -78,11 +79,10 @@ export default class NormalGameScene extends Phaser.Scene {
     this.enemies.addEnemyFarAwayFromPlayer(this.player, this.enemySize);
 
     // Score
-    this.localHighscore = DataHandler.normalLocalHighscore;
-    this.globalHighscore = DataHandler.normalGlobalHighscore;
+    this.localHighscore = DataHandler.localHighscore;
 
     const style: Phaser.Types.GameObjects.Text.TextStyle = {
-      font: "28px Arial",
+      font: "128px Arial",
       align: "center",
     };
     this.text = this.add
@@ -127,12 +127,7 @@ export default class NormalGameScene extends Phaser.Scene {
 
   private drawScores() {
     this.text.setText(
-      "Score: " +
-        this.score +
-        "\nHighscore: " +
-        this.localHighscore +
-        "\nGlobal: " +
-        this.globalHighscore
+      "Score: " + this.score + "\nHighscore: " + this.localHighscore
     );
   }
 
@@ -146,12 +141,10 @@ export default class NormalGameScene extends Phaser.Scene {
     //neues Ziel erzeugen
     this.getNewTarget();
 
-    // neuen Gegner erzeugen nur alle 2 Targets bis maximal 20
-    if (this.score % 2 == 0 && this.enemies.getLength() < 20)
-      // neuen Gegner erzeugen
-      this.enemies.addEnemyFarAwayFromPlayer(this.player, this.enemySize);
-
     this.score++;
+    // neuen Gegner erzeugen nur alle 5 Targets bis maximal 15
+    if (this.score % 5 == 0 && this.enemies.getLength() < 15)
+      this.enemies.addEnemyFarAwayFromPlayer(this.player, this.enemySize);
 
     this.drawScores();
   }
@@ -174,45 +167,23 @@ export default class NormalGameScene extends Phaser.Scene {
   }
 
   private restart() {
-    let inputNameDOM: Phaser.GameObjects.DOMElement | null = null;
-    if (DataHandler.isNewNormalGlobalScore(this.score)) {
-      inputNameDOM = InputHandler.getNameForHighscore(this);
-    }
     //Save Score if new local or global
-    DataHandler.handleNewNormalLocalScore(this.score);
+    DataHandler.handleNewLocalScore(this.score);
 
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       backgroundColor: "black",
     };
-    let isNameMissing: boolean = false;
     this.text
-      .setText("Save and Back\n\n" + this.text.text)
+      .setText("Back\n\n" + this.text.text)
       .setPadding(10)
       .setStyle(textStyle)
       .setInteractive({ useHandCursor: true })
       .on(EventKeys.PointerDown, () => {
-        if (inputNameDOM) {
-          let name: any = inputNameDOM.getChildByName("name");
-          if (name.value != "") {
-            const nameForHighscore = name.value;
-            DataHandler.setNewNormalGlobalHighscore(
-              this.score,
-              nameForHighscore
-            );
-          } else if (!isNameMissing) {
-            isNameMissing = true;
-            this.text.setText(this.text.text + "\n\nYour Name is missing!");
-            return;
-          } else {
-            return;
-          }
-        }
-
         console.log("Back to Main Menu");
         this.scene.start(SceneKeys.MainMenu);
       })
-      .on(EventKeys.PointerOver, () => this.text.setStyle({ fill: "#f39c12" }))
-      .on(EventKeys.PointerOut, () => this.text.setStyle({ fill: "#FFF" }));
+      .on(EventKeys.PointerOver, () => this.text.setStyle({ fill: "green" }))
+      .on(EventKeys.PointerOut, () => this.text.setStyle({ fill: "white" }));
   }
 
   render() {
