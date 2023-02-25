@@ -23,8 +23,6 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   scene: [Preloader, GameScene, MainMenuScene],
 };
-// to lock portrait
-screen.orientation.lock("portrait");
 
 let game = new Phaser.Game(config);
 
