@@ -4,8 +4,8 @@
   "description": "Phaser3 PWA Game about a little dino by Dirk Hierold",
   "start_url": "./index.html",
   "background_color": "white",
-  "theme_color": "#0f4a73",
-  "display": "standalone",
+  "theme_color": "white",
+  "display": "minimal-ui",
   "icons": [
     {
       "src": "images/icon-192-dino.png",
