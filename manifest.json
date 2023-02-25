@@ -3,10 +3,7 @@
   "short_name": "Di-No",
   "description": "Phaser3 PWA Game about a little dino by Dirk Hierold",
   "start_url": "/",
-  "background_color": "white",
-  "theme_color": "red",
-  "display": "fullscreen",
-  "orientation": "portrait",
+  "display": "standalone",
   "icons": [
     {
       "src": "images/icon-192-dino.png",
