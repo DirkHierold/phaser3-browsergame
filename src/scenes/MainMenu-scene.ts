@@ -103,7 +103,7 @@ export default class MainMenuScene extends Phaser.Scene {
     grid.placeAtIndex(27, title);
     Align.scaleToGameW(title, 3 / 4, this);
     grid.placeAtIndex(93, gameButton);
-    Align.scaleToGameW(gameButton, 3 / 4, this);
+    Align.scaleToGameH(gameButton, 3 / 11, this);
   }
 
   update(): void {
