@@ -14,6 +14,7 @@ export default class GameScene extends Phaser.Scene {
   private target!: Target;
 
   private enemies!: Enemies;
+  private firstEnemy!: Phaser.GameObjects.Image;
   private player!: Player;
 
   private playerSize: number = 0;
@@ -76,7 +77,10 @@ export default class GameScene extends Phaser.Scene {
 
     // Enemies
     this.enemies = new Enemies(this);
-    this.enemies.addEnemyFarAwayFromPlayer(this.player, this.enemySize);
+    this.firstEnemy = this.enemies.addEnemyFarAwayFromPlayer(
+      this.player,
+      this.enemySize
+    );
 
     // Score
     this.localHighscore = DataHandler.localHighscore;
@@ -117,8 +121,9 @@ export default class GameScene extends Phaser.Scene {
 
     //Steuerung
     this.player.move(this.input.activePointer);
-
     this.target.changeDirection(this.player);
+
+    this.physics.moveToObject(this.firstEnemy, this.player, 180);
   }
 
   private getNewTarget() {
