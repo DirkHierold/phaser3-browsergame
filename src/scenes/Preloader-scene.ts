@@ -13,6 +13,7 @@ export default class Preloader extends Phaser.Scene {
     this.load.image(TextureKeys.Enemy, "images/asteroid.png");
     this.load.image(TextureKeys.Background, "images/grass.jpg");
     this.load.audio("bgMusic", "audios/anomaly.mp3");
+    this.load.html("form", "form.html");
   }
 
   create() {

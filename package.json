@@ -18,9 +18,7 @@
   },
   "dependencies": {
     "esbuild": "^0.17.6",
-    "faunadb": "^4.7.1",
     "node": "^19.6.0",
-    "phaser": "^3.55.2",
-    "vercel": "^28.15.2"
+    "phaser": "^3.55.2"
   }
 }

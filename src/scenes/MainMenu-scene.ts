@@ -2,11 +2,12 @@ import EventKeys from "../consts/EventKeys";
 import SceneKeys from "../consts/SceneKeys";
 import TextureKeys from "../consts/TextureKeys";
 import Player from "../model/Player";
+import { Align } from "../utils/Align";
+import { AlignGrid } from "../utils/AlignGrid";
 import { Button } from "../utils/Button";
 import DataHandler from "../utils/DataHandler";
 
 export default class MainMenuScene extends Phaser.Scene {
-  spotOn: boolean = false;
   musicOn: boolean = false;
   musicRegistered: boolean = false;
   bgMusic!: Phaser.Sound.BaseSound;
@@ -29,21 +30,14 @@ export default class MainMenuScene extends Phaser.Scene {
     }
 
     this.musicOn = this.registry.get("musicOn");
-    this.spotOn = this.registry.get("spotOn");
 
-    this.gamewidth = window.innerWidth;
-    this.gameHeight = window.innerHeight;
+    this.gamewidth = this.game.scale.width;
+    this.gameHeight = this.game.scale.height;
 
     console.log("MainMenuScene create");
     // Background
     this.add
-      .tileSprite(
-        0,
-        0,
-        this.gamewidth,
-        window.innerHeight,
-        TextureKeys.Background
-      )
+      .tileSprite(0, 0, this.gamewidth, this.gameHeight, TextureKeys.Background)
       .setOrigin(0);
 
     // Image Dinosaur
@@ -57,10 +51,10 @@ export default class MainMenuScene extends Phaser.Scene {
     // Title
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       font: "128px Arial",
-      backgroundColor: "#111",
+      backgroundColor: "black",
       align: "center",
     };
-    this.add
+    const title = this.add
       .text(
         this.gamewidth / 2,
         this.gameHeight / 4,
@@ -69,33 +63,17 @@ export default class MainMenuScene extends Phaser.Scene {
       )
       .setOrigin(0.5);
 
-    // CameraChange Button
-    const text = "Spot:\n" + (this.spotOn ? "On" : "Off");
-    console.log(text);
-    const spotOnButton = new Button(
-      this.gamewidth / 10,
-      this.gameHeight / 10,
-      text,
-      this,
-      () => {}
-    );
-    spotOnButton.setScrollFactor(0).on(EventKeys.PointerDown, () => {
-      this.spotOn = !this.spotOn;
-      spotOnButton.setText("Spot:\n" + (this.spotOn ? "On" : "Off"));
-      this.registry.set("spotOn", this.spotOn);
-    });
-
     // MusicToogle Button
     const textMusicOn = "Music:\n" + (this.musicOn ? "On" : "Off");
     console.log(textMusicOn);
     const musicOnButton = new Button(
-      (this.gamewidth * 9) / 10,
+      (this.gamewidth * 3) / 4,
       this.gameHeight / 10,
       textMusicOn,
       this,
       () => {}
     );
-    musicOnButton.setScrollFactor(0).on(EventKeys.PointerDown, () => {
+    musicOnButton.on(EventKeys.PointerDown, () => {
       this.musicOn = !this.musicOn;
       musicOnButton.setText("Music:\n" + (this.musicOn ? "On" : "Off"));
       this.registry.set("musicOn", this.musicOn);
@@ -106,57 +84,29 @@ export default class MainMenuScene extends Phaser.Scene {
       }
     });
 
-    // Get actual Data
-    DataHandler.update().then(() => {
-      new Button(
-        this.gamewidth / 4,
-        (this.gameHeight * 3) / 4,
-        "Easy\n\nHighscore: " +
-          DataHandler.easyLocalHighscore +
-          "\nGlobal: " +
-          DataHandler.easyGlobalHighscore,
-        this,
-        () => {
-          this.scene.start(SceneKeys.EasyGame);
-        }
-      );
+    const gameButton = new Button(
+      this.gamewidth / 2,
+      (this.gameHeight * 3) / 4,
+      "Game\n\nHighscore: " + DataHandler.localHighscore,
+      this,
+      () => {
+        this.scene.start(SceneKeys.Game);
+      }
+    );
 
-      new Button(
-        this.gamewidth / 2,
-        (this.gameHeight * 3) / 4,
-        "Normal\n\nHighscore: " +
-          DataHandler.normalLocalHighscore +
-          "\nGlobal: " +
-          DataHandler.normalGlobalHighscore,
-        this,
-        () => {
-          this.scene.start(SceneKeys.NormalGame);
-        }
-      );
-
-      new Button(
-        (this.gamewidth * 3) / 4,
-        (this.gameHeight * 3) / 4,
-        "Hard\n\nHighscore: " +
-          DataHandler.hardLocalHighscore +
-          "\nGlobal: " +
-          DataHandler.hardGlobalHighscore,
-        this,
-        () => {
-          this.scene.start(SceneKeys.HardGame);
-        }
-      );
-    });
+    var grid = new AlignGrid(this, 11, 11);
+    //turn on the lines for testing
+    //and layout
+    // grid.showNumbers();
+    grid.placeAtIndex(10, musicOnButton);
+    Align.scaleToGameW(musicOnButton, 1 / 11, this);
+    grid.placeAtIndex(27, title);
+    Align.scaleToGameW(title, 3 / 4, this);
+    grid.placeAtIndex(93, gameButton);
+    Align.scaleToGameH(gameButton, 3 / 11, this);
   }
 
   update(): void {
-    if (this.spotOn) {
-      this.cameras.main.startFollow(this.player);
-    } else {
-      this.cameras.main.stopFollow();
-      this.cameras.main.setScroll(0, 0);
-    }
-
     this.player.move(this.input.activePointer);
   }
 }

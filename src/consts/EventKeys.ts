@@ -3,6 +3,7 @@ enum EventKeys {
   PointerOver = "pointerover",
   PointerOut = "pointerout",
   Resize = "resize",
+  Load = "load",
 }
 
 export default EventKeys;
