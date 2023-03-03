@@ -6,6 +6,7 @@ import { Align } from "../utils/Align";
 import { AlignGrid } from "../utils/AlignGrid";
 import { Button } from "../utils/Button";
 import DataHandler from "../utils/DataHandler";
+import AudioKeys from "../consts/AudioKeys";
 
 export default class MainMenuScene extends Phaser.Scene {
   musicOn: boolean = false;
@@ -19,11 +20,14 @@ export default class MainMenuScene extends Phaser.Scene {
     super(SceneKeys.MainMenu);
   }
 
-  async create() {
+  create() {
     this.musicRegistered = this.registry.get("musicRegistered");
 
     if (!this.musicRegistered) {
-      this.bgMusic = this.sound.add("bgMusic", { volume: 0.2, loop: true });
+      this.bgMusic = this.sound.add(AudioKeys.BG_Music, {
+        volume: 0.2,
+        loop: true,
+      });
       this.registry.set("musicRegistered", true);
       this.bgMusic.play();
       this.bgMusic.pause();
@@ -37,7 +41,7 @@ export default class MainMenuScene extends Phaser.Scene {
     console.log("MainMenuScene create");
     // Background
     this.add
-      .tileSprite(0, 0, this.gamewidth, this.gameHeight, TextureKeys.Background)
+      .tileSprite(0, 0, this.gamewidth, this.gameHeight, TextureKeys.Grass)
       .setOrigin(0);
 
     // Image Dinosaur

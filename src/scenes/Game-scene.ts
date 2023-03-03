@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import EventKeys from "../consts/EventKeys";
 import SceneKeys from "../consts/SceneKeys";
 import TextureKeys from "../consts/TextureKeys";
+import Asteroids from "../model/Asteroids";
 import Enemies from "../model/Enemies";
 import Player from "../model/Player";
 import Target from "../model/Target";
@@ -14,12 +15,15 @@ export default class GameScene extends Phaser.Scene {
   private target!: Target;
 
   private enemies!: Enemies;
-  private firstEnemy!: Phaser.GameObjects.Image;
+
+  private asteroids!: Asteroids;
+
   private player!: Player;
 
   private playerSize: number = 0;
   private targetSize: number = 0;
   private enemySize: number = 0;
+  private asteroidSize: number = 0;
 
   private text!: Phaser.GameObjects.Text;
 
@@ -49,6 +53,7 @@ export default class GameScene extends Phaser.Scene {
     this.playerSize = smallerSide / 10;
     this.targetSize = smallerSide / 10;
     this.enemySize = smallerSide / 10;
+    this.asteroidSize = smallerSide / 10;
   }
 
   //  Load the Google WebFont Loader script
@@ -59,7 +64,7 @@ export default class GameScene extends Phaser.Scene {
 
     // Background
     this.add
-      .tileSprite(0, 0, this.gameWidth, this.gameHeight, TextureKeys.Background)
+      .tileSprite(0, 0, this.gameWidth, this.gameHeight, TextureKeys.Grass)
       .setOrigin(0);
 
     // Player
@@ -70,17 +75,16 @@ export default class GameScene extends Phaser.Scene {
       this.playerSize
     );
 
-    if (this.registry.get("spotOn")) this.cameras.main.startFollow(this.player);
-
     // Target
     this.target = new Target(this, 0, 0, this.targetSize);
 
     // Enemies
     this.enemies = new Enemies(this);
-    this.firstEnemy = this.enemies.addEnemyFarAwayFromPlayer(
-      this.player,
-      this.enemySize
-    );
+    this.enemies.addEnemyInCorner(this.enemySize);
+
+    // Asteroids
+    this.asteroids = new Asteroids(this);
+    this.asteroids.addInCorner(this.asteroidSize);
 
     // Score
     this.localHighscore = DataHandler.localHighscore;
@@ -95,11 +99,38 @@ export default class GameScene extends Phaser.Scene {
       .setDepth(1);
     this.drawScores();
 
-    //Gegner getroffen?
+    //Spieler Gegner getroffen?
     this.physics.add.overlap(
       this.player,
       this.enemies,
       this.collideWithEnemy,
+      undefined,
+      this
+    );
+
+    //Spieler Asteroid getroffen?
+    this.physics.add.overlap(
+      this.player,
+      this.asteroids,
+      this.collideWithEnemy,
+      undefined,
+      this
+    );
+
+    //Gegner Asteroid getroffen?
+    this.physics.add.overlap(
+      this.enemies,
+      this.asteroids,
+      this.enemyCollideWithAsteroid,
+      undefined,
+      this
+    );
+
+    //Ziel Asteroid getroffen?
+    this.physics.add.overlap(
+      this.asteroids,
+      this.target,
+      this.asteroidCollideWithTarget,
       undefined,
       this
     );
@@ -113,7 +144,7 @@ export default class GameScene extends Phaser.Scene {
       this
     );
 
-    this.physics.add.collider(this.enemies, this.enemies);
+    this.physics.add.collider(this.asteroids, this.asteroids);
   }
 
   update() {
@@ -122,8 +153,15 @@ export default class GameScene extends Phaser.Scene {
     //Steuerung
     this.player.move(this.input.activePointer);
     this.target.changeDirection(this.player);
+    this.enemies.changeDirection(this.player);
 
-    this.physics.moveToObject(this.firstEnemy, this.player, 180);
+    if (this.enemies.getLength() > 0) {
+      this.physics.moveToObject(
+        this.enemies.getClosestToPlayer(this.player),
+        this.player,
+        180
+      );
+    }
   }
 
   private getNewTarget() {
@@ -147,9 +185,12 @@ export default class GameScene extends Phaser.Scene {
     this.getNewTarget();
 
     this.score++;
-    // neuen Gegner erzeugen nur alle 5 Targets bis maximal 15
-    if (this.score % 5 == 0 && this.enemies.getLength() < 15)
-      this.enemies.addEnemyFarAwayFromPlayer(this.player, this.enemySize);
+    // neuen Gegner und Asteroid erzeugen nur alle 5 Targets bis maximal 15
+    if (this.score % 5 == 0 && this.enemies.getLength() < 15) {
+      this.enemies.addEnemyInCorner(this.enemySize);
+
+      this.asteroids.addInCorner(this.asteroidSize);
+    }
 
     this.drawScores();
   }
@@ -169,6 +210,21 @@ export default class GameScene extends Phaser.Scene {
     this.gameOver = true;
     //ReloadButton
     this.restart();
+  }
+
+  private enemyCollideWithAsteroid(
+    enemy: Phaser.Types.Physics.Arcade.GameObjectWithBody,
+    _asteroid: Phaser.Types.Physics.Arcade.GameObjectWithBody
+  ) {
+    enemy.destroy();
+  }
+
+  private asteroidCollideWithTarget(
+    _asteroid: Phaser.Types.Physics.Arcade.GameObjectWithBody,
+    _target: Phaser.Types.Physics.Arcade.GameObjectWithBody
+  ) {
+    //neues Ziel erzeugen
+    this.getNewTarget();
   }
 
   private restart() {
