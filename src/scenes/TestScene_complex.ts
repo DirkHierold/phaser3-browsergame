@@ -82,15 +82,13 @@ export default class TestScene extends Phaser.Scene {
     // const scrollY = (backgroundImageHeight - displayHeight) * 0.5;
 
     console.log("scroll = ", scrollX, scrollY);
-    // this.cameras.main.setScroll(scrollX, scrollY);
+    this.cameras.main.setScroll(scrollX, scrollY);
     // this.cameras.main.setViewport(100, 100, 200, 50);
 
     // .setScale(0.2);
     let backgroundImage = this.add
       .image(0, 0, TextureKeys.Background_small)
-      .setDisplaySize(this.scale.width / 10, this.scale.width / 10)
       .setOrigin(0);
-
     // .setDisplaySize(newBackgroundImageWidth, newBackgroundImageHeight);
 
     // this.add
@@ -165,5 +163,47 @@ export default class TestScene extends Phaser.Scene {
     //   .text(16, 16, "score: 0", { fontSize: "32px" })
     //   .setOrigin(0)
     //   .setScrollFactor(0);
+
+    this.scale.on("resize", () => {
+      console.log("TestScene resize");
+      const backgroundImageWidth = 570;
+      const backgroundImageHeight = 360;
+      console.log(
+        "TestScene resize backgroundImage = ",
+        backgroundImageWidth,
+        backgroundImageHeight
+      );
+      const displayWidth = this.game.scale.width;
+      const displayHeight = this.game.scale.height;
+      console.log("TestScene resize display = ", displayWidth, displayHeight);
+      const scaleWidth = displayWidth / backgroundImageWidth;
+      const scaleHeight = displayHeight / backgroundImageHeight;
+      console.log("TestScene resize scale = ", scaleWidth, scaleHeight);
+      const maxScale = Math.max(scaleWidth, scaleHeight);
+      console.log("TestScene resize maxScale = ", maxScale);
+      const newBackgroundImageWidth = backgroundImageWidth * maxScale;
+      const newBackgroundImageHeight = backgroundImageHeight * maxScale;
+      console.log(
+        "TestScene resize newBackgroundImage = ",
+        newBackgroundImageWidth,
+        newBackgroundImageHeight
+      );
+
+      backgroundImage.setDisplaySize(
+        newBackgroundImageWidth,
+        newBackgroundImageHeight
+      );
+
+      const scrollX = (newBackgroundImageWidth - displayWidth) * 0.5;
+      const scrollY = (newBackgroundImageHeight - displayHeight) * 0.5;
+
+      // const scrollX = (backgroundImageWidth - newDisplayWidth) * 0.5;
+      // const scrollY = (backgroundImageHeight - newDisplayHeight) * 0.5;
+      // const scrollX = (backgroundImageWidth - displayWidth) * 0.5;
+      // const scrollY = (backgroundImageHeight - displayHeight) * 0.5;
+
+      console.log("TestScene resize scroll = ", scrollX, scrollY);
+      this.cameras.main.setScroll(scrollX, scrollY);
+    });
   }
 }

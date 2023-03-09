@@ -81,17 +81,17 @@ export default class Enemies extends Phaser.Physics.Arcade.Group {
   }
 
   getClosestToPlayer(player: Player): any {
-    console.log("getClosestToPlayer");
+    // console.log("getClosestToPlayer");
     let shortestDistance: number = 1000000000;
     let closestEnemy = null;
     this.children.each((child: any) => {
       let distance =
         Math.pow(child.x - player.x, 2) + Math.pow(child.y - player.y, 2);
-      console.log(distance);
+      // console.log(distance);
       if (distance < shortestDistance) {
         shortestDistance = distance;
         closestEnemy = child;
-        console.log(shortestDistance, closestEnemy);
+        // console.log(shortestDistance, closestEnemy);
       }
     });
     return closestEnemy;

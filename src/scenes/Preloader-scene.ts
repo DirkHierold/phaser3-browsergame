@@ -1,6 +1,8 @@
 import AudioKeys from "../consts/AudioKeys";
 import SceneKeys from "../consts/SceneKeys";
 import TextureKeys from "../consts/TextureKeys";
+import { Align } from "../utils/Align";
+import { AlignGrid } from "../utils/AlignGrid";
 
 export default class Preloader extends Phaser.Scene {
   constructor() {
@@ -21,81 +23,77 @@ export default class Preloader extends Phaser.Scene {
   preload() {
     console.log("preloader preload");
 
-    // Background
-    // this.add.tileSprite(
-    //   -100,
-    //   -100,
-    //   window.innerWidth,
-    //   window.innerHeight,
-    //   TextureKeys.Background
-    // );
-    // .setOrigin(0);
-    this.add.image(0, 0, TextureKeys.Grass);
+    var grid = new AlignGrid(this, 11, 11);
+    //turn on the lines for testing layout
+    // grid.showNumbers();
 
-    let progressBar = this.add.graphics();
-    let progressBox = this.add.graphics();
-    progressBox.fillStyle(0x222222, 0.8);
-    progressBox.fillRect(240, 270, 320, 50);
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
 
-    let width = this.cameras.main.width;
-    let height = this.cameras.main.height;
+    this.add.tileSprite(0, 0, width, height, TextureKeys.Grass).setOrigin(0);
+
+    let progressBox = this.add.rectangle(0, 0, 5, 1);
+    progressBox.setFillStyle(0x222222, 0.8);
+
+    grid.placeAtIndex(60, progressBox);
+    Align.scaleToGameW(progressBox, 9 / 11, this);
+
     let loadingText = this.make.text({
-      x: width / 2,
-      y: height / 2 - 50,
+      x: 0,
+      y: 0,
       text: "Loading...",
       style: {
-        font: "20px monospace",
-        // fill: "#ffffff",
+        font: "80px monospace",
       },
     });
     loadingText.setOrigin(0.5, 0.5);
+    grid.placeAtIndex(49, loadingText);
+    Align.scaleToGameW(loadingText, 5 / 11, this);
 
     let percentText = this.make.text({
-      x: width / 2,
-      y: height / 2 - 5,
+      x: 0,
+      y: 0,
       text: "0%",
       style: {
-        font: "18px monospace",
-        // fill: "#ffffff",
+        font: "80px monospace",
       },
     });
     percentText.setOrigin(0.5, 0.5);
+    grid.placeAtIndex(71, percentText);
 
     let assetText = this.make.text({
-      x: width / 2,
-      y: height / 2 + 50,
+      x: 0,
+      y: 0,
       text: "",
       style: {
-        font: "18px monospace",
-        // fill: "#ffffff",
+        font: "80px monospace",
       },
     });
     assetText.setOrigin(0.5, 0.5);
+    grid.placeAtIndex(82, assetText);
+
+    let progressBar = this.add.rectangle(116, 960, 0, 174);
+    progressBar.setFillStyle(0xffffff, 1);
 
     this.load.on("progress", function (value: number) {
       percentText.setText(parseInt((value * 100).toString()) + "%");
-      progressBar.clear();
-      progressBar.fillStyle(0xffffff, 1);
-      progressBar.fillRect(250, 280, 300 * value, 30);
+      progressBar.width = 116 * 9 * value;
     });
 
     this.load.on("fileprogress", function (file: any) {
       assetText.setText("Loading asset: " + file.key);
     });
-    // this.load.on("complete", function () {
-    //   progressBar.destroy();
-    //   progressBox.destroy();
-    //   loadingText.destroy();
-    //   percentText.destroy();
-    //   assetText.destroy();
-    // });
 
     this.load.image(TextureKeys.Player, "images/dino.png");
     this.load.image(TextureKeys.Target, "images/blue-dino.png");
     this.load.image(TextureKeys.Enemy, "images/red-dino.png");
     this.load.image(TextureKeys.Asteroid, "images/asteroid.png");
-    this.load.image(TextureKeys.Background, "images/background.jpg");
     this.load.audio(AudioKeys.BG_Music, "audios/anomaly.mp3");
+    this.load.atlas(
+      "test",
+      "images/roundOutline.png",
+      "images/roundOutline.xml"
+    );
   }
 
   create() {

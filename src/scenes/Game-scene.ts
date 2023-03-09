@@ -6,6 +6,7 @@ import Asteroids from "../model/Asteroids";
 import Enemies from "../model/Enemies";
 import Player from "../model/Player";
 import Target from "../model/Target";
+import { AlignGrid } from "../utils/AlignGrid";
 import DataHandler from "../utils/DataHandler";
 
 export default class GameScene extends Phaser.Scene {
@@ -32,6 +33,8 @@ export default class GameScene extends Phaser.Scene {
   private score!: number;
   private gameOver!: boolean;
 
+  private grid!: AlignGrid;
+
   constructor() {
     console.log("constructor");
     super(SceneKeys.Game);
@@ -54,13 +57,18 @@ export default class GameScene extends Phaser.Scene {
     this.targetSize = smallerSide / 10;
     this.enemySize = smallerSide / 10;
     this.asteroidSize = smallerSide / 10;
+
+    this.grid = new AlignGrid(this, 11, 11);
   }
 
   //  Load the Google WebFont Loader script
   // game.load.script('webfont', '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js');
 
   create() {
-    console.log("create");
+    console.log("Game Scene create");
+
+    //turn on the lines for testing and layout
+    // this.grid.showNumbers();
 
     // Background
     this.add
@@ -90,14 +98,13 @@ export default class GameScene extends Phaser.Scene {
     this.localHighscore = DataHandler.localHighscore;
 
     const style: Phaser.Types.GameObjects.Text.TextStyle = {
-      font: "128px Arial",
+      font: "20px Arial",
       align: "center",
     };
-    this.text = this.add
-      .text(this.gameWidth / 2, this.gameHeight / 2, "", style)
-      .setOrigin(0.5)
-      .setDepth(1);
-    this.drawScores();
+    this.text = this.add.text(0, 0, "", style).setDepth(1);
+    this.setText(
+      "Score: " + this.score + "\nHighscore: " + this.localHighscore
+    );
 
     //Spieler Gegner getroffen?
     this.physics.add.overlap(
@@ -168,10 +175,9 @@ export default class GameScene extends Phaser.Scene {
     this.target.setRandomPosition();
   }
 
-  private drawScores() {
-    this.text.setText(
-      "Score: " + this.score + "\nHighscore: " + this.localHighscore
-    );
+  private setText(text: string) {
+    this.text.setText(text);
+    this.grid.placeAtIndexAndScale(80, this.text, 5, 2);
   }
 
   private targetReached(
@@ -192,7 +198,9 @@ export default class GameScene extends Phaser.Scene {
       this.asteroids.addInCorner(this.asteroidSize);
     }
 
-    this.drawScores();
+    this.setText(
+      "Score: " + this.score + "\nHighscore: " + this.localHighscore
+    );
   }
 
   private collideWithEnemy(
@@ -235,7 +243,6 @@ export default class GameScene extends Phaser.Scene {
       backgroundColor: "black",
     };
     this.text
-      .setText("Back\n\n" + this.text.text)
       .setPadding(10)
       .setStyle(textStyle)
       .setInteractive({ useHandCursor: true })
@@ -245,6 +252,7 @@ export default class GameScene extends Phaser.Scene {
       })
       .on(EventKeys.PointerOver, () => this.text.setStyle({ fill: "green" }))
       .on(EventKeys.PointerOut, () => this.text.setStyle({ fill: "white" }));
+    this.setText("Back\n\n" + this.text.text);
   }
 
   render() {
