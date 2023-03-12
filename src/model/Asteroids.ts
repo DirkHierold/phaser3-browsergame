@@ -30,7 +30,7 @@ export default class Asteroids extends Phaser.Physics.Arcade.Group {
     return this.addOne(posX, posY, size);
   }
 
-  private addOne(
+  addOne(
     x: number,
     y: number,
     size: number

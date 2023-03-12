@@ -86,7 +86,7 @@ export default class TestScene extends Phaser.Scene {
     // this.cameras.main.setViewport(100, 100, 200, 50);
 
     // .setScale(0.2);
-    let backgroundImage = this.add
+    this.add
       .image(0, 0, TextureKeys.Background_small)
       .setDisplaySize(this.scale.width / 10, this.scale.width / 10)
       .setOrigin(0);

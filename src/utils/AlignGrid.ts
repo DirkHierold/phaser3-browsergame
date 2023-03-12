@@ -47,7 +47,7 @@ export class AlignGrid extends Phaser.GameObjects.Group {
     numberXcells: number,
     numberYcells: number
   ) {
-    console.log("placeAtAndScale object = ", obj);
+    // console.log("placeAtAndScale object = ", obj);
     //calculate the center of the cell
     //by adding half of the height and width
     //to the x and y of the coordinates
@@ -70,7 +70,7 @@ export class AlignGrid extends Phaser.GameObjects.Group {
 
       let fontSize = 60;
       while (obj.height < newHeight && obj.width < newWidth) {
-        console.log("fontSize = ", fontSize);
+        // console.log("fontSize = ", fontSize);
         fontSize += 1;
         obj.setFontSize(fontSize);
       }
@@ -78,6 +78,19 @@ export class AlignGrid extends Phaser.GameObjects.Group {
       // Mittig setzen
       obj.x = obj.x + 0.5 * (newWidth - obj.width);
       obj.y = obj.y + 0.5 * (newHeight - obj.height);
+    } else if (obj instanceof Phaser.GameObjects.BitmapText) {
+      let fontSize = 60;
+      while (obj.height < newHeight && obj.width < newWidth) {
+        // console.log("fontSize = ", fontSize);
+        fontSize += 1;
+        obj.setFontSize(fontSize);
+      }
+
+      // Mittig setzen
+      obj.x = obj.x + 0.5 * (newWidth - obj.width);
+      obj.y = obj.y + 0.5 * (newHeight - obj.height);
+    } else if (obj instanceof Phaser.GameObjects.Image) {
+      obj.setDisplaySize(newWidth, newHeight);
     } else {
       obj.width = newWidth;
       obj.height = newHeight;

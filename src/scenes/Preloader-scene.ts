@@ -1,10 +1,11 @@
 import AudioKeys from "../consts/AudioKeys";
 import SceneKeys from "../consts/SceneKeys";
 import TextureKeys from "../consts/TextureKeys";
-import { Align } from "../utils/Align";
 import { AlignGrid } from "../utils/AlignGrid";
 
 export default class Preloader extends Phaser.Scene {
+  grid!: AlignGrid;
+
   constructor() {
     super({
       key: SceneKeys.Preloader,
@@ -23,9 +24,9 @@ export default class Preloader extends Phaser.Scene {
   preload() {
     console.log("preloader preload");
 
-    var grid = new AlignGrid(this, 11, 11);
+    this.grid = new AlignGrid(this, 11, 11);
     //turn on the lines for testing layout
-    // grid.showNumbers();
+    // this.grid.showNumbers();
 
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
@@ -34,9 +35,7 @@ export default class Preloader extends Phaser.Scene {
 
     let progressBox = this.add.rectangle(0, 0, 5, 1);
     progressBox.setFillStyle(0x222222, 0.8);
-
-    grid.placeAtIndex(60, progressBox);
-    Align.scaleToGameW(progressBox, 9 / 11, this);
+    this.grid.placeAtIndexAndScale(56, progressBox, 9, 1);
 
     let loadingText = this.make.text({
       x: 0,
@@ -46,9 +45,7 @@ export default class Preloader extends Phaser.Scene {
         font: "80px monospace",
       },
     });
-    loadingText.setOrigin(0.5, 0.5);
-    grid.placeAtIndex(49, loadingText);
-    Align.scaleToGameW(loadingText, 5 / 11, this);
+    this.grid.placeAtIndexAndScale(47, loadingText, 5, 1);
 
     let percentText = this.make.text({
       x: 0,
@@ -58,8 +55,7 @@ export default class Preloader extends Phaser.Scene {
         font: "80px monospace",
       },
     });
-    percentText.setOrigin(0.5, 0.5);
-    grid.placeAtIndex(71, percentText);
+    this.grid.placeAtIndexAndScale(70, percentText, 3, 1);
 
     let assetText = this.make.text({
       x: 0,
@@ -69,8 +65,6 @@ export default class Preloader extends Phaser.Scene {
         font: "80px monospace",
       },
     });
-    assetText.setOrigin(0.5, 0.5);
-    grid.placeAtIndex(82, assetText);
 
     let progressBar = this.add.rectangle(116, 960, 0, 174);
     progressBar.setFillStyle(0xffffff, 1);
@@ -80,25 +74,32 @@ export default class Preloader extends Phaser.Scene {
       progressBar.width = 116 * 9 * value;
     });
 
+    const grid = this.grid;
     this.load.on("fileprogress", function (file: any) {
       assetText.setText("Loading asset: " + file.key);
+      grid.placeAtIndexAndScale(78, assetText, 9, 1);
     });
 
+    // for (let i = 0; i < 1000; i++) {
+    //   this.load.image("TextureKeys.Player" + i, "images/dino.png");
+    // }
     this.load.image(TextureKeys.Player, "images/dino.png");
     this.load.image(TextureKeys.Target, "images/blue-dino.png");
     this.load.image(TextureKeys.Enemy, "images/red-dino.png");
     this.load.image(TextureKeys.Asteroid, "images/asteroid.png");
     this.load.audio(AudioKeys.BG_Music, "audios/anomaly.mp3");
-    this.load.atlas(
-      "test",
+    this.load.atlasXML(
+      "roundOutline",
       "images/roundOutline.png",
       "images/roundOutline.xml"
     );
+    this.load.bitmapFont("arcade", "images/arcade.png", "images/arcade.xml");
   }
 
   create() {
     console.log("preloader create");
-
+    const bitMapText = this.add.bitmapText(0, 0, "arcade", "Dirk");
+    this.grid.placeAtIndexAndScale(0, bitMapText, 5, 1);
     this.scene.start(SceneKeys.MainMenu);
   }
 }

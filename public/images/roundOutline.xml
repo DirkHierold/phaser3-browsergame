@@ -3,7 +3,7 @@
 	<SubTexture name="buffalo.png" x="0" y="349" width="191" height="160"/>
 	<SubTexture name="chick.png" x="647" y="464" width="137" height="136"/>
 	<SubTexture name="chicken.png" x="775" y="600" width="136" height="153"/>
-	<SubTexture name="cow.png" x="353" y="340" width="153" height="136"/>
+	<SubTexture name="cow" x="353" y="340" width="153" height="136"/>
 	<SubTexture name="crocodile.png" x="638" y="784" width="137" height="136"/>
 	<SubTexture name="dog.png" x="643" y="299" width="137" height="165"/>
 	<SubTexture name="duck.png" x="640" y="163" width="137" height="136"/>

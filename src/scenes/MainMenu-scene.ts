@@ -2,10 +2,9 @@ import EventKeys from "../consts/EventKeys";
 import SceneKeys from "../consts/SceneKeys";
 import TextureKeys from "../consts/TextureKeys";
 import Player from "../model/Player";
-import { Align } from "../utils/Align";
 import { AlignGrid } from "../utils/AlignGrid";
 import { Button } from "../utils/Button";
-import DataHandler from "../utils/DataHandler";
+// import DataHandler from "../utils/DataHandler";
 import AudioKeys from "../consts/AudioKeys";
 
 export default class MainMenuScene extends Phaser.Scene {
@@ -56,6 +55,10 @@ export default class MainMenuScene extends Phaser.Scene {
       this.gamewidth / 4
     );
 
+    // Image Cow
+    // const cow = this.add.image(0, 0, "roundOutline", "cow");
+    // grid.placeAtIndex(36, cow);
+
     // Title
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       font: "20px Arial",
@@ -68,6 +71,7 @@ export default class MainMenuScene extends Phaser.Scene {
     const textMusicOn = "Music:\n" + (this.musicOn ? "On" : "Off");
     console.log(textMusicOn);
     const musicOnButton = new Button(0, 0, textMusicOn, this, () => {});
+    musicOnButton.setAlpha(0.5);
     musicOnButton.on(EventKeys.PointerDown, () => {
       this.musicOn = !this.musicOn;
       musicOnButton.setText("Music:\n" + (this.musicOn ? "On" : "Off"));
@@ -81,15 +85,11 @@ export default class MainMenuScene extends Phaser.Scene {
     grid.placeAtIndexAndScale(9, musicOnButton, 2, 1);
 
     // Play Game Button
-    const gameButton = new Button(
-      0,
-      0,
-      "Game\n\nHighscore: " + DataHandler.localHighscore,
-      this,
-      () => {
-        this.scene.start(SceneKeys.Game);
-      }
-    );
+    const gameButton = new Button(0, 0, "Play", this, () => {
+      this.scene.start(SceneKeys.Game, { music: this.bgMusic });
+      // this.scene.launch(SceneKeys.Game, { music: this.bgMusic });
+    });
+    gameButton.setAlpha(0.5);
     grid.placeAtIndexAndScale(80, gameButton, 5, 2);
   }
 
