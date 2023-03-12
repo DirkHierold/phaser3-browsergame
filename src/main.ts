@@ -6,8 +6,8 @@ import GameScene from "./scenes/Game-scene";
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: "app",
-  width: window.innerWidth,
-  height: window.innerHeight,
+  width: 1280,
+  height: 1920,
   dom: {
     createContainer: true,
   },
@@ -21,6 +21,7 @@ const config: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
+
   scene: [Preloader, GameScene, MainMenuScene],
 };
 

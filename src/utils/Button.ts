@@ -7,12 +7,11 @@ export class Button extends Phaser.GameObjects.Text {
     callback: Function
   ) {
     super(scene, x, y, text, {
-      font: "100px Arial",
+      font: "20px Arial",
       backgroundColor: "black",
       align: "center",
     });
-    this.setOrigin(0.5)
-      .setPadding(10)
+    this.setPadding(10)
       .setInteractive({ useHandCursor: true })
       .on("pointerdown", () => callback())
       .on("pointerover", () => this.setStyle({ fill: "green" }))
