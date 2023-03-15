@@ -20,7 +20,18 @@ export default class MainMenuScene extends Phaser.Scene {
   }
 
   create() {
-    var grid = new AlignGrid(this, 11, 11);
+    this.gamewidth = this.game.scale.width;
+    this.gameHeight = this.game.scale.height;
+
+    var grid = new AlignGrid(
+      this,
+      0,
+      0,
+      this.gamewidth,
+      this.gameHeight,
+      11,
+      12
+    );
     //turn on the lines for testing and layout
     // grid.showNumbers();
 
@@ -37,9 +48,6 @@ export default class MainMenuScene extends Phaser.Scene {
     }
 
     this.musicOn = this.registry.get("musicOn");
-
-    this.gamewidth = this.game.scale.width;
-    this.gameHeight = this.game.scale.height;
 
     console.log("MainMenuScene create");
     // Background
@@ -68,13 +76,10 @@ export default class MainMenuScene extends Phaser.Scene {
     grid.placeAtIndexAndScale(23, title, 9, 1);
 
     // MusicToogle Button
-    const textMusicOn = "Music:\n" + (this.musicOn ? "On" : "Off");
-    console.log(textMusicOn);
-    const musicOnButton = new Button(0, 0, textMusicOn, this, () => {});
+    const musicOnButton = new Button(0, 0, "Music", this, () => {});
     musicOnButton.setAlpha(0.5);
     musicOnButton.on(EventKeys.PointerDown, () => {
       this.musicOn = !this.musicOn;
-      musicOnButton.setText("Music:\n" + (this.musicOn ? "On" : "Off"));
       this.registry.set("musicOn", this.musicOn);
       if (this.musicOn) {
         this.bgMusic.resume();
@@ -86,11 +91,14 @@ export default class MainMenuScene extends Phaser.Scene {
 
     // Play Game Button
     const gameButton = new Button(0, 0, "Play", this, () => {
-      this.scene.start(SceneKeys.Game, { music: this.bgMusic });
+      this.scene.start(SceneKeys.Game, { music: this.bgMusic, level: 1 });
+
       // this.scene.launch(SceneKeys.Game, { music: this.bgMusic });
+      // this.scene.pause();
+      // this.scene.run(SceneKeys.Game, { music: this.bgMusic });
     });
     gameButton.setAlpha(0.5);
-    grid.placeAtIndexAndScale(80, gameButton, 5, 2);
+    grid.placeAtIndexAndScale(80, gameButton, 5, 1);
   }
 
   update(): void {
