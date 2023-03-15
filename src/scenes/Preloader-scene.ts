@@ -23,15 +23,21 @@ export default class Preloader extends Phaser.Scene {
 
   preload() {
     console.log("preloader preload");
-
-    this.grid = new AlignGrid(this, 11, 11);
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    this.grid = new AlignGrid(this, 0, 0, width, height, 11, 12);
     //turn on the lines for testing layout
     // this.grid.showNumbers();
 
-    const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
-
     this.add.tileSprite(0, 0, width, height, TextureKeys.Grass).setOrigin(0);
+
+    // Title
+    const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
+      font: "20px Arial",
+      align: "center",
+    };
+    const title = this.add.text(0, 0, "Don't die dino!", textStyle);
+    this.grid.placeAtIndexAndScale(23, title, 9, 1);
 
     let progressBox = this.add.rectangle(0, 0, 5, 1);
     progressBox.setFillStyle(0x222222, 0.8);
@@ -66,7 +72,7 @@ export default class Preloader extends Phaser.Scene {
       },
     });
 
-    let progressBar = this.add.rectangle(116, 960, 0, 174);
+    let progressBar = this.add.rectangle(116, 800, 0, 159).setOrigin(0);
     progressBar.setFillStyle(0xffffff, 1);
 
     this.load.on("progress", function (value: number) {
@@ -84,9 +90,14 @@ export default class Preloader extends Phaser.Scene {
     //   this.load.image("TextureKeys.Player" + i, "images/dino.png");
     // }
     this.load.image(TextureKeys.Player, "images/dino.png");
-    this.load.image(TextureKeys.Target, "images/blue-dino.png");
+    this.load.image(TextureKeys.Target, "images/dino-girl.png");
+    // this.load.image(TextureKeys.Target, "images/blue-dino.png");
     this.load.image(TextureKeys.Enemy, "images/red-dino.png");
     this.load.image(TextureKeys.Asteroid, "images/asteroid.png");
+
+    this.load.image(TextureKeys.Autumn_tree2, "images/Trees/Autumn_tree2.png");
+    this.load.image(TextureKeys.Burned_tree2, "images/Trees/Burned_tree2.png");
+
     this.load.audio(AudioKeys.BG_Music, "audios/anomaly.mp3");
     this.load.atlasXML(
       "roundOutline",
@@ -98,8 +109,8 @@ export default class Preloader extends Phaser.Scene {
 
   create() {
     console.log("preloader create");
-    const bitMapText = this.add.bitmapText(0, 0, "arcade", "Dirk");
-    this.grid.placeAtIndexAndScale(0, bitMapText, 5, 1);
+    // const bitMapText = this.add.bitmapText(0, 0, "arcade", "Dirk");
+    // this.grid.placeAtIndexAndScale(0, bitMapText, 5, 1);
     this.scene.start(SceneKeys.MainMenu);
   }
 }

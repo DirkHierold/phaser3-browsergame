@@ -1,63 +1,67 @@
+import DirectionKeys from "../consts/DirectionKeys";
 import TextureKeys from "../consts/TextureKeys";
-import Player from "./Player";
+import { AlignGrid } from "../utils/AlignGrid";
 
 export default class Asteroids extends Phaser.Physics.Arcade.Group {
   scene: Phaser.Scene;
+  grid: AlignGrid;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, grid: AlignGrid) {
     super(scene.physics.world, scene);
     this.scene = scene;
     scene.physics.world.enable(this);
     scene.add.existing(this);
+
+    this.grid = grid;
   }
 
-  addInCorner(size: number): Phaser.Physics.Arcade.Image {
-    const posX = this.scene.scale.width;
-    const posY = this.scene.scale.height;
-
-    return this.addOne(posX, posY, size);
-  }
-
-  addFarAwayFromPlayer(
-    player: Player,
-    size: number
-  ): Phaser.Physics.Arcade.Image {
-    const posX =
-      (player.x + this.scene.scale.width / 2) % this.scene.scale.width;
-    const posY =
-      (player.y + this.scene.scale.height / 2) % this.scene.scale.height;
-
-    return this.addOne(posX, posY, size);
-  }
-
-  addOne(
-    x: number,
-    y: number,
-    size: number
+  addAsteroid(
+    index: number,
+    direction: DirectionKeys
   ): Phaser.Types.Physics.Arcade.ImageWithDynamicBody {
-    let enemy: Phaser.GameObjects.Image = this.scene.add.image(
-      x,
-      y,
+    let asteroid: Phaser.GameObjects.Image = this.scene.add.image(
+      0,
+      0,
       TextureKeys.Asteroid
     );
-    enemy.setDisplaySize(size, size);
+    this.grid.placeAtIndexAndScale(index, asteroid, 1, 1);
 
-    this.add(enemy);
+    this.add(asteroid);
 
-    this.scene.physics.world.enable(enemy, Phaser.Physics.Arcade.DYNAMIC_BODY);
-    let enemyBody = enemy.body as Phaser.Physics.Arcade.Body;
-    enemyBody.setCircle(enemy.width / 2);
-    let velocity = new Phaser.Math.Vector2();
-    Phaser.Math.RandomXY(velocity);
-
-    enemyBody.setVelocity(
-      velocity.x * Phaser.Math.Between(60, 180),
-      velocity.y * Phaser.Math.Between(60, 180)
+    this.scene.physics.world.enable(
+      asteroid,
+      Phaser.Physics.Arcade.DYNAMIC_BODY
     );
+    let asteroidBody = asteroid.body as Phaser.Physics.Arcade.Body;
+    asteroidBody.setCircle(asteroid.width / 2);
 
-    enemyBody.setCollideWorldBounds(true);
-    enemyBody.setBounce(1, 1);
+    let velocityX = 0;
+    let velocityY = 0;
+    switch (direction) {
+      case DirectionKeys.Left:
+        velocityX = -250;
+        velocityY = 0;
+        break;
+      case DirectionKeys.Up:
+        velocityX = 0;
+        velocityY = -250;
+        break;
+      case DirectionKeys.Right:
+        velocityX = 250;
+        velocityY = 0;
+        break;
+      case DirectionKeys.Down:
+        velocityX = 0;
+        velocityY = 250;
+        break;
+      default:
+        break;
+    }
+    asteroidBody.setVelocity(velocityX, velocityY);
 
-    return enemy as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+    asteroidBody.setCollideWorldBounds(true);
+    asteroidBody.setBounce(1, 1);
+
+    return asteroid as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   }
 }

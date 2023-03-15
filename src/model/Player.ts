@@ -11,13 +11,11 @@ export default class Player extends Phaser.Physics.Arcade.Image {
     scene.physics.world.enable(this);
     scene.add.existing(this);
 
-    // this.setOrigin(0);
     this.setDisplaySize(playerSize, playerSize);
+    this.setCircle(this.width * 0.375);
 
-    this.setBodySize(this.width / 2, (this.height * 7) / 8);
     this.setCollideWorldBounds(true);
-
-    this.body.setOffset(this.width / 10, this.height / 8);
+    this.setOffset(0, this.height / 8);
   }
 
   move(activePointer: Phaser.Input.Pointer) {
@@ -29,17 +27,33 @@ export default class Player extends Phaser.Physics.Arcade.Image {
       const actualtouchX = activePointer.x;
       const actualtouchY = activePointer.y;
 
-      this.x += actualtouchX - this.oldTouchX;
-      this.y += actualtouchY - this.oldTouchY;
+      const maxSpeed = 25;
+      let diffX = actualtouchX - this.oldTouchX;
+      if (diffX > maxSpeed) {
+        diffX = maxSpeed;
+      } else if (diffX < -maxSpeed) {
+        diffX = -maxSpeed;
+      }
+      this.x += diffX;
+
+      let diffY = actualtouchY - this.oldTouchY;
+      if (diffY > maxSpeed) {
+        diffY = maxSpeed;
+      } else if (diffY < -maxSpeed) {
+        diffY = -maxSpeed;
+      }
+      this.y += diffY;
 
       // Player looks to the right and changes to left
       if (actualtouchX - this.oldTouchX < 0 && this.flipX) {
         this.toggleFlipX();
-        this.body.setOffset(this.width / 10, this.height / 8);
+        this.body.setOffset(0, this.height / 8);
+        this.x -= 2 * (this.x - (this.body.x + this.body.width / 2));
         // Player looks to the left and changes to right
       } else if (actualtouchX - this.oldTouchX > 0 && !this.flipX) {
         this.toggleFlipX();
-        this.body.setOffset((this.width * 2) / 5, this.height / 8);
+        this.body.setOffset((this.width * 2) / 8, this.height / 8);
+        this.x -= 2 * (this.x - (this.body.x + this.body.width / 2));
       }
 
       this.oldTouchX = actualtouchX;
