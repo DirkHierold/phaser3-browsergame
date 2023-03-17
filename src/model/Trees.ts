@@ -14,7 +14,7 @@ export default class Trees extends Phaser.Physics.Arcade.StaticGroup {
     this.grid = grid;
   }
 
-  addTree(index: number): Phaser.Types.Physics.Arcade.ImageWithDynamicBody {
+  addTree(index: number): Phaser.Types.Physics.Arcade.ImageWithStaticBody {
     let tree = this.scene.physics.add.staticImage(
       0,
       0,
@@ -26,6 +26,6 @@ export default class Trees extends Phaser.Physics.Arcade.StaticGroup {
     this.grid.placeAtIndexAndScale(index, tree, 1, 1);
     tree.body.updateFromGameObject();
 
-    return tree as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+    return tree as Phaser.Types.Physics.Arcade.ImageWithStaticBody;
   }
 }

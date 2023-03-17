@@ -18,7 +18,8 @@ export class AlignGrid extends Phaser.GameObjects.Group {
     width: number,
     height: number,
     cols = 3,
-    rows = 3
+    rows = 3,
+    hasToBeQuadratic: boolean = true
   ) {
     super(scene);
     this.scene = scene;
@@ -34,21 +35,34 @@ export class AlignGrid extends Phaser.GameObjects.Group {
     this.cellWidth = this.width / this.columns;
     //ch cell height is the parent height divided the number of rows
     this.cellHeight = this.height / this.rows;
+
+    if (hasToBeQuadratic) {
+      if (this.cellWidth < this.cellHeight) {
+        this.cellHeight = this.cellWidth;
+      } else {
+        this.cellWidth = this.cellHeight;
+      }
+      this.width = this.cellWidth * this.columns;
+      this.height = this.cellHeight * this.rows;
+
+      this.baseX = x + 0.5 * (width - this.width);
+      this.baseY = y + 0.5 * (height - this.height);
+    }
   }
   //place an object in relation to the grid
   private placeAt(xx: number, yy: number, obj: any) {
     //calculate the center of the cell
     //by adding half of the height and width
     //to the x and y of the coordinates
-    var x2 = this.cellWidth * xx + this.cellWidth / 2;
-    var y2 = this.cellHeight * yy + this.cellHeight / 2;
+    const x2 = this.cellWidth * xx + this.cellWidth / 2;
+    const y2 = this.cellHeight * yy + this.cellHeight / 2;
     obj.x = this.baseX + x2;
     obj.y = this.baseY + y2;
   }
 
   placeAtIndex(index: number, obj: any) {
-    var yy = Math.floor(index / this.columns);
-    var xx = index - yy * this.columns;
+    const yy = Math.floor(index / this.columns);
+    const xx = index - yy * this.columns;
     this.placeAt(xx, yy, obj);
   }
 
@@ -67,8 +81,8 @@ export class AlignGrid extends Phaser.GameObjects.Group {
     //to the x and y of the coordinates
 
     if (obj instanceof Phaser.GameObjects.Text || obj instanceof Button) {
-      var x2 = this.cellWidth * xx + newWidth / 2;
-      var y2 = this.cellHeight * yy + newHeight / 2;
+      const x2 = this.cellWidth * xx + newWidth / 2;
+      const y2 = this.cellHeight * yy + newHeight / 2;
       obj.x = this.baseX + x2;
       obj.y = this.baseY + y2;
 
@@ -84,8 +98,8 @@ export class AlignGrid extends Phaser.GameObjects.Group {
         obj.setFontSize(fontSize);
       }
     } else if (obj instanceof Phaser.GameObjects.BitmapText) {
-      var x2 = this.cellWidth * xx + newWidth / 2;
-      var y2 = this.cellHeight * yy + newHeight / 2;
+      const x2 = this.cellWidth * xx + newWidth / 2;
+      const y2 = this.cellHeight * yy + newHeight / 2;
       obj.x = this.baseX + x2;
       obj.y = this.baseY + y2;
 
@@ -97,9 +111,12 @@ export class AlignGrid extends Phaser.GameObjects.Group {
         fontSize += 1;
         obj.setFontSize(fontSize);
       }
-    } else if (obj instanceof Phaser.GameObjects.Image) {
-      var x2 = this.cellWidth * xx + newWidth / 2;
-      var y2 = this.cellHeight * yy + newHeight / 2;
+    } else if (
+      obj instanceof Phaser.GameObjects.Image ||
+      obj instanceof Phaser.Physics.Arcade.Image
+    ) {
+      const x2 = this.cellWidth * xx + newWidth / 2;
+      const y2 = this.cellHeight * yy + newHeight / 2;
       obj.x = this.baseX + x2;
       obj.y = this.baseY + y2;
 
@@ -107,13 +124,16 @@ export class AlignGrid extends Phaser.GameObjects.Group {
 
       // gleichmäßig skalieren
       if (newWidth < newHeight) {
-        obj.setDisplaySize(newWidth, newWidth);
+        obj.setDisplaySize(newWidth * 0.99, newWidth * 0.99);
       } else {
-        obj.setDisplaySize(newHeight, newHeight);
+        obj.setDisplaySize(newHeight * 0.99, newHeight * 0.99);
+      }
+      if (obj instanceof Phaser.Physics.Arcade.Image) {
+        obj.body.updateFromGameObject();
       }
     } else if (obj instanceof Phaser.GameObjects.Rectangle) {
-      var x2 = this.cellWidth * xx;
-      var y2 = this.cellHeight * yy;
+      const x2 = this.cellWidth * xx;
+      const y2 = this.cellHeight * yy;
       obj.x = this.baseX + x2;
       obj.y = this.baseY + y2;
 
@@ -121,9 +141,18 @@ export class AlignGrid extends Phaser.GameObjects.Group {
 
       obj.width = newWidth;
       obj.height = newHeight;
+    } else if (obj instanceof Phaser.Physics.Arcade.World) {
+      const x2 = this.cellWidth * xx;
+      const y2 = this.cellHeight * yy;
+      const x = this.baseX + x2;
+      const y = this.baseY + y2;
+
+      const width = newWidth;
+      const height = newHeight;
+      obj.setBounds(x, y, width, height);
     } else {
-      var x2 = this.cellWidth * xx + newWidth / 2;
-      var y2 = this.cellHeight * yy + newHeight / 2;
+      const x2 = this.cellWidth * xx + newWidth / 2;
+      const y2 = this.cellHeight * yy + newHeight / 2;
       obj.x = this.baseX + x2;
       obj.y = this.baseY + y2;
 
@@ -140,8 +169,8 @@ export class AlignGrid extends Phaser.GameObjects.Group {
     numberXcells: number,
     numberYcells: number
   ) {
-    var yy = Math.floor(index / this.columns);
-    var xx = index - yy * this.columns;
+    const yy = Math.floor(index / this.columns);
+    const xx = index - yy * this.columns;
     this.placeAtAndScale(xx, yy, obj, numberXcells, numberYcells);
   }
 
@@ -165,9 +194,9 @@ export class AlignGrid extends Phaser.GameObjects.Group {
   showNumbers() {
     this.show();
     let n = 0;
-    for (var i = 0; i < this.rows; i++) {
+    for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.columns; j++) {
-        let numText = this.scene.add
+        const numText = this.scene.add
           .text(0, 0, n.toString(), {
             color: "red",
           })

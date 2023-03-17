@@ -12,6 +12,7 @@ export class Button extends Phaser.GameObjects.Text {
       align: "center",
     });
     this.setPadding(10)
+      .setAlpha(0.5)
       .setInteractive({ useHandCursor: true })
       .on("pointerup", () => callback())
       .on("pointerover", () => this.setStyle({ fill: "green" }))

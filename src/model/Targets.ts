@@ -38,7 +38,7 @@ export default class Targets extends Phaser.Physics.Arcade.Group {
   }
 
   changeDirection(player: Player) {
-    this.children.each((child: any) => {
+    this.children.iterate((child: any) => {
       // Player is right from Target
       if (player.body.x > child.body.x + child.body.width && !child.flipX) {
         child.toggleFlipX();

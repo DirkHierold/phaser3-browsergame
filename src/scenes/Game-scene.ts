@@ -27,8 +27,6 @@ export default class GameScene extends Phaser.Scene {
 
   private player!: Player;
 
-  private playerSize: number = 0;
-
   // private text!: Phaser.GameObjects.Text;
 
   // private localHighscore = 0;
@@ -42,11 +40,13 @@ export default class GameScene extends Phaser.Scene {
   // private musicRegistered: boolean = false;
   private bgMusic!: Phaser.Sound.BaseSound;
   private musicOn: boolean = false;
-  private pauseOn: boolean = false;
 
   private level: number = 0;
+  private maxLevel: number = 4;
   private lastTargetReached: boolean = false;
   private targetIndex: number = 0;
+  private dieCounter: number = 0;
+  private deathText!: Phaser.GameObjects.Text;
 
   constructor() {
     console.log("constructor");
@@ -61,18 +61,11 @@ export default class GameScene extends Phaser.Scene {
     this.gameWidth = this.game.scale.width;
     this.gameHeight = this.game.scale.height;
 
-    let smallerSide = this.gameWidth;
-    if (this.gameWidth > this.gameHeight) {
-      smallerSide = this.gameHeight;
-    }
-
-    this.playerSize = smallerSide / 10;
-
     // Music
     this.bgMusic = data.music;
     this.musicOn = this.registry.get("musicOn");
 
-    this.level = data.level;
+    this.level = data.level < this.maxLevel ? data.level : this.maxLevel;
     this.lastTargetReached = false;
 
     this.menuGrid = new AlignGrid(
@@ -80,66 +73,28 @@ export default class GameScene extends Phaser.Scene {
       0,
       0,
       this.gameWidth,
-      this.gameHeight / 15,
-      10,
-      1
+      this.gameHeight,
+      11,
+      15,
+      false
     );
-
-    switch (this.level) {
-      case 1:
-        this.grid = new AlignGrid(
-          this,
-          0,
-          this.gameHeight / 15,
-          this.gameWidth,
-          (this.gameHeight * 14) / 15,
-          5,
-          7
-        );
-        break;
-
-      default:
-        this.grid = new AlignGrid(
-          this,
-          0,
-          this.gameHeight / 15,
-          this.gameWidth,
-          (this.gameHeight * 14) / 15,
-          11,
-          11
-        );
-        break;
-    }
   }
 
   create() {
     console.log("Game Scene create");
 
-    //turn on the lines for testing and layout
-    // this.menuGrid.showNumbers();
-    // this.grid.showNumbers();
-
     // Background
-    this.add
-      .tileSprite(
-        0,
-        this.gameHeight / 15,
-        this.gameWidth,
-        (this.gameHeight * 14) / 15,
-        TextureKeys.Grass
-      )
-      .setOrigin(0);
+    const background = this.add.tileSprite(0, 0, 0, 0, TextureKeys.Grass);
 
-    this.physics.world.setBounds(
-      0,
-      this.gameHeight / 15,
-      this.gameWidth,
-      (this.gameHeight * 14) / 15
-    );
+    // const world = this.physics.world.setBounds(
+    //   0,
+    //   this.gameHeight / 15,
+    //   this.gameWidth,
+    //   (this.gameHeight * 14) / 15
+    // );
 
     // MusicToogle Button
     const musicOnButton = new Button(0, 0, "Music", this, () => {});
-    musicOnButton.setAlpha(0.5);
     musicOnButton.on(EventKeys.PointerDown, () => {
       this.musicOn = !this.musicOn;
       this.registry.set("musicOn", this.musicOn);
@@ -149,21 +104,15 @@ export default class GameScene extends Phaser.Scene {
         this.bgMusic.pause();
       }
     });
-    this.menuGrid.placeAtIndexAndScale(8, musicOnButton, 2, 1);
+    this.menuGrid.placeAtIndexAndScale(9, musicOnButton, 2, 1);
 
-    // Pause Button
-    const pauseButton = new Button(0, 0, "II", this, () => {});
-    pauseButton.setAlpha(0.5);
-    pauseButton.on(EventKeys.PointerUp, () => {
-      this.pauseOn = !this.pauseOn;
-      console.log("Pause:\n" + (this.pauseOn ? "On" : "Off"));
-      if (this.pauseOn) {
-        this.game.loop.sleep();
-      } else {
-        this.game.loop.wake();
-      }
+    // Back Button
+    const backButton = new Button(0, 0, "Back", this, () => {});
+    backButton.on(EventKeys.PointerUp, () => {
+      this.dieCounter = 0;
+      this.scene.start(SceneKeys.MainMenu);
     });
-    this.menuGrid.placeAtIndexAndScale(0, pauseButton, 2, 1);
+    this.menuGrid.placeAtIndexAndScale(0, backButton, 2, 1);
 
     // Score
     // this.localHighscore = DataHandler.localHighscore;
@@ -176,26 +125,81 @@ export default class GameScene extends Phaser.Scene {
     // this.setText("Saved: " + this.score + "/8");
 
     // Leveltext
-    const levelText = this.add.text(0, 0, "Level: " + this.level, style);
-    this.menuGrid.placeAtIndexAndScale(4, levelText, 2, 1);
+    const levelText = this.add.text(
+      0,
+      0,
+      "Level: " + this.level + "/" + this.maxLevel,
+      style
+    );
+    this.menuGrid.placeAtIndexAndScale(3, levelText, 2, 1);
 
-    // Player
-    this.player = new Player(this, 0, 0, this.playerSize);
+    this.deathText = this.add.text(0, 0, "Death: " + this.dieCounter, style);
+    this.menuGrid.placeAtIndexAndScale(6, this.deathText, 2, 1);
 
-    // Targets
-    this.targets = new Targets(this, this.grid);
-    this.trees = new Trees(this, this.grid);
-    this.asteroids = new Asteroids(this, this.grid);
     switch (this.level) {
       case 1:
+        // Grid
+        this.grid = new AlignGrid(
+          this,
+          0,
+          this.gameHeight / 15,
+          this.gameWidth,
+          (this.gameHeight * 14) / 15,
+          3,
+          3
+        );
+
+        // Background
+        this.grid.placeAtIndexAndScale(0, background, 3, 3);
+
+        // WorldBounds
+        this.grid.placeAtIndexAndScale(0, this.physics.world, 3, 3);
         // Player
-        this.grid.placeAtIndexAndScale(30, this.player, 1, 1);
+        this.player = new Player(this, 6, 1, 1, this.grid);
 
         // Targets
+        this.targets = new Targets(this, this.grid);
+        this.targets.addTarget(0);
+        this.targetIndex = 6;
+
+        // Trees
+        this.trees = new Trees(this, this.grid);
+        this.trees.addTree(1);
+        this.trees.addTree(2);
+        this.trees.addTree(7);
+        this.trees.addTree(8);
+
+        // Asteroids
+        this.asteroids = new Asteroids(this, this.grid);
+        this.asteroids.addAsteroid(4, DirectionKeys.Right);
+        break;
+      case 2:
+        // Grid
+        this.grid = new AlignGrid(
+          this,
+          0,
+          this.gameHeight / 15,
+          this.gameWidth,
+          (this.gameHeight * 14) / 15,
+          5,
+          7
+        );
+
+        // Background
+        this.grid.placeAtIndexAndScale(0, background, 5, 7);
+
+        // WorldBounds
+        this.grid.placeAtIndexAndScale(0, this.physics.world, 5, 7);
+        // Player
+        this.player = new Player(this, 30, 1, 1, this.grid);
+
+        // Targets
+        this.targets = new Targets(this, this.grid);
         this.targets.addTarget(4);
         this.targetIndex = 30;
 
         // Trees
+        this.trees = new Trees(this, this.grid);
         this.trees.addTree(1);
         this.trees.addTree(16);
         this.trees.addTree(21);
@@ -209,15 +213,32 @@ export default class GameScene extends Phaser.Scene {
         this.trees.addTree(33);
 
         // Asteroids
+        this.asteroids = new Asteroids(this, this.grid);
         this.asteroids.addAsteroid(22, DirectionKeys.Down);
         this.asteroids.addAsteroid(10, DirectionKeys.Right);
         this.asteroids.addAsteroid(22, DirectionKeys.Right);
         break;
-      case 2:
+      case 3:
+        this.grid = new AlignGrid(
+          this,
+          0,
+          this.gameHeight / 15,
+          this.gameWidth,
+          (this.gameHeight * 14) / 15,
+          11,
+          11
+        );
+        // Background
+        this.grid.placeAtIndexAndScale(0, background, 11, 11);
+
+        // WorldBounds
+        this.grid.placeAtIndexAndScale(0, this.physics.world, 11, 11);
+
         // Player
-        this.grid.placeAtIndexAndScale(60, this.player, 1, 1);
+        this.player = new Player(this, 60, 1, 1, this.grid);
 
         // Targets
+        this.targets = new Targets(this, this.grid);
         this.targets.addTarget(0);
         this.targets.addTarget(10);
         this.targets.addTarget(110);
@@ -233,6 +254,7 @@ export default class GameScene extends Phaser.Scene {
         // this.enemies.addEnemyInCorner(this.enemySize);
 
         // Asteroids
+        this.asteroids = new Asteroids(this, this.grid);
         this.asteroids.addAsteroid(12, DirectionKeys.Right);
         this.asteroids.addAsteroid(20, DirectionKeys.Down);
         this.asteroids.addAsteroid(100, DirectionKeys.Up);
@@ -244,6 +266,7 @@ export default class GameScene extends Phaser.Scene {
         this.asteroids.addAsteroid(84, DirectionKeys.Left);
 
         // Trees
+        this.trees = new Trees(this, this.grid);
         this.trees.addTree(2);
         this.trees.addTree(4);
         this.trees.addTree(5);
@@ -286,11 +309,27 @@ export default class GameScene extends Phaser.Scene {
         this.trees.addTree(118);
         break;
 
-      case 3:
+      case 4:
+        this.grid = new AlignGrid(
+          this,
+          0,
+          this.gameHeight / 15,
+          this.gameWidth,
+          (this.gameHeight * 14) / 15,
+          11,
+          11
+        );
+        // Background
+        this.grid.placeAtIndexAndScale(0, background, 11, 11);
+
+        // WorldBounds
+        this.grid.placeAtIndexAndScale(0, this.physics.world, 11, 11);
+
         // Player
-        this.grid.placeAtIndexAndScale(60, this.player, 1, 1);
+        this.player = new Player(this, 60, 1, 1, this.grid);
 
         // Targets
+        this.targets = new Targets(this, this.grid);
         this.targets.addTarget(12);
         this.targets.addTarget(20);
         this.targets.addTarget(100);
@@ -298,58 +337,96 @@ export default class GameScene extends Phaser.Scene {
         this.targetIndex = 60;
 
         // Asteroids
+        this.asteroids = new Asteroids(this, this.grid);
         this.asteroids.addAsteroid(0, DirectionKeys.Right);
-        this.asteroids.addAsteroid(2, DirectionKeys.Down);
-        this.asteroids.addAsteroid(22, DirectionKeys.Up);
-        this.asteroids.addAsteroid(24, DirectionKeys.Left);
+        this.asteroids.addAsteroid(3, DirectionKeys.Down);
+        this.asteroids.addAsteroid(33, DirectionKeys.Up);
+        this.asteroids.addAsteroid(36, DirectionKeys.Left);
 
-        this.asteroids.addAsteroid(8, DirectionKeys.Right);
+        this.asteroids.addAsteroid(7, DirectionKeys.Right);
         this.asteroids.addAsteroid(10, DirectionKeys.Down);
-        this.asteroids.addAsteroid(30, DirectionKeys.Up);
-        this.asteroids.addAsteroid(32, DirectionKeys.Left);
+        this.asteroids.addAsteroid(40, DirectionKeys.Up);
+        this.asteroids.addAsteroid(43, DirectionKeys.Left);
 
-        this.asteroids.addAsteroid(88, DirectionKeys.Right);
-        this.asteroids.addAsteroid(90, DirectionKeys.Down);
+        this.asteroids.addAsteroid(77, DirectionKeys.Right);
+        this.asteroids.addAsteroid(80, DirectionKeys.Down);
         this.asteroids.addAsteroid(110, DirectionKeys.Up);
-        this.asteroids.addAsteroid(112, DirectionKeys.Left);
+        this.asteroids.addAsteroid(113, DirectionKeys.Left);
 
-        this.asteroids.addAsteroid(96, DirectionKeys.Right);
-        this.asteroids.addAsteroid(98, DirectionKeys.Down);
-        this.asteroids.addAsteroid(118, DirectionKeys.Up);
+        this.asteroids.addAsteroid(84, DirectionKeys.Right);
+        this.asteroids.addAsteroid(87, DirectionKeys.Down);
+        this.asteroids.addAsteroid(117, DirectionKeys.Up);
         this.asteroids.addAsteroid(120, DirectionKeys.Left);
+
+        this.asteroids.addAsteroid(11, DirectionKeys.Right);
+        this.asteroids.addAsteroid(65, DirectionKeys.Left);
+        this.asteroids.addAsteroid(99, DirectionKeys.Right);
+
+        this.asteroids.addAsteroid(1, DirectionKeys.Down);
+        this.asteroids.addAsteroid(9, DirectionKeys.Down);
+        this.asteroids.addAsteroid(115, DirectionKeys.Up);
         // Trees
-        this.trees.addTree(33);
-        this.trees.addTree(35);
-        this.trees.addTree(3);
-        this.trees.addTree(25);
-        this.trees.addTree(36);
+        this.trees = new Trees(this, this.grid);
+        this.trees.addTree(44);
+        this.trees.addTree(46);
+        this.trees.addTree(47);
+        this.trees.addTree(4);
+        this.trees.addTree(26);
+        this.trees.addTree(37);
 
-        this.trees.addTree(7);
-        this.trees.addTree(29);
-        this.trees.addTree(40);
-        this.trees.addTree(41);
-        this.trees.addTree(43);
+        this.trees.addTree(6);
+        this.trees.addTree(28);
+        this.trees.addTree(39);
+        this.trees.addTree(51);
+        this.trees.addTree(52);
+        this.trees.addTree(54);
 
-        this.trees.addTree(77);
-        this.trees.addTree(79);
-        this.trees.addTree(80);
-        this.trees.addTree(91);
-        this.trees.addTree(113);
+        this.trees.addTree(66);
+        this.trees.addTree(68);
+        this.trees.addTree(69);
+        this.trees.addTree(81);
+        this.trees.addTree(92);
+        this.trees.addTree(114);
 
-        this.trees.addTree(84);
-        this.trees.addTree(85);
-        this.trees.addTree(87);
-        this.trees.addTree(95);
-        this.trees.addTree(117);
+        this.trees.addTree(73);
+        this.trees.addTree(74);
+        this.trees.addTree(76);
+        this.trees.addTree(83);
+        this.trees.addTree(94);
+        this.trees.addTree(116);
         break;
       default:
-        // Player
-        this.grid.placeAtIndexAndScale(60, this.player, 1, 1);
+        this.grid = new AlignGrid(
+          this,
+          0,
+          this.gameHeight / 15,
+          this.gameWidth,
+          (this.gameHeight * 14) / 15,
+          11,
+          11
+        );
+        // Background
+        this.grid.placeAtIndexAndScale(0, background, 11, 11);
 
-        const backButton = new Button(0, 0, "More to come!", this, () => {
-          this.scene.start(SceneKeys.MainMenu);
-        });
-        this.grid.placeAtIndexAndScale(91, backButton, 5, 3);
+        // WorldBounds
+        this.grid.placeAtIndexAndScale(0, this.physics.world, 11, 11);
+
+        // Player
+        this.player = new Player(this, 60, 1, 1, this.grid);
+
+        this.trees = new Trees(this, this.grid);
+        this.asteroids = new Asteroids(this, this.grid);
+        this.targets = new Targets(this, this.grid);
+
+        let endTextString = "";
+        if (this.dieCounter == 0) {
+          endTextString = "You are the best\ndino in the world!";
+          // this.targets.addTarget(61).setActive(false);
+        } else {
+          endTextString = "Next time\ndon't die dino!";
+        }
+        const endText = this.add.text(0, 0, endTextString, style);
+        this.grid.placeAtIndexAndScale(67, endText, 9, 5);
         break;
     }
 
@@ -404,6 +481,10 @@ export default class GameScene extends Phaser.Scene {
       this.asteroidOverlapTree
     );
     this.physics.add.collider(this.player, this.trees);
+
+    //turn on the lines for testing and layout
+    // this.menuGrid.showNumbers();
+    // this.grid.showNumbers();
   }
 
   private asteroidOverlapTree(
@@ -476,6 +557,10 @@ export default class GameScene extends Phaser.Scene {
     (player as Phaser.Types.Physics.Arcade.ImageWithDynamicBody).setTint(
       0xff0000
     );
+
+    this.dieCounter++;
+    this.deathText.setText("Death: " + this.dieCounter);
+    this.menuGrid.placeAtIndexAndScale(6, this.deathText, 2, 1);
 
     // this.gameOver = true;
     // //ReloadButton

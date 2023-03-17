@@ -30,7 +30,8 @@ export default class MainMenuScene extends Phaser.Scene {
       this.gamewidth,
       this.gameHeight,
       11,
-      12
+      12,
+      false
     );
     //turn on the lines for testing and layout
     // grid.showNumbers();
@@ -56,12 +57,7 @@ export default class MainMenuScene extends Phaser.Scene {
       .setOrigin(0);
 
     // Image Dinosaur
-    this.player = new Player(
-      this,
-      this.gamewidth / 2,
-      this.gameHeight / 2,
-      this.gamewidth / 4
-    );
+    this.player = new Player(this, 48, 3, 3, grid);
 
     // Image Cow
     // const cow = this.add.image(0, 0, "roundOutline", "cow");
@@ -99,6 +95,17 @@ export default class MainMenuScene extends Phaser.Scene {
     });
     gameButton.setAlpha(0.5);
     grid.placeAtIndexAndScale(80, gameButton, 5, 1);
+
+    let controlTextString = "";
+    if (window.orientation !== undefined) {
+      // if mobile
+      controlTextString = "Use touch to move!";
+    } else {
+      // if desktop
+      controlTextString = "Use direction keys to move!";
+    }
+    const controlText = this.add.text(0, 0, controlTextString, textStyle);
+    grid.placeAtIndexAndScale(100, controlText, 9, 1);
   }
 
   update(): void {

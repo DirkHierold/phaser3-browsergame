@@ -25,7 +25,7 @@ export default class Preloader extends Phaser.Scene {
     console.log("preloader preload");
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
-    this.grid = new AlignGrid(this, 0, 0, width, height, 11, 12);
+    this.grid = new AlignGrid(this, 0, 0, width, height, 11, 12, false);
     //turn on the lines for testing layout
     // this.grid.showNumbers();
 
