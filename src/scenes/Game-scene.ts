@@ -65,7 +65,7 @@ export default class GameScene extends Phaser.Scene {
     this.bgMusic = data.music;
     this.musicOn = this.registry.get("musicOn");
 
-    this.level = data.level < this.maxLevel ? data.level : this.maxLevel;
+    this.level = data.level;
     this.lastTargetReached = false;
 
     this.menuGrid = new AlignGrid(
@@ -128,7 +128,10 @@ export default class GameScene extends Phaser.Scene {
     const levelText = this.add.text(
       0,
       0,
-      "Level: " + this.level + "/" + this.maxLevel,
+      "Level: " +
+        (this.level < this.maxLevel ? this.level : this.maxLevel) +
+        "/" +
+        this.maxLevel,
       style
     );
     this.menuGrid.placeAtIndexAndScale(3, levelText, 2, 1);
@@ -358,12 +361,8 @@ export default class GameScene extends Phaser.Scene {
         this.asteroids.addAsteroid(117, DirectionKeys.Up);
         this.asteroids.addAsteroid(120, DirectionKeys.Left);
 
-        this.asteroids.addAsteroid(11, DirectionKeys.Right);
         this.asteroids.addAsteroid(65, DirectionKeys.Left);
-        this.asteroids.addAsteroid(99, DirectionKeys.Right);
 
-        this.asteroids.addAsteroid(1, DirectionKeys.Down);
-        this.asteroids.addAsteroid(9, DirectionKeys.Down);
         this.asteroids.addAsteroid(115, DirectionKeys.Up);
         // Trees
         this.trees = new Trees(this, this.grid);
