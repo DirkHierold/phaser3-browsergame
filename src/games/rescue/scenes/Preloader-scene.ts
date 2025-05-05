@@ -14,7 +14,7 @@ export default class Preloader extends Phaser.Scene {
           {
             type: "image",
             key: TextureKeys.Grass,
-            url: "images/grass.jpg",
+            url: "/images/grass.jpg",
           },
         ],
       },
@@ -89,22 +89,22 @@ export default class Preloader extends Phaser.Scene {
     // for (let i = 0; i < 1000; i++) {
     //   this.load.image("TextureKeys.Player" + i, "images/dino.png");
     // }
-    this.load.image(TextureKeys.Player, "images/dino.png");
-    this.load.image(TextureKeys.Target, "images/dino-girl.png");
+    this.load.image(TextureKeys.Player, "/images/dino.png");
+    this.load.image(TextureKeys.Target, "/images/dino-girl.png");
     // this.load.image(TextureKeys.Target, "images/blue-dino.png");
-    this.load.image(TextureKeys.Enemy, "images/red-dino.png");
-    this.load.image(TextureKeys.Asteroid, "images/asteroid.png");
+    this.load.image(TextureKeys.Enemy, "/images/red-dino.png");
+    this.load.image(TextureKeys.Asteroid, "/images/asteroid.png");
 
-    this.load.image(TextureKeys.Autumn_tree2, "images/Trees/Autumn_tree2.png");
-    this.load.image(TextureKeys.Burned_tree2, "images/Trees/Burned_tree2.png");
+    this.load.image(TextureKeys.Autumn_tree2, "/images/Trees/Autumn_tree2.png");
+    this.load.image(TextureKeys.Burned_tree2, "/images/Trees/Burned_tree2.png");
 
-    this.load.audio(AudioKeys.BG_Music, "audios/anomaly.mp3");
+    this.load.audio(AudioKeys.BG_Music, "/audios/anomaly.mp3");
     this.load.atlasXML(
       "roundOutline",
-      "images/roundOutline.png",
-      "images/roundOutline.xml"
+      "/images/roundOutline.png",
+      "/images/roundOutline.xml"
     );
-    this.load.bitmapFont("arcade", "images/arcade.png", "images/arcade.xml");
+    this.load.bitmapFont("arcade", "/images/arcade.png", "/images/arcade.xml");
   }
 
   create() {

@@ -60,26 +60,24 @@
     <h1>Wähle ein Spiel aus:</h1>
     <div class="game-container">
         <!-- Spiel 1 -->
-        <div class="game" onclick="startGame('di-no.html')">
-            <img src="assets/dino.png" alt="Di-No">
-            <p>Di-No</p>
+        <div class="game">
+            <a href="./src/games/rescue/index.html">
+                <img src="/assets/dino-girl.png" alt="Di-No">
+            </a>
+            <p>Rescue</p>
         </div>
         <!-- Weitere Spiele können hier hinzugefügt werden -->
     </div>
     <div class="game-container">
         <!-- Spiel 2 -->
-        <div class="game" onclick="startGame('asteroid.html')">
-            <img src="images/asteroid.png" alt="Asteroid">
+        <div class="game">
+            <a href="./src/games/asteroid/index.html">
+                <img src="/images/asteroid.png" alt="Asteroid">
+            </a>
             <p>Asteroid</p>
         </div>
         <!-- Weitere Spiele können hier hinzugefügt werden -->
     </div>
-
-    <script>
-        function startGame(gameUrl) {
-            window.location.href = gameUrl; // Weiterleitung zur Spielseite
-        }
-    </script>
 </body>
 
 </html>
