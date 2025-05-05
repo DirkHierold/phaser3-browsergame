@@ -1,4 +1,4 @@
-import { Button } from "../utils/Button";
+import { Button } from "./Button";
 
 export class AlignGrid extends Phaser.GameObjects.Group {
   scene: Phaser.Scene;

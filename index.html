@@ -1,23 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="cache-control" content="no-cache" />
-    <!-- <meta name="viewport" content="width=device-width, viewport-fit=cover" /> -->
-    <meta name="viewport" content="user-scalable=0, minimal-ui=1" />
-    <meta name="theme-color" content="white" />
-    <!-- content="user-scalable=0, initial-scale=1,minimum-scale=1, maximum-scale=1, minimal-ui=1" -->
-    <title>Di-No</title>
-    <link rel="manifest" href="manifest.json" />
-    <link rel="icon" href="images/icon-192-dino.png" sizes="192x192" />
-    <link rel="icon" href="images/icon-256-dino.png" sizes="256x256" />
-    <link rel="icon" href="images/icon-512-dino.png" sizes="512x512" />
-    <link href="game.css" rel="stylesheet" />
-    <link rel="apple-touch-icon" href="images/icon-192-dino.jpg" />
-    <meta name="apple-mobile-web-app-status-bar" content="white" />
-    <script type="module" src="src/main.ts"></script>
-  </head>
-  <body>
-    <div id="app"></div>
-  </body>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dirk Hierold</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        .game-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 50px;
+        }
+
+        .game {
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .game:hover {
+            transform: scale(1.05);
+        }
+
+        .game img {
+            width: 200px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .game p {
+            margin: 10px 0 0;
+            font-size: 16px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Willkommen! Wähle ein Spiel aus:</h1>
+    <div class="game-container">
+        <!-- Spiel 1 -->
+        <div class="game" onclick="startGame('di-no.html')">
+            <img src="assets/dino.png" alt="Di-No">
+            <p>Di-No</p>
+        </div>
+        <!-- Weitere Spiele können hier hinzugefügt werden -->
+    </div>
+    <div class="game-container">
+        <!-- Spiel 2 -->
+        <div class="game" onclick="startGame('asteroid.html')">
+            <img src="images/asteroid.png" alt="Asteroid">
+            <p>Asteroid</p>
+        </div>
+        <!-- Weitere Spiele können hier hinzugefügt werden -->
+    </div>
+
+    <script>
+        function startGame(gameUrl) {
+            window.location.href = gameUrl; // Weiterleitung zur Spielseite
+        }
+    </script>
+</body>
+
 </html>
