@@ -8,17 +8,17 @@
   "display": "fullscreen",
   "icons": [
     {
-      "src": "/images/icon-192-dino.png",
+      "src": "/images/dino-girl.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/images/icon-256-dino.png",
+      "src": "/images/dino-girl.png",
       "sizes": "256x256",
       "type": "image/png"
     },
     {
-      "src": "/images/icon-512-dino.png",
+      "src": "/images/dino-girl.png",
       "sizes": "512x512",
       "type": "image/png"
     }
