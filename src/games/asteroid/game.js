@@ -97,7 +97,7 @@ function startNewGame() {
 	}
 
 	target = new Image();
-	target.src = '/images/dino1.png';
+	target.src = '/images/blue-dino.png';
 
 	target.onload = function () {
 		getNewTarget();
