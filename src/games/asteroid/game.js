@@ -114,7 +114,7 @@ function startNewGame() {
 	enemy.src = '/images/asteroid.png';
 
 	enemyPositions = [
-		getRandomPos()
+		getRandomEnemyPos()
 	];
 
 	enemyDirection = [
@@ -155,7 +155,7 @@ function isColliding(x1, y1, size1, x2, y2, size2) {
 }
 
 function getNewTarget() {
-	[targetX, targetY] = getRandomPos();
+	[targetX, targetY] = getRandomTargetPos();
 }
 
 function drawTarget() {
@@ -163,13 +163,18 @@ function drawTarget() {
 }
 
 function getNewEnemy() {
-	enemyPositions.push(getRandomPos())
+	enemyPositions.push(getRandomEnemyPos())
 	enemyDirection.push(getRandomDirection())
 }
 
 function targetReached() {
 
-	if (targetComplete && isColliding(playerX, playerY, playerSize, targetX, targetY, targetSize)) {
+	if (targetComplete &&
+		isPixelColliding(
+			gameFieldContext,
+			player, playerX, playerY, playerSize, playerSize,
+			target, targetX, targetY, targetSize, targetSize
+		)) {
 		// Ziel erreicht!
 		console.log(playerX, playerY, playerSize, targetX, targetY, targetSize)
 		console.log("Target reached!");
@@ -251,18 +256,59 @@ function loop(time) {
 		window.requestAnimationFrame(loop)
 }
 
-function getRandomPos() {
-	return [enemySize + Math.floor(Math.random() * (gameField.width - 2 * enemySize)), enemySize + Math.floor(Math.random() * (gameField.height - 2 * enemySize))];
+function getRandomEnemyPos() {
+	// Find the center of the player
+	const playerCenterX = playerX + playerSize / 2;
+	const playerCenterY = playerY + playerSize / 2;
+
+	// Decide which half to spawn in (opposite of player)
+	let x, y;
+	if (playerCenterX < gameField.width / 2) {
+		// Player is on the left, spawn enemy on the right
+		x = gameField.width / 2 + enemySize + Math.floor(Math.random() * (gameField.width / 2 - 2 * enemySize));
+	} else {
+		// Player is on the right, spawn enemy on the left
+		x = enemySize + Math.floor(Math.random() * (gameField.width / 2 - 2 * enemySize));
+	}
+
+	if (playerCenterY < gameField.height / 2) {
+		// Player is on the top, spawn enemy on the bottom
+		y = gameField.height / 2 + enemySize + Math.floor(Math.random() * (gameField.height / 2 - 2 * enemySize));
+	} else {
+		// Player is on the bottom, spawn enemy on the top
+		y = enemySize + Math.floor(Math.random() * (gameField.height / 2 - 2 * enemySize));
+	}
+
+	return [x, y];
+}
+
+function getRandomTargetPos() {
+	return [enemySize + Math.floor(Math.random() * (gameField.width - 2 * enemySize)),
+	enemySize + Math.floor(Math.random() * (gameField.height - 2 * enemySize))];
 }
 
 function getRandomDirection() {
-	return [Math.floor(-3 + Math.random() * 6), Math.floor(-3 + Math.random() * 6)];
+	// Bereich: [-3, -1] ∪ [1, 3]
+	function randomComponent() {
+		const sign = Math.random() < 0.5 ? -1 : 1;
+		// Wert zwischen 1 und 3
+		return sign * (1 + Math.random() * 2);
+	}
+	return [randomComponent(), randomComponent()];
 }
 
 function checkCollidingWithEnemies() {
 	for (let nr = 0; nr < enemyPositions.length; nr++) {
-		if (isColliding(playerX, playerY, playerSize, enemyPositions[nr][0], enemyPositions[nr][1], enemySize)) {
-			// Zusammenstoß
+		// if (isColliding(playerX, playerY, playerSize, enemyPositions[nr][0], enemyPositions[nr][1], enemySize)) {
+		// 	// Zusammenstoß
+		// 	collideWithEnemy();
+		// }
+
+		if (isPixelColliding(
+			gameFieldContext,
+			player, playerX, playerY, playerSize, playerSize,
+			enemy, enemyPositions[nr][0], enemyPositions[nr][1], enemySize, enemySize
+		)) {
 			collideWithEnemy();
 		}
 	}
@@ -352,4 +398,80 @@ function handleMove(evt) {
 	} else if (playerX >= gameField.width - playerSize) {
 		playerX = gameField.width - playerSize;
 	}
+}
+
+/**
+ * Pixelperfekte Kollision zweier Bilder auf dem Canvas.
+ * Nutzt als Vorfilter einen Bounding-Box-Test.
+ * @param {CanvasRenderingContext2D} ctx - Der Canvas-Kontext.
+ * @param {Image} imgA - Erstes Bild.
+ * @param {number} ax - X-Position von Bild A.
+ * @param {number} ay - Y-Position von Bild A.
+ * @param {number} aw - Breite von Bild A.
+ * @param {number} ah - Höhe von Bild A.
+ * @param {Image} imgB - Zweites Bild.
+ * @param {number} bx - X-Position von Bild B.
+ * @param {number} by - Y-Position von Bild B.
+ * @param {number} bw - Breite von Bild B.
+ * @param {number} bh - Höhe von Bild B.
+ * @returns {boolean} true, wenn eine pixelgenaue Kollision vorliegt.
+ */
+function isPixelColliding(ctx, imgA, ax, ay, aw, ah, imgB, bx, by, bw, bh) {
+	// Bounding-Box-Test (frühzeitiger Ausstieg)
+	if (
+		ax + aw <= bx || bx + bw <= ax ||
+		ay + ah <= by || by + bh <= ay
+	) {
+		return false;
+	}
+
+	// Überlappenden Bereich berechnen
+	const left = Math.max(ax, bx);
+	const right = Math.min(ax + aw, bx + bw);
+	const top = Math.max(ay, by);
+	const bottom = Math.min(ay + ah, by + bh);
+	let width = right - left;
+	let height = bottom - top;
+
+	// Immer aufrunden, damit Canvas gültige Werte bekommt
+	width = Math.ceil(width);
+	height = Math.ceil(height);
+
+	if (!width || !height || width <= 0 || height <= 0) return false;
+
+	// Quell-Offsets und Skalierung berechnen (wie gehabt)
+	const sxA = (left - ax) * (imgA.width / aw);
+	const syA = (top - ay) * (imgA.height / ah);
+	const swA = width * (imgA.width / aw);
+	const shA = height * (imgA.height / ah);
+
+	const sxB = (left - bx) * (imgB.width / bw);
+	const syB = (top - by) * (imgB.height / bh);
+	const swB = width * (imgB.width / bw);
+	const shB = height * (imgB.height / bh);
+
+	// Offscreen-Canvas für beide Bilder erzeugen
+	const canvasA = document.createElement('canvas');
+	canvasA.width = width;
+	canvasA.height = height;
+	const ctxA = canvasA.getContext('2d');
+	ctxA.drawImage(imgA, sxA, syA, swA, shA, 0, 0, width, height);
+
+	const canvasB = document.createElement('canvas');
+	canvasB.width = width;
+	canvasB.height = height;
+	const ctxB = canvasB.getContext('2d');
+	ctxB.drawImage(imgB, sxB, syB, swB, shB, 0, 0, width, height);
+
+	// Bilddaten holen
+	const dataA = ctxA.getImageData(0, 0, width, height).data;
+	const dataB = ctxB.getImageData(0, 0, width, height).data;
+
+	// Pixelweise prüfen (nur Alpha-Kanal)
+	for (let i = 0; i < width * height; i++) {
+		if (dataA[i * 4 + 3] > 0 && dataB[i * 4 + 3] > 0) {
+			return true;
+		}
+	}
+	return false;
 }
