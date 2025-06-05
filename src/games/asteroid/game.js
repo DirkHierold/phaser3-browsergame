@@ -61,6 +61,7 @@ function startNewGame() {
 	gameFieldContext = gameField.getContext("2d");
 
 	let reloadButton = document.getElementById("reloadButton");
+	reloadButton.style.display = "none";
 
 	window.addEventListener('resize', resizeCanvas, false);
 
