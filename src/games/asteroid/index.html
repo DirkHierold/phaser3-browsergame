@@ -5,31 +5,17 @@
     <meta charset="UTF-8">
     <title>Asteroid</title>
     <meta http-equiv="cache-control" content="no-cache">
-    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
-    <script type="module" src="./game.js"></script>
     <link href="./game.css" rel="stylesheet">
     <link rel="manifest" href="./manifest.json" />
     <link rel="icon" href="/images/asteroid.png" sizes="512x512" />
     <link rel="apple-touch-icon" href="/images/asteroid.png" />
     <meta name="apple-mobile-web-app-status-bar" content="white" />
+    <script type="module" src="./main.ts"></script>
 </head>
 
 <body>
-    <!-- <h1>JavaScript for Games</h1> -->
-    <canvas id="gameField" width=500 height=500></canvas>
-    <div class="center">
-        <button id="reloadButton">NEW GAME</button>
-        <div id="score">Score: 0</div>
-        <div id="highscore">Highscore: 0</div>
-        <div id="alltime">Alltime: 0</div>
-    </div>
-    <!-- <div id="gameArena">
-        <canvas id="gameField" width="600" height="400"></canvas> 
-        <div id="score">Score: 0</div> 
-        <div id="time">Time: 0</div>
-        <div id="timeOver">Time Over</div>
-        <div id="gameover">Game Over</div>
-    </div> -->
+    <div id="app"></div>
+    <!-- Score UI will be handled by Phaser scene -->
 </body>
 
 </html>

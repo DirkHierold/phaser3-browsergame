@@ -1,18 +1,14 @@
 import Phaser from "phaser";
 import DirectionKeys from "../consts/DirectionKeys";
-// import AudioKeys from "../consts/AudioKeys";
 import EventKeys from "../consts/EventKeys";
 import SceneKeys from "../consts/SceneKeys";
 import TextureKeys from "../consts/TextureKeys";
 import Asteroids from "../model/Asteroids";
-// import Enemies from "../model/Enemies";
 import Player from "../model/Player";
-// import Target from "../model/Target";
 import Targets from "../model/Targets";
 import Trees from "../model/Trees";
 import { AlignGrid } from "../utils/AlignGrid";
 import { Button } from "../utils/Button";
-// import DataHandler from "../utils/DataHandler";
 
 export default class GameScene extends Phaser.Scene {
   private gameWidth = 0;
@@ -20,24 +16,16 @@ export default class GameScene extends Phaser.Scene {
 
   private targets!: Targets;
 
-  // private enemies!: Enemies;
-
   private asteroids!: Asteroids;
   private trees!: Trees;
 
   private player!: Player;
 
-  // private text!: Phaser.GameObjects.Text;
-
-  // private localHighscore = 0;
-
-  // private score!: number;
   private gameOver!: boolean;
 
   private grid!: AlignGrid;
   private menuGrid!: AlignGrid;
 
-  // private musicRegistered: boolean = false;
   private bgMusic!: Phaser.Sound.BaseSound;
   private musicOn: boolean = false;
 
@@ -55,7 +43,7 @@ export default class GameScene extends Phaser.Scene {
 
   init(data: any) {
     console.log("init", data);
-    // this.score = 0;
+
     this.gameOver = false;
 
     this.gameWidth = this.game.scale.width;
@@ -86,15 +74,8 @@ export default class GameScene extends Phaser.Scene {
     // Background
     const background = this.add.tileSprite(0, 0, 0, 0, TextureKeys.Grass);
 
-    // const world = this.physics.world.setBounds(
-    //   0,
-    //   this.gameHeight / 15,
-    //   this.gameWidth,
-    //   (this.gameHeight * 14) / 15
-    // );
-
     // MusicToogle Button
-    const musicOnButton = new Button(0, 0, "Music", this, () => {});
+    const musicOnButton = new Button(0, 0, "Music", this, () => { });
     musicOnButton.on(EventKeys.PointerDown, () => {
       this.musicOn = !this.musicOn;
       this.registry.set("musicOn", this.musicOn);
@@ -107,31 +88,26 @@ export default class GameScene extends Phaser.Scene {
     this.menuGrid.placeAtIndexAndScale(9, musicOnButton, 2, 1);
 
     // Back Button
-    const backButton = new Button(0, 0, "Back", this, () => {});
+    const backButton = new Button(0, 0, "Back", this, () => { });
     backButton.on(EventKeys.PointerUp, () => {
       this.dieCounter = 0;
       this.scene.start(SceneKeys.MainMenu);
     });
     this.menuGrid.placeAtIndexAndScale(0, backButton, 2, 1);
 
-    // Score
-    // this.localHighscore = DataHandler.localHighscore;
-
     const style: Phaser.Types.GameObjects.Text.TextStyle = {
       font: "20px Arial",
       align: "center",
     };
-    // this.text = this.add.text(0, 0, "", style);
-    // this.setText("Saved: " + this.score + "/8");
 
     // Leveltext
     const levelText = this.add.text(
       0,
       0,
       "Level: " +
-        (this.level < this.maxLevel ? this.level : this.maxLevel) +
-        "/" +
-        this.maxLevel,
+      (this.level < this.maxLevel ? this.level : this.maxLevel) +
+      "/" +
+      this.maxLevel,
       style
     );
     this.menuGrid.placeAtIndexAndScale(3, levelText, 2, 1);
@@ -251,10 +227,6 @@ export default class GameScene extends Phaser.Scene {
         this.targets.addTarget(90);
         this.targets.addTarget(96);
         this.targetIndex = 60;
-
-        // Enemies
-        // this.enemies = new Enemies(this);
-        // this.enemies.addEnemyInCorner(this.enemySize);
 
         // Asteroids
         this.asteroids = new Asteroids(this, this.grid);
@@ -420,7 +392,6 @@ export default class GameScene extends Phaser.Scene {
         let endTextString = "";
         if (this.dieCounter == 0) {
           endTextString = "You are the best\ndino in the world!";
-          // this.targets.addTarget(61).setActive(false);
         } else {
           endTextString = "Next time\ndon't die dino!";
         }
@@ -428,15 +399,6 @@ export default class GameScene extends Phaser.Scene {
         this.grid.placeAtIndexAndScale(67, endText, 9, 5);
         break;
     }
-
-    //Spieler Gegner getroffen?
-    // this.physics.add.overlap(
-    //   this.player,
-    //   this.enemies,
-    //   this.collideWithEnemy,
-    //   undefined,
-    //   this
-    // );
 
     //Spieler Asteroid getroffen?
     this.physics.add.overlap(
@@ -446,24 +408,6 @@ export default class GameScene extends Phaser.Scene {
       undefined,
       this
     );
-
-    //Gegner Asteroid getroffen?
-    // this.physics.add.overlap(
-    //   this.enemies,
-    //   this.asteroids,
-    //   this.enemyCollideWithAsteroid,
-    //   undefined,
-    //   this
-    // );
-
-    //Ziel Asteroid getroffen?
-    // this.physics.add.overlap(
-    //   this.asteroids,
-    //   this.target,
-    //   this.asteroidCollideWithTarget,
-    //   undefined,
-    //   this
-    // );
 
     //Ziel erreicht?
     this.physics.add.overlap(
@@ -503,21 +447,7 @@ export default class GameScene extends Phaser.Scene {
     //Steuerung
     this.player.move(this.input.activePointer);
     this.targets.changeDirection(this.player);
-    // this.enemies.changeDirection(this.player);
-
-    // if (this.enemies.getLength() > 0) {
-    //   this.physics.moveToObject(
-    //     this.enemies.getClosestToPlayer(this.player),
-    //     this.player,
-    //     180
-    //   );
-    // }
   }
-
-  // private setText(text: string) {
-  //   this.text.setText(text);
-  //   // this.grid.placeAtIndexAndScale(6, this.text, 3, 1);
-  // }
 
   private targetReached(
     _player: Phaser.Types.Physics.Arcade.GameObjectWithBody,
@@ -526,16 +456,8 @@ export default class GameScene extends Phaser.Scene {
     // Ziel erreicht!
     console.log("Target reached!");
 
-    // this.score++;
-    _target.destroy();
-    // neuen Gegner und Asteroid erzeugen nur alle 5 Targets bis maximal 15
-    // if (this.score % 5 == 0 && this.enemies.getLength() < 15) {
-    //   this.enemies.addEnemyInCorner(this.enemySize);
+    _target.destroy()
 
-    //   this.asteroids.addInCorner(this.asteroidSize);
-    // }
-
-    // this.setText("Saved: " + this.score + "/8");
     if (this.targets.getLength() == 0 && !this.lastTargetReached) {
       // this.cameras.main.flash();
       this.targets.addTarget(this.targetIndex);
@@ -581,24 +503,5 @@ export default class GameScene extends Phaser.Scene {
         }
       }
     );
-    //Save Score if new local or global
-    // DataHandler.handleNewLocalScore(this.score);
-
-    // const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
-    //   backgroundColor: "black",
-    // };
-    // this.text
-    //   .setPadding(10)
-    //   .setStyle(textStyle)
-    //   .setDepth(1)
-    //   .setInteractive({ useHandCursor: true })
-    //   .on(EventKeys.PointerDown, () => {
-    //     console.log("Back to Main Menu");
-    //     this.scene.start(SceneKeys.MainMenu);
-    //   })
-    //   .on(EventKeys.PointerOver, () => this.text.setStyle({ fill: "green" }))
-    //   .on(EventKeys.PointerOut, () => this.text.setStyle({ fill: "white" }));
-    // this.setText("Back\n\n" + this.text.text);
-    // this.grid.placeAtIndexAndScale(80, this.text, 5, 2);
   }
 }
