@@ -2,7 +2,7 @@
   "name": "Don't die dino!",
   "short_name": "Rescue",
   "description": "Phaser3 PWA Game about a little dino by Dirk Hierold",
-  "start_url": "./index.html",
+  "start_url": "/src/games/rescue/index.html",
   "background_color": "white",
   "theme_color": "white",
   "display": "fullscreen",

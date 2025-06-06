@@ -2,7 +2,7 @@
   "name": "Don't die dino!",
   "short_name": "Asteroid",
   "description": "Phaser3 PWA Game about a little dino by Dirk Hierold",
-  "start_url": "./index.html",
+  "start_url": "/src/games/asteroid/index.html",
   "background_color": "white",
   "theme_color": "white",
   "display": "fullscreen",
