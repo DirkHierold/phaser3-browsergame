@@ -259,6 +259,14 @@ export default class AsteroidScene extends Phaser.Scene {
         this.gameOver = true;
         this.physics.pause();
 
+        // Freeze player movement as well
+        this.player.body.enable = false;
+
+        // Disable drag input after game over
+        this.input.off("pointerdown");
+        this.input.off("pointerup");
+        this.input.off("pointermove");
+
         // Show NEW GAME button in the center of the game using the Button class (like rescue)
         const centerX = this.game.scale.width / 2;
         const centerY = this.game.scale.height / 2 + 120;
@@ -271,7 +279,6 @@ export default class AsteroidScene extends Phaser.Scene {
             this.newGameButton.destroy();
             // Reset gameOver and resume physics before restart
             this.gameOver = false;
-            this.physics.resume();
             this.scene.restart();
         });
         this.newGameButton.setOrigin(0.5, 0.5).setDepth(1000);
