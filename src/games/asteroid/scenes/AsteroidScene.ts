@@ -1,7 +1,10 @@
 import Phaser from "phaser";
-import { Button } from "../../rescue/utils/Button"; // adjust path if needed
+import { Button } from "../../rescue/utils/Button";
+import Player from "../model/Player";
+import Target from "../model/Target";
+import Enemies from "../model/Enemy";
 
-enum TextureKeys {
+export enum TextureKeys {
     Player = "player",
     Target = "target",
     Enemy = "enemy",
@@ -9,9 +12,9 @@ enum TextureKeys {
 }
 
 export default class AsteroidScene extends Phaser.Scene {
-    private player!: Phaser.Physics.Arcade.Image;
-    private target!: Phaser.Physics.Arcade.Image;
-    private enemies!: Phaser.Physics.Arcade.Group;
+    private player!: Player;
+    private target!: Target;
+    private enemies!: Enemies;
     private score: number = 0;
     private highscore: number = 0;
     private alltime: number = 0;
@@ -70,20 +73,14 @@ export default class AsteroidScene extends Phaser.Scene {
             .setDepth(10);
 
         // Player
-        this.player = this.physics.add.image(this.game.scale.width / 2, this.game.scale.height / 2, TextureKeys.Player)
-            .setCircle(32)
-            .setDisplaySize(64, 64)
-            .setCollideWorldBounds(true);
+        this.player = new Player(this, this.game.scale.width / 2, this.game.scale.height / 2);
 
         // Target
-        this.target = this.physics.add.image(0, 0, TextureKeys.Target)
-            .setCircle(32)
-            .setDisplaySize(64, 64)
-            .setCollideWorldBounds(true);
+        this.target = new Target(this, 0, 0);
         this.placeTarget();
 
-        // Enemies
-        this.enemies = this.physics.add.group();
+        // Enemies group
+        this.enemies = new Enemies(this);
         this.spawnEnemy();
 
         // Input: drag dino analog to pointer movement, do not jump on click
@@ -240,10 +237,7 @@ export default class AsteroidScene extends Phaser.Scene {
             x = Phaser.Math.Between(margin, this.game.scale.width - margin);
             y = Phaser.Math.Between(margin, this.game.scale.height - margin);
         }
-        const enemy = this.enemies.create(x, y, TextureKeys.Enemy) as Phaser.Physics.Arcade.Image;
-        enemy.setCircle(32).setDisplaySize(64, 64).setCollideWorldBounds(true).setBounce(1, 1);
-        // Random velocity
-        enemy.setVelocity(Phaser.Math.Between(-200, 200), Phaser.Math.Between(-200, 200));
+        this.enemies.addEnemy(x, y);
     }
 
     private handleTargetReached() {
