@@ -39,43 +39,38 @@ export default class AsteroidScene extends Phaser.Scene {
         // Background
         this.add.image(0, 0, TextureKeys.Background)
             .setOrigin(0)
-            .setDisplaySize(this.scale.width, this.scale.height);
+            .setDisplaySize(this.game.scale.width, this.game.scale.height);
 
-        // Score UI - centered horizontally and vertically
-        const centerX = this.scale.width / 2;
-        const blockHeight = 48 + 20 + 28 + 12 + 28; // score + spacing + highscore + spacing + alltime
-        const startY = (this.scale.height - blockHeight) / 2;
+        // Score UI - centered horizontally and vertically, all 28px
+        const centerX = this.game.scale.width / 2;
+        const blockHeight = 28 + 20 + 28 + 12 + 28; // all 28px + spacing
+        const startY = (this.game.scale.height - blockHeight) / 2;
 
-        this.scoreText = this.add.text(centerX, startY, "Score: 0", {
-            fontSize: "48px",
-            color: "#000",
-            fontStyle: "bold",
+        const style: Phaser.Types.GameObjects.Text.TextStyle = {
             fontFamily: "Arial",
-        })
+            color: "#000",
+            fontSize: "28px",
+            align: "center",
+        };
+
+        this.scoreText = this.add.text(centerX, startY, "Score: 0", style)
             .setOrigin(0.5, 0)
             .setDepth(10);
 
+        this.score = 0
         this.highscore = Number(localStorage.getItem("highscore")) || 0;
         this.alltime = Number(localStorage.getItem("alltime")) || 0;
 
-        this.highscoreText = this.add.text(centerX, startY + 48 + 20, `Highscore: ${this.highscore}`, {
-            fontSize: "28px",
-            color: "#000",
-            fontFamily: "Arial",
-        })
+        this.highscoreText = this.add.text(centerX, startY + 28 + 12, `Highscore: ${this.highscore}`, style)
             .setOrigin(0.5, 0)
             .setDepth(10);
 
-        this.alltimeText = this.add.text(centerX, startY + 48 + 20 + 28 + 12, `Alltime: ${this.alltime}`, {
-            fontSize: "28px",
-            color: "#000",
-            fontFamily: "Arial",
-        })
+        this.alltimeText = this.add.text(centerX, startY + 28 + 12 + 28 + 12, `Alltime: ${this.alltime}`, style)
             .setOrigin(0.5, 0)
             .setDepth(10);
 
         // Player
-        this.player = this.physics.add.image(this.scale.width / 2, this.scale.height / 2, TextureKeys.Player)
+        this.player = this.physics.add.image(this.game.scale.width / 2, this.game.scale.height / 2, TextureKeys.Player)
             .setCircle(32)
             .setDisplaySize(64, 64)
             .setCollideWorldBounds(true);
@@ -108,8 +103,8 @@ export default class AsteroidScene extends Phaser.Scene {
                 const dy = pointer.y - this.dragOffsetY;
                 let newX = this.player.x + dx;
                 let newY = this.player.y + dy;
-                newX = Phaser.Math.Clamp(newX, this.player.displayWidth / 2, this.scale.width - this.player.displayWidth / 2);
-                newY = Phaser.Math.Clamp(newY, this.player.displayHeight / 2, this.scale.height - this.player.displayHeight / 2);
+                newX = Phaser.Math.Clamp(newX, this.player.displayWidth / 2, this.game.scale.width - this.player.displayWidth / 2);
+                newY = Phaser.Math.Clamp(newY, this.player.displayHeight / 2, this.game.scale.height - this.player.displayHeight / 2);
                 this.player.x = newX;
                 this.player.y = newY;
                 this.dragOffsetX = pointer.x;
@@ -232,18 +227,18 @@ export default class AsteroidScene extends Phaser.Scene {
 
     private placeTarget() {
         const margin = 64;
-        this.target.x = Phaser.Math.Between(margin, this.scale.width - margin);
-        this.target.y = Phaser.Math.Between(margin, this.scale.height - margin);
+        this.target.x = Phaser.Math.Between(margin, this.game.scale.width - margin);
+        this.target.y = Phaser.Math.Between(margin, this.game.scale.height - margin);
     }
 
     private spawnEnemy() {
         const margin = 64;
-        let x = Phaser.Math.Between(margin, this.scale.width - margin);
-        let y = Phaser.Math.Between(margin, this.scale.height - margin);
+        let x = Phaser.Math.Between(margin, this.game.scale.width - margin);
+        let y = Phaser.Math.Between(margin, this.game.scale.height - margin);
         // Avoid spawning on player
         while (Phaser.Math.Distance.Between(x, y, this.player.x, this.player.y) < 100) {
-            x = Phaser.Math.Between(margin, this.scale.width - margin);
-            y = Phaser.Math.Between(margin, this.scale.height - margin);
+            x = Phaser.Math.Between(margin, this.game.scale.width - margin);
+            y = Phaser.Math.Between(margin, this.game.scale.height - margin);
         }
         const enemy = this.enemies.create(x, y, TextureKeys.Enemy) as Phaser.Physics.Arcade.Image;
         enemy.setCircle(32).setDisplaySize(64, 64).setCollideWorldBounds(true).setBounce(1, 1);
@@ -271,8 +266,8 @@ export default class AsteroidScene extends Phaser.Scene {
         this.physics.pause();
 
         // Show NEW GAME button in the center of the game using the Button class (like rescue)
-        const centerX = this.scale.width / 2;
-        const centerY = this.scale.height / 2 + 120;
+        const centerX = this.game.scale.width / 2;
+        const centerY = this.game.scale.height / 2 + 120;
 
         if (this.newGameButton) {
             this.newGameButton.destroy();

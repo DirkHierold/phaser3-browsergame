@@ -2,10 +2,13 @@ import Phaser from "phaser";
 import AsteroidScene from "./scenes/AsteroidScene";
 
 const config: Phaser.Types.Core.GameConfig = {
-    type: Phaser.AUTO,
+    type: Phaser.CANVAS,
     parent: "app",
-    width: 800,
-    height: 600,
+    width: 600,
+    height: 800,
+    dom: {
+        createContainer: true,
+    },
     physics: {
         default: "arcade",
         arcade: {
