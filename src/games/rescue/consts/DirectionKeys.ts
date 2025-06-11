@@ -1,8 +1,6 @@
-enum DirectionKeys {
-  Left = "Left",
-  Up = "Up",
-  Right = "Right",
-  Down = "Down",
+export const DirectionKeys ={
+  Left : new Phaser.Math.Vector2(-1, 0),
+  Up :  new Phaser.Math.Vector2(0, -1),
+  Right : new Phaser.Math.Vector2(1, 0),
+  Down : new Phaser.Math.Vector2(0, 1),
 }
-
-export default DirectionKeys;

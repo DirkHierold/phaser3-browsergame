@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { Button } from "../../../shared/utils/Button";
 import Player from "../../../shared/Player";
 import Target from "../model/Target";
-import Enemies from "../model/Enemy";
+import Enemies from "../../../shared/Enemy";
 
 export enum TextureKeys {
     Player = "player",
