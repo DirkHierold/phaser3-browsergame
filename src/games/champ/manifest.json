@@ -1,0 +1,26 @@
+{
+  "name": "Don't die dino!",
+  "short_name": "Champ",
+  "description": "Phaser3 PWA Game about a little dino by Dirk Hierold",
+  "start_url": "/src/games/champ/index.html",
+  "background_color": "white",
+  "theme_color": "white",
+  "display": "fullscreen",
+  "icons": [
+    {
+      "src": "/images/dino.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/dino.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/dino.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

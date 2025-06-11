@@ -1,9 +1,9 @@
 import EventKeys from "../consts/EventKeys";
 import SceneKeys from "../consts/SceneKeys";
 import TextureKeys from "../consts/TextureKeys";
-import Player from "../model/Player";
-import { AlignGrid } from "../utils/AlignGrid";
-import { Button } from "../utils/Button";
+import Player from "../../../shared/Player";
+import { AlignGrid } from "../../../shared/utils/AlignGrid";
+import { Button } from "../../../shared/utils/Button";
 // import DataHandler from "../utils/DataHandler";
 import AudioKeys from "../consts/AudioKeys";
 
@@ -57,7 +57,8 @@ export default class MainMenuScene extends Phaser.Scene {
       .setOrigin(0);
 
     // Image Dinosaur
-    this.player = new Player(this, 48, 3, 3, grid);
+    this.player = new Player(this);
+    grid.placeAtIndexAndScale(48, this.player, 3, 3);
 
     // Image Cow
     // const cow = this.add.image(0, 0, "roundOutline", "cow");
@@ -72,7 +73,7 @@ export default class MainMenuScene extends Phaser.Scene {
     grid.placeAtIndexAndScale(23, title, 9, 1);
 
     // MusicToogle Button
-    const musicOnButton = new Button(0, 0, "Music", this, () => {});
+    const musicOnButton = new Button(0, 0, "Music", this, () => { });
     musicOnButton.setAlpha(0.5);
     musicOnButton.on(EventKeys.PointerDown, () => {
       this.musicOn = !this.musicOn;

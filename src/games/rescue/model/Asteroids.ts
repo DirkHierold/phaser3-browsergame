@@ -1,6 +1,6 @@
 import DirectionKeys from "../consts/DirectionKeys";
 import TextureKeys from "../consts/TextureKeys";
-import { AlignGrid } from "../utils/AlignGrid";
+import { AlignGrid } from "../../../shared/utils/AlignGrid";
 
 export default class Asteroids extends Phaser.Physics.Arcade.Group {
   scene: Phaser.Scene;

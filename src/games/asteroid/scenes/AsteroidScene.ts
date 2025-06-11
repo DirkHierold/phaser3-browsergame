@@ -1,6 +1,6 @@
 import Phaser from "phaser";
-import { Button } from "../../rescue/utils/Button";
-import Player from "../model/Player";
+import { Button } from "../../../shared/utils/Button";
+import Player from "../../../shared/Player";
 import Target from "../model/Target";
 import Enemies from "../model/Enemy";
 
@@ -21,9 +21,7 @@ export default class AsteroidScene extends Phaser.Scene {
     private scoreText!: Phaser.GameObjects.Text;
     private highscoreText!: Phaser.GameObjects.Text;
     private alltimeText!: Phaser.GameObjects.Text;
-    private dragging: boolean = false;
-    private dragOffsetX: number = 0;
-    private dragOffsetY: number = 0;
+
     private gameOver: boolean = false;
     private newGameButton!: Button;
 
@@ -73,7 +71,7 @@ export default class AsteroidScene extends Phaser.Scene {
             .setDepth(10);
 
         // Player
-        this.player = new Player(this, this.game.scale.width / 2, this.game.scale.height / 2);
+        this.player = new Player(this);
 
         // Target
         this.target = new Target(this, 0, 0);
@@ -82,32 +80,6 @@ export default class AsteroidScene extends Phaser.Scene {
         // Enemies group
         this.enemies = new Enemies(this);
         this.spawnEnemy();
-
-        // Input: drag dino analog to pointer movement, do not jump on click
-        this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
-            this.dragging = true;
-            this.dragOffsetX = pointer.x;
-            this.dragOffsetY = pointer.y;
-        });
-
-        this.input.on("pointerup", () => {
-            this.dragging = false;
-        });
-
-        this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
-            if (this.dragging) {
-                const dx = pointer.x - this.dragOffsetX;
-                const dy = pointer.y - this.dragOffsetY;
-                let newX = this.player.x + dx;
-                let newY = this.player.y + dy;
-                newX = Phaser.Math.Clamp(newX, this.player.displayWidth / 2, this.game.scale.width - this.player.displayWidth / 2);
-                newY = Phaser.Math.Clamp(newY, this.player.displayHeight / 2, this.game.scale.height - this.player.displayHeight / 2);
-                this.player.x = newX;
-                this.player.y = newY;
-                this.dragOffsetX = pointer.x;
-                this.dragOffsetY = pointer.y;
-            }
-        });
 
         // Collisions
         this.physics.add.overlap(this.player, this.target, this.handleTargetReached, undefined, this);
@@ -119,6 +91,8 @@ export default class AsteroidScene extends Phaser.Scene {
 
     update() {
         if (this.gameOver) return;
+
+        this.player.move(this.input.activePointer);
 
         // Pixel-perfect collision check between player and each enemy
         let hit = false;
@@ -258,9 +232,6 @@ export default class AsteroidScene extends Phaser.Scene {
     private handlePlayerHit() {
         this.gameOver = true;
         this.physics.pause();
-
-        // Freeze player movement as well
-        this.player.body.enable = false;
 
         // Disable drag input after game over
         this.input.off("pointerdown");

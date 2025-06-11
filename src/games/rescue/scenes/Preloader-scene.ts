@@ -1,7 +1,7 @@
 import AudioKeys from "../consts/AudioKeys";
 import SceneKeys from "../consts/SceneKeys";
 import TextureKeys from "../consts/TextureKeys";
-import { AlignGrid } from "../utils/AlignGrid";
+import { AlignGrid } from "../../../shared/utils/AlignGrid";
 
 export default class Preloader extends Phaser.Scene {
   grid!: AlignGrid;

@@ -4,11 +4,11 @@ import EventKeys from "../consts/EventKeys";
 import SceneKeys from "../consts/SceneKeys";
 import TextureKeys from "../consts/TextureKeys";
 import Asteroids from "../model/Asteroids";
-import Player from "../model/Player";
+import Player from "../../../shared/Player";
 import Targets from "../model/Targets";
 import Trees from "../model/Trees";
-import { AlignGrid } from "../utils/AlignGrid";
-import { Button } from "../utils/Button";
+import { AlignGrid } from "../../../shared/utils/AlignGrid";
+import { Button } from "../../../shared/utils/Button";
 
 export default class GameScene extends Phaser.Scene {
   private gameWidth = 0;
@@ -134,7 +134,8 @@ export default class GameScene extends Phaser.Scene {
         // WorldBounds
         this.grid.placeAtIndexAndScale(0, this.physics.world, 3, 3);
         // Player
-        this.player = new Player(this, 6, 1, 1, this.grid);
+        this.player = new Player(this);
+        this.grid.placeAtIndexAndScale(6, this.player, 1, 1);
 
         // Targets
         this.targets = new Targets(this, this.grid);
@@ -170,7 +171,8 @@ export default class GameScene extends Phaser.Scene {
         // WorldBounds
         this.grid.placeAtIndexAndScale(0, this.physics.world, 5, 7);
         // Player
-        this.player = new Player(this, 30, 1, 1, this.grid);
+        this.player = new Player(this);
+        this.grid.placeAtIndexAndScale(30, this.player, 1, 1);
 
         // Targets
         this.targets = new Targets(this, this.grid);
@@ -214,7 +216,8 @@ export default class GameScene extends Phaser.Scene {
         this.grid.placeAtIndexAndScale(0, this.physics.world, 11, 11);
 
         // Player
-        this.player = new Player(this, 60, 1, 1, this.grid);
+        this.player = new Player(this);
+        this.grid.placeAtIndexAndScale(60, this.player, 1, 1);
 
         // Targets
         this.targets = new Targets(this, this.grid);
@@ -301,7 +304,8 @@ export default class GameScene extends Phaser.Scene {
         this.grid.placeAtIndexAndScale(0, this.physics.world, 11, 11);
 
         // Player
-        this.player = new Player(this, 60, 1, 1, this.grid);
+        this.player = new Player(this);
+        this.grid.placeAtIndexAndScale(60, this.player, 1, 1);
 
         // Targets
         this.targets = new Targets(this, this.grid);
@@ -383,7 +387,8 @@ export default class GameScene extends Phaser.Scene {
         this.grid.placeAtIndexAndScale(0, this.physics.world, 11, 11);
 
         // Player
-        this.player = new Player(this, 60, 1, 1, this.grid);
+        this.player = new Player(this);
+        this.grid.placeAtIndexAndScale(60, this.player, 1, 1);
 
         this.trees = new Trees(this, this.grid);
         this.asteroids = new Asteroids(this, this.grid);

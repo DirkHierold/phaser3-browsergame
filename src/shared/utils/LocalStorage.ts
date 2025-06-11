@@ -1,4 +1,4 @@
-import StorageItemKeys from "../consts/StorageItemKeys";
+import StorageItemKeys from "../../games/rescue/consts/StorageItemKeys";
 
 export default class LocalStorage {
   storage: Storage = window.localStorage;
