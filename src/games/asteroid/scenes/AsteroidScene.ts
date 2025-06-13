@@ -3,13 +3,7 @@ import { Button } from "../../../shared/utils/Button";
 import Player from "../../../shared/Player";
 import Target from "../model/Target";
 import Enemies from "../../../shared/Enemy";
-
-export enum TextureKeys {
-    Player = "player",
-    Target = "target",
-    Enemy = "enemy",
-    Background = "background"
-}
+import { TextureKeys} from "../../../shared/utils/TextureKeys";
 
 export default class AsteroidScene extends Phaser.Scene {
     private player!: Player;
@@ -123,6 +117,8 @@ export default class AsteroidScene extends Phaser.Scene {
         ) {
             this.handleTargetReached();
         }
+
+        this.enemies.changeDirection(this.player);
     }
 
     // Pixel-perfect collision using alpha channel
@@ -211,7 +207,7 @@ export default class AsteroidScene extends Phaser.Scene {
             x = Phaser.Math.Between(margin, this.game.scale.width - margin);
             y = Phaser.Math.Between(margin, this.game.scale.height - margin);
         }
-        this.enemies.addEnemy(x, y);
+        this.enemies.addEnemyWithLocation(x, y);
     }
 
     private handleTargetReached() {

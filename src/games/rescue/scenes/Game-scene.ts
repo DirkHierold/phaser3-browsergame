@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { DirectionKeys } from "../consts/DirectionKeys";
 import EventKeys from "../consts/EventKeys";
 import SceneKeys from "../consts/SceneKeys";
-import TextureKeys from "../consts/TextureKeys";
+import { TextureKeys} from "../../../shared/utils/TextureKeys";
 import Enemies from "../../../shared/Enemy";
 import Player from "../../../shared/Player";
 import Targets from "../model/Targets";
@@ -409,6 +409,7 @@ export default class GameScene extends Phaser.Scene {
     // Control
     this.player.move(this.input.activePointer);
     this.targets.changeDirection(this.player);
+    this.asteroids.changeDirection(this.player);
   }
 
   private targetReached(

@@ -1,6 +1,6 @@
-import TextureKeys from "../consts/TextureKeys";
+import {TextureKeys }from "../../../shared/utils/TextureKeys";
 import { AlignGrid } from "../../../shared/utils/AlignGrid";
-import Player from "./Player";
+import Player from "../../../shared/Player";
 
 export default class Targets extends Phaser.Physics.Arcade.Group {
   scene: Phaser.Scene;

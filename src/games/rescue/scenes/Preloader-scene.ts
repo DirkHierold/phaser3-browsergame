@@ -1,6 +1,6 @@
 import AudioKeys from "../consts/AudioKeys";
 import SceneKeys from "../consts/SceneKeys";
-import TextureKeys from "../consts/TextureKeys";
+import {TextureKeys} from "../../../shared/utils/TextureKeys";
 import { AlignGrid } from "../../../shared/utils/AlignGrid";
 
 export default class Preloader extends Phaser.Scene {
@@ -91,26 +91,15 @@ export default class Preloader extends Phaser.Scene {
     // }
     this.load.image(TextureKeys.Player, "/images/dino.png");
     this.load.image(TextureKeys.Target, "/images/dino-girl.png");
-    // this.load.image(TextureKeys.Target, "images/blue-dino.png");
-    this.load.image(TextureKeys.Enemy, "/images/red-dino.png");
-    this.load.image(TextureKeys.Asteroid, "/images/asteroid.png");
+    this.load.image(TextureKeys.Enemy, "/images/asteroid.png");
 
     this.load.image(TextureKeys.Autumn_tree2, "/images/Trees/Autumn_tree2.png");
-    this.load.image(TextureKeys.Burned_tree2, "/images/Trees/Burned_tree2.png");
 
     this.load.audio(AudioKeys.BG_Music, "/audios/anomaly.mp3");
-    this.load.atlasXML(
-      "roundOutline",
-      "/images/roundOutline.png",
-      "/images/roundOutline.xml"
-    );
-    this.load.bitmapFont("arcade", "/images/arcade.png", "/images/arcade.xml");
   }
 
   create() {
     console.log("preloader create");
-    // const bitMapText = this.add.bitmapText(0, 0, "arcade", "Dirk");
-    // this.grid.placeAtIndexAndScale(0, bitMapText, 5, 1);
     this.scene.start(SceneKeys.MainMenu);
   }
 }

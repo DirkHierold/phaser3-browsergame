@@ -1,6 +1,6 @@
 // filepath: c:\visualStudioCode\phaser3-browsergame\src\games\asteroid\model\Target.ts
 import Phaser from "phaser";
-import { TextureKeys } from "../scenes/AsteroidScene";
+import { TextureKeys } from "../../../shared/utils/TextureKeys";
 
 export default class Target extends Phaser.Physics.Arcade.Image {
     constructor(scene: Phaser.Scene, x: number, y: number) {

@@ -1,4 +1,4 @@
-import TextureKeys from "../consts/TextureKeys";
+import { TextureKeys} from "../../../shared/utils/TextureKeys";
 import { AlignGrid } from "../../../shared/utils/AlignGrid";
 
 export default class Trees extends Phaser.Physics.Arcade.StaticGroup {
