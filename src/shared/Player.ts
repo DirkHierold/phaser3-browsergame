@@ -10,7 +10,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     touchCircle!: Phaser.GameObjects.Arc;
     moveCircle!: Phaser.GameObjects.Arc;
     maxDiff: number = 100;
-    speed: number = 900;
     faceSize: number = 120;
 
     constructor(
@@ -60,11 +59,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         (this.body as Phaser.Physics.Arcade.Body).setOffset(0, 0);
         this.setCollideWorldBounds(true);
 
-        // Ensure speed is always set to a reasonable value based on grid/cell size
-        this.speed = Math.max(300, actualSize * 8);
-
-        this.cursors = scene.input.keyboard!.createCursorKeys();
-
         this.touchCenterX = this.scene.scale.width / 2;
         this.touchCenterY = (this.scene.scale.height * 4) / 5;
 
@@ -89,7 +83,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
             .setDepth(10)
             .setVisible(false);
 
-        this.speed = this.speed * this.scale;
     }
 
     move(pointer?: Phaser.Input.Pointer) {

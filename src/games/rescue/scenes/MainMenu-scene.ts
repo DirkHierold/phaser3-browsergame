@@ -1,6 +1,6 @@
 import EventKeys from "../consts/EventKeys";
 import SceneKeys from "../consts/SceneKeys";
-import TextureKeys from "../consts/TextureKeys";
+import {TextureKeys} from "../../../shared/utils/TextureKeys";
 import Player from "../../../shared/Player";
 import { AlignGrid } from "../../../shared/utils/AlignGrid";
 import { Button } from "../../../shared/utils/Button";
