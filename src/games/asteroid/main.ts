@@ -6,6 +6,8 @@ const config: Phaser.Types.Core.GameConfig = {
     parent: "app",
     width: 600,
     height: 800,
+    //green background
+    backgroundColor: "#008000",
     dom: {
         createContainer: true,
     },

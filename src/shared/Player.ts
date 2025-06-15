@@ -3,14 +3,7 @@ import Phaser from "phaser";
 export default class Player extends Phaser.Physics.Arcade.Sprite {
     oldTouchX: number = 0;
     oldTouchY: number = 0;
-    isDown: boolean = false;
-    cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-    touchCenterX: number = 0;
-    touchCenterY: number = 0;
-    touchCircle!: Phaser.GameObjects.Arc;
-    moveCircle!: Phaser.GameObjects.Arc;
-    maxDiff: number = 100;
-    faceSize: number = 120;
+   
 
     constructor(
         scene: Phaser.Scene,
@@ -20,9 +13,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         scene.physics.world.enable(this);
         scene.add.existing(this);
 
-        // Use the provided actualSize for the face
-        actualSize = Math.max(32, Math.round(actualSize));
-        this.faceSize = actualSize; // Store the face size for reference
         const uniqueFaceKey = `player-face-${actualSize}-${Date.now()}-${Math.random()}`;
         // Create graphics object but do not add to display list
         const gfx = scene.make.graphics({ x: 0, y: 0 });
@@ -58,31 +48,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         (this.body as Phaser.Physics.Arcade.Body).setSize(actualSize, actualSize);
         (this.body as Phaser.Physics.Arcade.Body).setOffset(0, 0);
         this.setCollideWorldBounds(true);
-
-        this.touchCenterX = this.scene.scale.width / 2;
-        this.touchCenterY = (this.scene.scale.height * 4) / 5;
-
-        this.touchCircle = this.scene.add
-            .circle(
-                this.touchCenterX,
-                this.touchCenterY,
-                this.scene.scale.width / 7,
-                0xff0000,
-                0.5
-            )
-            .setDepth(10)
-            .setVisible(false);
-        this.moveCircle = this.scene.add
-            .circle(
-                this.touchCenterX,
-                this.touchCenterY,
-                this.scene.scale.width / 7,
-                0x00ff00,
-                0.5
-            )
-            .setDepth(10)
-            .setVisible(false);
-
     }
 
     move(pointer?: Phaser.Input.Pointer) {

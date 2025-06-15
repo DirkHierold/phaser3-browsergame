@@ -1,13 +1,11 @@
 import Phaser from 'phaser';
 import { pixelPerfectOverlap } from './pixelPerfectUtil';
 import Player from '../../shared/Player';
-import { TextureKeys } from '../../shared/utils/TextureKeys';
 import Enemies from '../../shared/Enemy';
-import { DirectionKeys } from '../rescue/consts/DirectionKeys';
+import { DirectionKeys } from '../../shared/utils/consts/DirectionKeys';
 
 export default class ChampScene extends Phaser.Scene {
     dino!: Player;
-    ground!: Phaser.GameObjects.TileSprite;
     obstacles!: Enemies;
     score: number = 0;
     scoreText!: Phaser.GameObjects.Text;
@@ -15,9 +13,6 @@ export default class ChampScene extends Phaser.Scene {
     bgTrees!: Phaser.GameObjects.Group;
 
     preload() {
-        this.load.image(TextureKeys.Player, '/images/dino.png');
-        this.load.image(TextureKeys.Enemy, '/images/asteroid.png');
-        this.load.image('ground', '/images/grass.jpg');
         // Preload all tree images for background decoration
         const treeImagesList = ['Autumn_tree2'];
         for (const name of treeImagesList) {
@@ -27,8 +22,6 @@ export default class ChampScene extends Phaser.Scene {
 
     create() {
         this.physics.world.setBounds(0, 0, 800, 580);
-        this.ground = this.add.tileSprite(400, 580, 800, 40, 'ground');
-        this.physics.add.existing(this.ground, true);
 
         this.dino = new Player(this);
         this.dino.setPosition(100, 550);
@@ -67,7 +60,6 @@ export default class ChampScene extends Phaser.Scene {
         this.scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '24px', color: '#000' });
         this.nextObstacle = 0;
 
-        this.ground.setDepth(0); // ensure grass is behind trees
         this.bgTrees.getChildren().forEach((tree) => {
             (tree as Phaser.GameObjects.Image).setDepth(1);
         });
@@ -86,7 +78,6 @@ export default class ChampScene extends Phaser.Scene {
     }
 
     update(time: number) {
-        this.ground.tilePositionX += 4;
         this.dino.x += 2;
         if (this.dino.x > 200) this.dino.x = 200;
         if (time > this.nextObstacle) {

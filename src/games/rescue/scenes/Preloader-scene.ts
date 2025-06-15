@@ -1,5 +1,5 @@
-import AudioKeys from "../consts/AudioKeys";
-import SceneKeys from "../consts/SceneKeys";
+import AudioKeys from "../../../shared/utils/consts/AudioKeys";
+import SceneKeys from "../../../shared/utils/consts/SceneKeys";
 import {TextureKeys} from "../../../shared/utils/TextureKeys";
 import { AlignGrid } from "../../../shared/utils/AlignGrid";
 
@@ -9,15 +9,6 @@ export default class Preloader extends Phaser.Scene {
   constructor() {
     super({
       key: SceneKeys.Preloader,
-      pack: {
-        files: [
-          {
-            type: "image",
-            key: TextureKeys.Grass,
-            url: "/images/grass.jpg",
-          },
-        ],
-      },
     });
   }
 
@@ -28,8 +19,6 @@ export default class Preloader extends Phaser.Scene {
     this.grid = new AlignGrid(this, 0, 0, width, height, 11, 12, false);
     //turn on the lines for testing layout
     // this.grid.showNumbers();
-
-    this.add.tileSprite(0, 0, width, height, TextureKeys.Grass).setOrigin(0);
 
     // Title
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
@@ -85,13 +74,6 @@ export default class Preloader extends Phaser.Scene {
       assetText.setText("Loading asset: " + file.key);
       grid.placeAtIndexAndScale(78, assetText, 9, 1);
     });
-
-    // for (let i = 0; i < 1000; i++) {
-    //   this.load.image("TextureKeys.Player" + i, "images/dino.png");
-    // }
-    this.load.image(TextureKeys.Player, "/images/dino.png");
-    this.load.image(TextureKeys.Target, "/images/dino-girl.png");
-    this.load.image(TextureKeys.Enemy, "/images/asteroid.png");
 
     this.load.image(TextureKeys.Autumn_tree2, "/images/Trees/Autumn_tree2.png");
 

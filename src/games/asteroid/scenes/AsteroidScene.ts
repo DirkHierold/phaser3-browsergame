@@ -1,13 +1,13 @@
 import Phaser from "phaser";
 import { Button } from "../../../shared/utils/Button";
 import Player from "../../../shared/Player";
-import Target from "../model/Target";
+import Targets from "../model/../../../shared/Targets";
 import Enemies from "../../../shared/Enemy";
-import { TextureKeys} from "../../../shared/utils/TextureKeys";
 
 export default class AsteroidScene extends Phaser.Scene {
     private player!: Player;
-    private target!: Target;
+    private targets!: Targets;
+    private target!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
     private enemies!: Enemies;
     private score: number = 0;
     private highscore: number = 0;
@@ -24,18 +24,9 @@ export default class AsteroidScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image(TextureKeys.Player, "/images/dino.png");
-        this.load.image(TextureKeys.Target, "/images/blue-dino.png");
-        this.load.image(TextureKeys.Enemy, "/images/asteroid.png");
-        this.load.image(TextureKeys.Background, "/images/grass.jpg");
     }
 
     create() {
-        // Background
-        this.add.image(0, 0, TextureKeys.Background)
-            .setOrigin(0)
-            .setDisplaySize(this.game.scale.width, this.game.scale.height);
-
         // Score UI - centered horizontally and vertically, all 28px
         const centerX = this.game.scale.width / 2;
         const blockHeight = 28 + 20 + 28 + 12 + 28; // all 28px + spacing
@@ -66,13 +57,17 @@ export default class AsteroidScene extends Phaser.Scene {
 
         // Player
         this.player = new Player(this);
+        this.player.setDepth(30)
 
         // Target
-        this.target = new Target(this, 0, 0);
+        this.targets = new Targets(this);
+        this.target = this.targets.addTarget(0,0);
+        this.target.setDepth(30);
         this.placeTarget();
 
         // Enemies group
         this.enemies = new Enemies(this);
+        this.enemies.setDepth(30);
         this.spawnEnemy();
 
         // Collisions
@@ -119,6 +114,7 @@ export default class AsteroidScene extends Phaser.Scene {
         }
 
         this.enemies.changeDirection(this.player);
+        this.targets.changeDirection(this.player);
     }
 
     // Pixel-perfect collision using alpha channel
@@ -207,7 +203,7 @@ export default class AsteroidScene extends Phaser.Scene {
             x = Phaser.Math.Between(margin, this.game.scale.width - margin);
             y = Phaser.Math.Between(margin, this.game.scale.height - margin);
         }
-        this.enemies.addEnemyWithLocation(x, y);
+        this.enemies.addEnemyWithLocation(x, y).setDepth(30);
     }
 
     private handleTargetReached() {

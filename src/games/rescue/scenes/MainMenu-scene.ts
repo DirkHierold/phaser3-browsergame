@@ -1,11 +1,10 @@
-import EventKeys from "../consts/EventKeys";
-import SceneKeys from "../consts/SceneKeys";
-import {TextureKeys} from "../../../shared/utils/TextureKeys";
+import EventKeys from "../../../shared/utils/consts/EventKeys";
+import SceneKeys from "../../../shared/utils/consts/SceneKeys";
 import Player from "../../../shared/Player";
 import { AlignGrid } from "../../../shared/utils/AlignGrid";
 import { Button } from "../../../shared/utils/Button";
 // import DataHandler from "../utils/DataHandler";
-import AudioKeys from "../consts/AudioKeys";
+import AudioKeys from "../../../shared/utils/consts/AudioKeys";
 
 export default class MainMenuScene extends Phaser.Scene {
   musicOn: boolean = false;
@@ -51,10 +50,6 @@ export default class MainMenuScene extends Phaser.Scene {
     this.musicOn = this.registry.get("musicOn");
 
     console.log("MainMenuScene create");
-    // Background
-    this.add
-      .tileSprite(0, 0, this.gamewidth, this.gameHeight, TextureKeys.Grass)
-      .setOrigin(0);
 
     // Image Dinosaur
     this.player = new Player(this);

@@ -1,11 +1,10 @@
 import Phaser from "phaser";
-import { DirectionKeys } from "../consts/DirectionKeys";
-import EventKeys from "../consts/EventKeys";
-import SceneKeys from "../consts/SceneKeys";
-import { TextureKeys} from "../../../shared/utils/TextureKeys";
+import { DirectionKeys } from "../../../shared/utils/consts/DirectionKeys";
+import EventKeys from "../../../shared/utils/consts/EventKeys";
+import SceneKeys from "../../../shared/utils/consts/SceneKeys";
 import Enemies from "../../../shared/Enemy";
 import Player from "../../../shared/Player";
-import Targets from "../model/Targets";
+import Targets from "../../../shared/Targets";
 import Trees from "../model/Trees";
 import { AlignGrid } from "../../../shared/utils/AlignGrid";
 import { Button } from "../../../shared/utils/Button";
@@ -71,9 +70,6 @@ export default class GameScene extends Phaser.Scene {
   create() {
     console.log("Game Scene create");
 
-    // Background
-    const background = this.add.tileSprite(0, 0, 0, 0, TextureKeys.Grass);
-
     // MusicToggle Button
     const musicOnButton = new Button(0, 0, "Music", this, () => { });
     musicOnButton.on(EventKeys.PointerUp, () => {
@@ -128,9 +124,6 @@ export default class GameScene extends Phaser.Scene {
           3
         );
 
-        // Background
-        this.grid.placeAtIndexAndScale(0, background, 3, 3);
-
         // WorldBounds
         this.grid.placeAtIndexAndScale(0, this.physics.world, 3, 3);
         // Player
@@ -138,8 +131,10 @@ export default class GameScene extends Phaser.Scene {
         this.grid.placeAtIndexAndScale(6, this.player, 1, 1);
 
         // Targets
-        this.targets = new Targets(this, this.grid);
-        this.targets.addTarget(0);
+        this.targets = new Targets(this);
+        const target1= this.targets.addTarget(0,0);
+
+        this.grid.placeAtIndexAndScale(0, target1, 1, 1);
         this.targetIndex = 6;
 
         // Trees
@@ -166,9 +161,6 @@ export default class GameScene extends Phaser.Scene {
           7
         );
 
-        // Background
-        this.grid.placeAtIndexAndScale(0, background, 5, 7);
-
         // WorldBounds
         this.grid.placeAtIndexAndScale(0, this.physics.world, 5, 7);
         // Player
@@ -176,8 +168,9 @@ export default class GameScene extends Phaser.Scene {
         this.grid.placeAtIndexAndScale(30, this.player, 1, 1);
 
         // Targets
-        this.targets = new Targets(this, this.grid);
-        this.targets.addTarget(4);
+        this.targets = new Targets(this);
+        const target2 = this.targets.addTarget(0,0);
+        this.grid.placeAtIndexAndScale(4, target2, 1, 1);
         this.targetIndex = 30;
 
         // Trees
@@ -216,8 +209,6 @@ export default class GameScene extends Phaser.Scene {
           11,
           11
         );
-        // Background
-        this.grid.placeAtIndexAndScale(0, background, 11, 11);
 
         // WorldBounds
         this.grid.placeAtIndexAndScale(0, this.physics.world, 11, 11);
@@ -227,15 +218,27 @@ export default class GameScene extends Phaser.Scene {
         this.grid.placeAtIndexAndScale(60, this.player, 1, 1);
 
         // Targets
-        this.targets = new Targets(this, this.grid);
-        this.targets.addTarget(0);
-        this.targets.addTarget(10);
-        this.targets.addTarget(110);
-        this.targets.addTarget(120);
-        this.targets.addTarget(24);
-        this.targets.addTarget(30);
-        this.targets.addTarget(90);
-        this.targets.addTarget(96);
+        this.targets = new Targets(this);
+
+        const target3 = [
+          this.targets.addTarget(0, 0),
+          this.targets.addTarget(0, 0),
+          this.targets.addTarget(0, 0),
+          this.targets.addTarget(0, 0),
+          this.targets.addTarget(0, 0),
+          this.targets.addTarget(0, 0),
+          this.targets.addTarget(0, 0),
+          this.targets.addTarget(0, 0)
+        ];
+        this.grid.placeAtIndexAndScale(0, target3[0], 1, 1);
+        this.grid.placeAtIndexAndScale(10, target3[1], 1, 1);
+        this.grid.placeAtIndexAndScale(110, target3[2], 1, 1);
+        this.grid.placeAtIndexAndScale(120, target3[3], 1, 1);
+        this.grid.placeAtIndexAndScale(24, target3[4], 1, 1);
+        this.grid.placeAtIndexAndScale(30, target3[5], 1, 1);
+        this.grid.placeAtIndexAndScale(90, target3[6], 1, 1);
+        this.grid.placeAtIndexAndScale(96, target3[7], 1, 1);
+        
         this.targetIndex = 60;
 
         // Asteroids
@@ -275,8 +278,6 @@ export default class GameScene extends Phaser.Scene {
           11,
           11
         );
-        // Background
-        this.grid.placeAtIndexAndScale(0, background, 11, 11);
 
         // WorldBounds
         this.grid.placeAtIndexAndScale(0, this.physics.world, 11, 11);
@@ -286,11 +287,17 @@ export default class GameScene extends Phaser.Scene {
         this.grid.placeAtIndexAndScale(60, this.player, 1, 1);
 
         // Targets
-        this.targets = new Targets(this, this.grid);
-        this.targets.addTarget(12);
-        this.targets.addTarget(20);
-        this.targets.addTarget(100);
-        this.targets.addTarget(108);
+        this.targets = new Targets(this);
+        const target4 = [
+          this.targets.addTarget(0, 0),
+          this.targets.addTarget(0, 0),
+          this.targets.addTarget(0, 0),
+          this.targets.addTarget(0, 0),
+          ]
+        this.grid.placeAtIndexAndScale(12, target4[0], 1, 1);
+        this.grid.placeAtIndexAndScale(20, target4[1], 1, 1);
+        this.grid.placeAtIndexAndScale(100, target4[2], 1, 1);
+        this.grid.placeAtIndexAndScale(108, target4[3], 1, 1);
         this.targetIndex = 60;
 
         // Asteroids
@@ -335,8 +342,6 @@ export default class GameScene extends Phaser.Scene {
           11,
           11
         );
-        // Background
-        this.grid.placeAtIndexAndScale(0, background, 11, 11);
 
         // WorldBounds
         this.grid.placeAtIndexAndScale(0, this.physics.world, 11, 11);
@@ -347,7 +352,7 @@ export default class GameScene extends Phaser.Scene {
 
         this.trees = new Trees(this, this.grid);
         this.asteroids = new Enemies(this);
-        this.targets = new Targets(this, this.grid);
+        this.targets = new Targets(this);
 
         let endTextString = "";
         if (this.dieCounter === 0) {
@@ -420,7 +425,8 @@ export default class GameScene extends Phaser.Scene {
     console.log("Target reached!");
     object2.destroy();
     if (this.targets.getLength() === 0 && !this.lastTargetReached) {
-      this.targets.addTarget(this.targetIndex);
+      const lastTarget = this.targets.addTarget(0,0);
+      this.grid.placeAtIndexAndScale(this.targetIndex, lastTarget, 1, 1);
       this.lastTargetReached = true;
     } else if (this.targets.getLength() === 0 && this.lastTargetReached) {
       this.restart(true);
