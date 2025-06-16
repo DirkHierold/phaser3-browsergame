@@ -61,7 +61,7 @@ export default class AsteroidScene extends Phaser.Scene {
 
         // Target
         this.targets = new Targets(this);
-        this.target = this.targets.addTarget(0,0);
+        this.target = this.targets.addTarget(0, 0);
         this.target.setDepth(30);
         this.placeTarget();
 
@@ -245,5 +245,8 @@ export default class AsteroidScene extends Phaser.Scene {
             this.scene.restart();
         });
         this.newGameButton.setOrigin(0.5, 0.5).setDepth(1000);
+        this.scoreText.setDepth(1000)
+        this.highscoreText.setDepth(1000);
+        this.alltimeText.setDepth(1000);
     }
 }

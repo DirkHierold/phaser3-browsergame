@@ -3,7 +3,7 @@ import Phaser from "phaser";
 export default class Player extends Phaser.Physics.Arcade.Sprite {
     oldTouchX: number = 0;
     oldTouchY: number = 0;
-   
+
 
     constructor(
         scene: Phaser.Scene,
@@ -50,36 +50,28 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         this.setCollideWorldBounds(true);
     }
 
-    move(pointer?: Phaser.Input.Pointer) {
+    move(pointer: Phaser.Input.Pointer) {
         // Asteroid game: drag to move, no jump, no grid logic
-        if (!pointer) return;
         if (pointer.isDown) {
             // If this is a new drag, initialize oldTouchX/Y to avoid jump
             if (this.oldTouchX === 0 && this.oldTouchY === 0) {
                 this.oldTouchX = pointer.x;
                 this.oldTouchY = pointer.y;
             }
+
             // Calculate delta from last pointer position
             const dx = pointer.x - this.oldTouchX;
             const dy = pointer.y - this.oldTouchY;
-            let newX = this.x + dx;
-            let newY = this.y + dy;
-            // Clamp to world bounds
-            newX = Phaser.Math.Clamp(newX, this.displayWidth / 2, this.scene.scale.width - this.displayWidth / 2);
-            newY = Phaser.Math.Clamp(newY, this.displayHeight / 2, this.scene.scale.height - this.displayHeight / 2);
-            // Toggle face direction based on movement (only if dx is significant)
+
+            this.setVelocity(dx * 60, dy * 60)
+
             if (Math.abs(dx) > 1) {
-                if (dx > 0) {
-                    this.setFlipX(false);
-                } else if (dx < 0) {
-                    this.setFlipX(true);
-                }
+                this.setFlipX(dx <= 0);
             }
-            this.x = newX;
-            this.y = newY;
             this.oldTouchX = pointer.x;
             this.oldTouchY = pointer.y;
         } else {
+            this.setVelocity(0, 0)
             // Reset oldTouchX/Y when not dragging
             this.oldTouchX = 0;
             this.oldTouchY = 0;

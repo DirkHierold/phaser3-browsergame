@@ -1,6 +1,5 @@
 import AudioKeys from "../../../shared/utils/consts/AudioKeys";
 import SceneKeys from "../../../shared/utils/consts/SceneKeys";
-import {TextureKeys} from "../../../shared/utils/TextureKeys";
 import { AlignGrid } from "../../../shared/utils/AlignGrid";
 
 export default class Preloader extends Phaser.Scene {
@@ -74,8 +73,6 @@ export default class Preloader extends Phaser.Scene {
       assetText.setText("Loading asset: " + file.key);
       grid.placeAtIndexAndScale(78, assetText, 9, 1);
     });
-
-    this.load.image(TextureKeys.Autumn_tree2, "/images/Trees/Autumn_tree2.png");
 
     this.load.audio(AudioKeys.BG_Music, "/audios/anomaly.mp3");
   }

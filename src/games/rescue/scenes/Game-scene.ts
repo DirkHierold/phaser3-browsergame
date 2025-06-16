@@ -5,7 +5,7 @@ import SceneKeys from "../../../shared/utils/consts/SceneKeys";
 import Enemies from "../../../shared/Enemy";
 import Player from "../../../shared/Player";
 import Targets from "../../../shared/Targets";
-import Trees from "../model/Trees";
+import Obstacles from "../../../shared/Obstacles";
 import { AlignGrid } from "../../../shared/utils/AlignGrid";
 import { Button } from "../../../shared/utils/Button";
 
@@ -16,7 +16,7 @@ export default class GameScene extends Phaser.Scene {
   private targets!: Targets;
 
   private asteroids!: Enemies;
-  private trees!: Trees;
+  private trees!: Obstacles;
 
   private player!: Player;
 
@@ -132,21 +132,27 @@ export default class GameScene extends Phaser.Scene {
 
         // Targets
         this.targets = new Targets(this);
-        const target1= this.targets.addTarget(0,0);
+        const target1 = this.targets.addTarget(0, 0);
 
         this.grid.placeAtIndexAndScale(0, target1, 1, 1);
         this.targetIndex = 6;
 
         // Trees
-        this.trees = new Trees(this, this.grid);
-        this.trees.addTree(1);
-        this.trees.addTree(2);
-        this.trees.addTree(7);
-        this.trees.addTree(8);
+        this.trees = new Obstacles(this);
+        const trees1 = [this.trees.addObstacle(0, 0),
+        this.trees.addObstacle(0, 0),
+        this.trees.addObstacle(0, 0),
+        this.trees.addObstacle(0, 0)
+        ]
+        this.grid.placeAtIndexAndScale(1, trees1[0], 1, 1);
+        this.grid.placeAtIndexAndScale(2, trees1[1], 1, 1);
+        this.grid.placeAtIndexAndScale(7, trees1[2], 1, 1);
+        this.grid.placeAtIndexAndScale(8, trees1[3], 1, 1);
+
 
         // Asteroids
         this.asteroids = new Enemies(this);
-        const asteroid1  = this.asteroids.addEnemyWithDirection(DirectionKeys.Right);
+        const asteroid1 = this.asteroids.addEnemyWithDirection(DirectionKeys.Right);
         this.grid.placeAtIndexAndScale(4, asteroid1, 1, 1);
         break;
       case 2:
@@ -169,23 +175,35 @@ export default class GameScene extends Phaser.Scene {
 
         // Targets
         this.targets = new Targets(this);
-        const target2 = this.targets.addTarget(0,0);
+        const target2 = this.targets.addTarget(0, 0);
         this.grid.placeAtIndexAndScale(4, target2, 1, 1);
         this.targetIndex = 30;
 
         // Trees
-        this.trees = new Trees(this, this.grid);
-        this.trees.addTree(1);
-        this.trees.addTree(16);
-        this.trees.addTree(21);
-        this.trees.addTree(26);
-        this.trees.addTree(31);
+        this.trees = new Obstacles(this);
+        const trees2 = [
+          this.trees.addObstacle(0, 0),
+          this.trees.addObstacle(0, 0),
+          this.trees.addObstacle(0, 0),
+          this.trees.addObstacle(0, 0),
 
-        this.trees.addTree(3);
-        this.trees.addTree(8);
-        this.trees.addTree(13);
-        this.trees.addTree(18);
-        this.trees.addTree(33);
+          this.trees.addObstacle(0, 0),
+          this.trees.addObstacle(0, 0),
+          this.trees.addObstacle(0, 0),
+          this.trees.addObstacle(0, 0),
+          this.trees.addObstacle(0, 0),
+          this.trees.addObstacle(0, 0),
+        ]
+        this.grid.placeAtIndexAndScale(1, trees2[0], 1, 1);
+        this.grid.placeAtIndexAndScale(16, trees2[1], 1, 1);
+        this.grid.placeAtIndexAndScale(21, trees2[2], 1, 1);
+        this.grid.placeAtIndexAndScale(26, trees2[3], 1, 1);
+        this.grid.placeAtIndexAndScale(31, trees2[4], 1, 1);
+        this.grid.placeAtIndexAndScale(3, trees2[5], 1, 1);
+        this.grid.placeAtIndexAndScale(8, trees2[6], 1, 1);
+        this.grid.placeAtIndexAndScale(13, trees2[7], 1, 1);
+        this.grid.placeAtIndexAndScale(18, trees2[8], 1, 1);
+        this.grid.placeAtIndexAndScale(33, trees2[9], 1, 1);
 
         // Asteroids
         this.asteroids = new Enemies(this);
@@ -238,7 +256,7 @@ export default class GameScene extends Phaser.Scene {
         this.grid.placeAtIndexAndScale(30, target3[5], 1, 1);
         this.grid.placeAtIndexAndScale(90, target3[6], 1, 1);
         this.grid.placeAtIndexAndScale(96, target3[7], 1, 1);
-        
+
         this.targetIndex = 60;
 
         // Asteroids
@@ -264,8 +282,10 @@ export default class GameScene extends Phaser.Scene {
         asteroids3.forEach(a => a.setDepth && a.setDepth(3));
 
         // Trees
-        this.trees = new Trees(this, this.grid);
-        [2,4,5,6,8,22,26,27,28,32,44,46,48,50,52,54,55,57,63,65,66,68,70,72,74,76,88,92,93,94,98,112,114,115,116,118].forEach(idx => this.trees.addTree(idx));
+        this.trees = new Obstacles(this);
+        [2, 4, 5, 6, 8, 22, 26, 27, 28, 32, 44, 46, 48, 50, 52, 54, 55, 57, 63, 65, 66, 68, 70, 72, 74, 76, 88, 92, 93, 94, 98, 112, 114, 115, 116, 118].forEach(idx =>
+          this.grid.placeAtIndexAndScale(idx, this.trees.addObstacle(0, 0), 1, 1)
+        );
         this.trees.setDepth && this.trees.setDepth(1);
         break;
       case 4:
@@ -293,7 +313,7 @@ export default class GameScene extends Phaser.Scene {
           this.targets.addTarget(0, 0),
           this.targets.addTarget(0, 0),
           this.targets.addTarget(0, 0),
-          ]
+        ]
         this.grid.placeAtIndexAndScale(12, target4[0], 1, 1);
         this.grid.placeAtIndexAndScale(20, target4[1], 1, 1);
         this.grid.placeAtIndexAndScale(100, target4[2], 1, 1);
@@ -322,14 +342,16 @@ export default class GameScene extends Phaser.Scene {
           this.asteroids.addEnemyWithDirection(DirectionKeys.Left),
           this.asteroids.addEnemyWithDirection(DirectionKeys.Up)
         ];
-        [0,3,33,36,7,10,40,43,77,80,110,113,84,87,117,120,65,115].forEach((idx, i) => {
+        [0, 3, 33, 36, 7, 10, 40, 43, 77, 80, 110, 113, 84, 87, 117, 120, 65, 115].forEach((idx, i) => {
           this.grid.placeAtIndexAndScale(idx, asteroids4[i], 1, 1);
           asteroids4[i].setDepth && asteroids4[i].setDepth(3);
         });
 
         // Trees
-        this.trees = new Trees(this, this.grid);
-        [44,46,47,4,26,37,6,28,39,51,52,54,66,68,69,81,92,114,73,74,76,83,94,116].forEach(idx => this.trees.addTree(idx));
+        this.trees = new Obstacles(this);
+        [44, 46, 47, 4, 26, 37, 6, 28, 39, 51, 52, 54, 66, 68, 69, 81, 92, 114, 73, 74, 76, 83, 94, 116].forEach(
+          idx => this.grid.placeAtIndexAndScale(idx, this.trees.addObstacle(0, 0), 1, 1)
+        );
         this.trees.setDepth && this.trees.setDepth(1);
         break;
       default:
@@ -350,7 +372,7 @@ export default class GameScene extends Phaser.Scene {
         this.player = new Player(this);
         this.grid.placeAtIndexAndScale(60, this.player, 1, 1);
 
-        this.trees = new Trees(this, this.grid);
+        this.trees = new Obstacles(this);
         this.asteroids = new Enemies(this);
         this.targets = new Targets(this);
 
@@ -412,7 +434,7 @@ export default class GameScene extends Phaser.Scene {
     if (this.gameOver) return;
 
     // Control
-    this.player.move(this.input.activePointer);
+    this.player.move(this.input.activePointer, this.trees);
     this.targets.changeDirection(this.player);
     this.asteroids.changeDirection(this.player);
   }
@@ -425,7 +447,7 @@ export default class GameScene extends Phaser.Scene {
     console.log("Target reached!");
     object2.destroy();
     if (this.targets.getLength() === 0 && !this.lastTargetReached) {
-      const lastTarget = this.targets.addTarget(0,0);
+      const lastTarget = this.targets.addTarget(0, 0);
       this.grid.placeAtIndexAndScale(this.targetIndex, lastTarget, 1, 1);
       this.lastTargetReached = true;
     } else if (this.targets.getLength() === 0 && this.lastTargetReached) {
