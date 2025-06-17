@@ -3,6 +3,7 @@ import Phaser from "phaser";
 export default class Player extends Phaser.Physics.Arcade.Sprite {
     oldTouchX: number = 0;
     oldTouchY: number = 0;
+    private lastPointerTime: number = 0;
 
 
     constructor(
@@ -51,30 +52,34 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     move(pointer: Phaser.Input.Pointer) {
-        // Asteroid game: drag to move, no jump, no grid logic
         if (pointer.isDown) {
-            // If this is a new drag, initialize oldTouchX/Y to avoid jump
+            const now = pointer.event.timeStamp;
             if (this.oldTouchX === 0 && this.oldTouchY === 0) {
                 this.oldTouchX = pointer.x;
                 this.oldTouchY = pointer.y;
+                this.lastPointerTime = now;
             }
-
-            // Calculate delta from last pointer position
+            const dt = (now - this.lastPointerTime) / 1000; // Sekunden
             const dx = pointer.x - this.oldTouchX;
             const dy = pointer.y - this.oldTouchY;
-
-            this.setVelocity(dx * 60, dy * 60)
+            let vx = 0, vy = 0;
+            if (dt > 0) {
+                vx = dx / dt;
+                vy = dy / dt;
+            }
+            this.setVelocity(vx, vy);
 
             if (Math.abs(dx) > 1) {
                 this.setFlipX(dx <= 0);
             }
             this.oldTouchX = pointer.x;
             this.oldTouchY = pointer.y;
+            this.lastPointerTime = now;
         } else {
-            this.setVelocity(0, 0)
-            // Reset oldTouchX/Y when not dragging
+            this.setVelocity(0, 0);
             this.oldTouchX = 0;
             this.oldTouchY = 0;
+            this.lastPointerTime = 0;
         }
     }
 }

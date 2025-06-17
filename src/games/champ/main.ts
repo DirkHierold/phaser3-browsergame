@@ -3,50 +3,42 @@ import { pixelPerfectOverlap } from './pixelPerfectUtil';
 import Player from '../../shared/Player';
 import Enemies from '../../shared/Enemy';
 import { DirectionKeys } from '../../shared/utils/consts/DirectionKeys';
+import Obstacles from '../../shared/Obstacles';
 
 export default class ChampScene extends Phaser.Scene {
-    dino!: Player;
-    obstacles!: Enemies;
+    player!: Player;
+    enemies!: Enemies;
     score: number = 0;
     scoreText!: Phaser.GameObjects.Text;
-    nextObstacle: number = 0;
-    bgTrees!: Phaser.GameObjects.Group;
+    nextEnemy: number = 0;
+    obstacles!: Obstacles;
 
     preload() {
-        // Preload all tree images for background decoration
-        const treeImagesList = ['Autumn_tree2'];
-        for (const name of treeImagesList) {
-            this.load.image('tree_' + name, '/images/Trees/' + name + '.png');
-        }
     }
 
     create() {
         this.physics.world.setBounds(0, 0, 800, 580);
 
-        this.dino = new Player(this);
-        this.dino.setPosition(100, 550);
+        this.player = new Player(this);
+        this.player.setPosition(100, 550);
         // Set gravity for the dino
-        const body = this.dino.body as Phaser.Physics.Arcade.Body | null;
+        const body = this.player.body as Phaser.Physics.Arcade.Body | null;
         if (body) {
             body.setGravityY(1000);
         }
 
         // Add decorative trees that move from right to left at ground level, not as obstacles
-        this.bgTrees = this.add.group();
-        const treeKeys = ['tree_Autumn_tree2'];
+        this.obstacles = new Obstacles(this);
         for (let i = 0; i < 3; i++) {
             const x = 500 + i * 120 + Phaser.Math.Between(-40, 40);
             const y = 500; // ground level
-            const scale = 2.5; // triple the size
-            const treeKey = treeKeys[0]; // use a single tree type for simplicity
-            const tree = this.add.image(x, y, treeKey).setScale(scale).setDepth(1); // setDepth(1) to be in front of grass
-            this.bgTrees.add(tree);
+            this.obstacles.addObstacle(x, y);
         }
 
-        this.obstacles = new Enemies(this);
+        this.enemies = new Enemies(this);
         this.physics.add.overlap(
-            this.dino,
-            this.obstacles,
+            this.player,
+            this.enemies,
             this.handlePixelPerfectCollision as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
             undefined,
             this
@@ -58,40 +50,42 @@ export default class ChampScene extends Phaser.Scene {
 
         this.score = 0;
         this.scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '24px', color: '#000' });
-        this.nextObstacle = 0;
+        this.nextEnemy = 0;
 
-        this.bgTrees.getChildren().forEach((tree) => {
-            (tree as Phaser.GameObjects.Image).setDepth(1);
+        this.obstacles.getChildren().forEach((obstacle) => {
+            (obstacle as Phaser.GameObjects.Image).setDepth(1);
         });
-        this.dino.setDepth(3); // dino in front of trees and grass
+        this.player.setDepth(3); // dino in front of trees and grass
         // Set depth for all existing asteroids to 3 (front)
-        this.obstacles.getChildren().forEach((obs) => {
+        this.enemies.getChildren().forEach((obs) => {
             (obs as Phaser.GameObjects.Sprite).setDepth(3);
         });
+
+        this.physics.add.collider(this.player, this.obstacles);
     }
 
     jump() {
-        const body = this.dino.body as Phaser.Physics.Arcade.Body | null;
+        const body = this.player.body as Phaser.Physics.Arcade.Body | null;
         if (body && body.onFloor()) {
-            body.setVelocityY(-900); // much higher jump
+            this.player.setVelocityY(-900); // much higher jump
         }
     }
 
     update(time: number) {
-        this.dino.x += 2;
-        if (this.dino.x > 200) this.dino.x = 200;
-        if (time > this.nextObstacle) {
-            const newObstacle = this.obstacles.addEnemy(800, 550,DirectionKeys.Still); // spawn at right edge
-            newObstacle.setDepth(3); // ensure obstacles are in front of grass
-            this.nextObstacle = time + Phaser.Math.Between(2000, 3000); // more apart
+        this.player.setVelocityX(2);
+        if (this.player.x > 200) this.player.setVelocityX(0); // stop moving after 200px
+        if (time > this.nextEnemy) {
+            const newEnemy = this.enemies.addEnemy(800, 550, DirectionKeys.Still); // spawn at right edge
+            newEnemy.setDepth(3); // ensure obstacles are in front of grass
+            this.nextEnemy = time + Phaser.Math.Between(2000, 3000); // more apart
         }
-        this.obstacles.children.iterate((obstacle: Phaser.GameObjects.GameObject | undefined) => {
-            const obs = obstacle as Phaser.Physics.Arcade.Sprite;
-            if (obs) {
-                obs.x -= 4;
+        this.enemies.children.iterate((enemy: Phaser.GameObjects.GameObject | undefined) => {
+            const ene = enemy as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+            if (ene) {
+                ene.body.setVelocityX(-240);
                 // Remove obstacle if it collides with the left world border
-                if (obs.x - obs.displayWidth / 2 <= 0) {
-                    obs.destroy();
+                if (ene.x - ene.displayWidth / 2 <= 0) {
+                    ene.destroy();
                     this.score += 1;
                     this.scoreText.setText('Score: ' + this.score);
                 }
@@ -100,31 +94,31 @@ export default class ChampScene extends Phaser.Scene {
         });
 
         // Move background trees from right to left at the same speed as the grass
-        if (this.bgTrees) {
-            this.bgTrees.getChildren().forEach((tree) => {
-                const img = tree as Phaser.GameObjects.Image;
-                img.x -= 4; // match grass speed
-                if (img.x < -100) {
-                    img.x = 900 + Phaser.Math.Between(0, 100);
+        if (this.obstacles) {
+            this.obstacles.getChildren().forEach((obstacle) => {
+                const obs = obstacle as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+                obs.body.setVelocityX(-100)
+                if (obs.x < -100) {
+                    obs.x = 900 + Phaser.Math.Between(0, 100);
                 }
             });
         }
 
         // Gradually slow down horizontal velocity after jump
-        const body = this.dino.body as Phaser.Physics.Arcade.Body | null;
+        const body = this.player.body as Phaser.Physics.Arcade.Body | null;
         if (body && body.velocity.x > 0 && body.onFloor()) {
-            body.setVelocityX(0);
+            this.player.setVelocityX(0);
         }
-        this.obstacles.changeDirection(this.dino);
+        this.enemies.changeDirection(this.player);
     }
 
     handlePixelPerfectCollision(
-        dino: Phaser.GameObjects.GameObject,
+        player: Phaser.GameObjects.GameObject,
         obstacle: Phaser.GameObjects.GameObject
     ) {
         if (
             pixelPerfectOverlap(
-                dino as Phaser.GameObjects.Sprite,
+                player as Phaser.GameObjects.Sprite,
                 obstacle as Phaser.GameObjects.Sprite,
                 this
             )
@@ -155,14 +149,10 @@ const config: Phaser.Types.Core.GameConfig = {
         }
     },
     scale: {
-            mode: Phaser.Scale.FIT,
-            autoCenter: Phaser.Scale.CENTER_BOTH,
-        },
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+    },
     scene: ChampScene,
-    // Move the canvas to the bottom of the screen using CSS
 };
-
-// In your index.html or game.css, add:
-// #game { position: absolute; bottom: 0; left: 0; right: 0; margin: 0 auto; }
 
 new Phaser.Game(config);
