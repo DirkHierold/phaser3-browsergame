@@ -13,10 +13,20 @@ export default class ChampScene extends Phaser.Scene {
     nextEnemy: number = 0;
     obstacles!: Obstacles;
 
+    private levelData: any[]; // Level-Daten laden (z.B. aus JSON)
+    private nextElementIndex: number = 0;
+    private scrollSpeed: number = 240; // Pixel pro Sekunde
+    private currentLevelX: number = 0; // Aktuelle Position in der "Welt" (relevant für Level-Daten)
+
     preload() {
+        this.load.json('level', '/src/games/champ/level.json');
     }
 
     create() {
+        this.levelData = this.cache.json.get('level'); // Oder direkt ein Array
+        this.currentLevelX = 0; // Start bei 0
+        this.nextElementIndex = 0;
+
         this.physics.world.setBounds(0, 0, 800, 580);
 
         this.player = new Player(this);
@@ -29,11 +39,6 @@ export default class ChampScene extends Phaser.Scene {
 
         // Add decorative trees that move from right to left at ground level, not as obstacles
         this.obstacles = new Obstacles(this);
-        for (let i = 0; i < 3; i++) {
-            const x = 500 + i * 120 + Phaser.Math.Between(-40, 40);
-            const y = 500; // ground level
-            this.obstacles.addObstacle(x, y);
-        }
 
         this.enemies = new Enemies(this);
         this.physics.add.overlap(
@@ -52,15 +57,6 @@ export default class ChampScene extends Phaser.Scene {
         this.scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '24px', color: '#000' });
         this.nextEnemy = 0;
 
-        this.obstacles.getChildren().forEach((obstacle) => {
-            (obstacle as Phaser.GameObjects.Image).setDepth(1);
-        });
-        this.player.setDepth(3); // dino in front of trees and grass
-        // Set depth for all existing asteroids to 3 (front)
-        this.enemies.getChildren().forEach((obs) => {
-            (obs as Phaser.GameObjects.Sprite).setDepth(3);
-        });
-
         this.physics.add.collider(this.player, this.obstacles);
     }
 
@@ -71,18 +67,17 @@ export default class ChampScene extends Phaser.Scene {
         }
     }
 
-    update(time: number) {
+    update(time: number, delta: number) {
         this.player.setVelocityX(2);
         if (this.player.x > 200) this.player.setVelocityX(0); // stop moving after 200px
         if (time > this.nextEnemy) {
             const newEnemy = this.enemies.addEnemy(800, 550, DirectionKeys.Still); // spawn at right edge
-            newEnemy.setDepth(3); // ensure obstacles are in front of grass
             this.nextEnemy = time + Phaser.Math.Between(2000, 3000); // more apart
         }
         this.enemies.children.iterate((enemy: Phaser.GameObjects.GameObject | undefined) => {
             const ene = enemy as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
             if (ene) {
-                ene.body.setVelocityX(-240);
+                ene.body.setVelocityX(-this.scrollSpeed);
                 // Remove obstacle if it collides with the left world border
                 if (ene.x - ene.displayWidth / 2 <= 0) {
                     ene.destroy();
@@ -93,16 +88,6 @@ export default class ChampScene extends Phaser.Scene {
             return null; // Fix: must return boolean | null
         });
 
-        // Move background trees from right to left at the same speed as the grass
-        if (this.obstacles) {
-            this.obstacles.getChildren().forEach((obstacle) => {
-                const obs = obstacle as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-                obs.body.setVelocityX(-100)
-                if (obs.x < -100) {
-                    obs.x = 900 + Phaser.Math.Between(0, 100);
-                }
-            });
-        }
 
         // Gradually slow down horizontal velocity after jump
         const body = this.player.body as Phaser.Physics.Arcade.Body | null;
@@ -110,6 +95,46 @@ export default class ChampScene extends Phaser.Scene {
             this.player.setVelocityX(0);
         }
         this.enemies.changeDirection(this.player);
+
+        // Level vorwärts scrollen (currentLevelX repräsentiert die Position des rechten Rands des aktuellen Bildschirms in der Welt)
+        this.currentLevelX += this.scrollSpeed * (delta / 1000); // delta ist Millisekunden
+
+        // Hindernisse bewegen und neue generieren
+        this.obstacles.getChildren().forEach((obstacle) => {
+            const obs = obstacle as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+            obs.body.setVelocityX(-this.scrollSpeed); // Wichtig: Setzen Sie die Geschwindigkeit hier basierend auf scrollSpeed
+
+            // Wenn Hindernis den Bildschirm verlassen hat, recyceln/zurücksetzen
+            if (obs.x < -obs.displayWidth / 2) { // displayWidth/2, da x der Mittelpunkt ist
+                obs.destroy(); // Entfernen Sie das Hindernis, wenn es den Bildschirm verlässt
+            }
+        });
+
+        // Neue Level-Elemente generieren basierend auf levelData
+        while (this.nextElementIndex < this.levelData.length) {
+            const elementData = this.levelData[this.nextElementIndex];
+            // Überprüfen, ob das Element erscheinen sollte
+            // elementData.time ist die Welt-X-Koordinate, wann das Element ins Bild kommen soll
+            // (this.game.config.width / 2) ist die Mitte des Bildschirms
+            // currentLevelX muss so weit gescrollt sein, dass elementData.time erreicht ist
+            // Achtung: Wenn elementData.time sehr klein ist, muss currentLevelX negativ werden (da wir von rechts nach links scrollen)
+            // oder Sie passen die Logik an Ihre Level-Definition an.
+
+            // Eine einfachere Logik: wenn der "Erzeugungspunkt" des Elements (z.B. elementData.xWorld)
+            // erreicht ist, basierend auf der aktuellen Scroll-Position.
+            // Angenommen, elementData.x ist die X-Koordinate relativ zum Spieler (am rechten Rand sichtbar)
+            const spawnXThreshold = Number(this.game.config.width) - (this.scrollSpeed * (delta / 1000) * 10); // Spawnen etwas früher
+            if (elementData.xWorld < (this.currentLevelX + spawnXThreshold)) { // Wenn das Element fast im Bild ist
+                // Erzeugen Sie das Element am rechten Rand
+                this.obstacles.addObstacle(
+                    Number(this.game.config.width) + (elementData.xWorld - this.currentLevelX), // X-Position relativ zum rechten Rand
+                    elementData.y
+                );
+                this.nextElementIndex++;
+            } else {
+                break; // Noch nicht an der Reihe
+            }
+        }
     }
 
     handlePixelPerfectCollision(

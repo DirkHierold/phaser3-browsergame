@@ -1,0 +1,24 @@
+[
+    {
+        "xWorld": 900,
+        "type": "spike",
+        "y": 400
+    },
+    {
+        "xWorld": 1000,
+        "type": "platform",
+        "y": 350,
+        "width": 100
+    },
+    {
+        "xWorld": 1100,
+        "type": "spike",
+        "y": 400
+    },
+    {
+        "xWorld": 1300,
+        "type": "platform",
+        "y": 300,
+        "width": 50
+    }
+]
