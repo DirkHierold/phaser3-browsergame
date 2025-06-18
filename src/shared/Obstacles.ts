@@ -29,21 +29,16 @@ export default class Obstacles extends Phaser.Physics.Arcade.Group {
     // Wichtig: Konfigurieren Sie den Body des dynamischen Hindernisses
     const body = obstacle.body as Phaser.Physics.Arcade.Body;
     if (body) {
-      console.log("Body exists for obstacle:", obstacle);
       body.setSize(actualSize, actualSize);
       body.setAllowGravity(false);
       body.setImmovable(true);
       body.setCollideWorldBounds(false);
-      console.log("Body immovable status after set:", body.immovable); // Sollte true sein
-    } else {
-      console.warn("Body is null for obstacle:", obstacle); // Sollte nicht passieren
     }
     this.add(obstacle);
 
     // HIER ERNEUT setImmovable AUFRUFEN, NACHDEM ES DER GRUPPE HINZUGEFÜGT WURDE
     if (body) { // Nochmalige Prüfung, dass der Body existiert
       body.setImmovable(true); // <-- HIER NEU HINZUFÜGEN
-      console.log("Obstacle body immovable status AFTER add:", body.immovable); // Erneuter Log zur Überprüfung
     }
 
     return obstacle as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;

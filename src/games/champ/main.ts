@@ -19,7 +19,7 @@ export default class ChampScene extends Phaser.Scene {
     private currentLevelX: number = 0; // Aktuelle Position in der "Welt" (relevant für Level-Daten)
 
     preload() {
-        this.load.json('level', '/src/games/champ/level.json');
+        this.load.json('level', '/level.json');
     }
 
     create() {
@@ -71,7 +71,7 @@ export default class ChampScene extends Phaser.Scene {
         this.player.setVelocityX(2);
         if (this.player.x > 200) this.player.setVelocityX(0); // stop moving after 200px
         if (time > this.nextEnemy) {
-            const newEnemy = this.enemies.addEnemy(800, 550, DirectionKeys.Still); // spawn at right edge
+            this.enemies.addEnemy(800, 550, DirectionKeys.Still); // spawn at right edge
             this.nextEnemy = time + Phaser.Math.Between(2000, 3000); // more apart
         }
         this.enemies.children.iterate((enemy: Phaser.GameObjects.GameObject | undefined) => {
