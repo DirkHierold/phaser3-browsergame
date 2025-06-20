@@ -26,7 +26,7 @@ export default class Enemies extends Phaser.Physics.Arcade.Group {
 
   addEnemy(x: number, y: number, velocity: Phaser.Math.Vector2): Phaser.Types.Physics.Arcade.ImageWithDynamicBody {
     // Create a triangle with an unhappy face using a graphics object
-    const size = 64;
+    const size = 50;
     const uniqueEnemyKey = `enemy-triangle-${size}-${Date.now()}-${Math.random()}`;
     const gfx = this.scene.make.graphics({ x: 0, y: 0 });
     gfx.clear();

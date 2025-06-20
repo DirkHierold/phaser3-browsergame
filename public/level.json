@@ -1,24 +1,114 @@
 [
     {
-        "xWorld": 900,
+        "xWorld": 800,
         "type": "spike",
-        "y": 400
+        "y": 550,
+        "width": 50,
+        "height": 50
     },
     {
         "xWorld": 1000,
         "type": "platform",
-        "y": 350,
-        "width": 100
+        "y": 450,
+        "width": 100,
+        "height": 50
     },
     {
         "xWorld": 1100,
         "type": "spike",
-        "y": 400
+        "y": 550,
+        "width": 50,
+        "height": 100
     },
     {
         "xWorld": 1300,
         "type": "platform",
         "y": 300,
-        "width": 50
+        "width": 50,
+        "height": 50
+    },
+    {
+        "xWorld": 1400,
+        "type": "spike",
+        "y": 550,
+        "width": 50,
+        "height": 50
+    },
+    {
+        "xWorld": 1600,
+        "type": "platform",
+        "y": 550,
+        "width": 50,
+        "height": 50
+    },
+    {
+        "xWorld": 1600,
+        "type": "platform",
+        "y": 250,
+        "width": 100,
+        "height": 50
+    },
+    {
+        "xWorld": 1700,
+        "type": "spike",
+        "y": 550,
+        "width": 50,
+        "height": 100
+    },
+    {
+        "xWorld": 1900,
+        "type": "platform",
+        "y": 300,
+        "width": 50,
+        "height": 50
+    },
+    {
+        "xWorld": 2000,
+        "type": "spike",
+        "y": 550,
+        "width": 50,
+        "height": 50
+    },
+    {
+        "xWorld": 2200,
+        "type": "platform",
+        "y": 350,
+        "width": 100,
+        "height": 50
+    },
+    {
+        "xWorld": 2300,
+        "type": "spike",
+        "y": 550,
+        "width": 50,
+        "height": 50
+    },
+    {
+        "xWorld": 2500,
+        "type": "spike",
+        "y": 550,
+        "width": 50,
+        "height": 50
+    },
+    {
+        "xWorld": 2600,
+        "type": "platform",
+        "y": 400,
+        "width": 50,
+        "height": 200
+    },
+    {
+        "xWorld": 2600,
+        "type": "platform",
+        "y": 0,
+        "width": 50,
+        "height": 300
+    },
+    {
+        "xWorld": 3500,
+        "type": "goal",
+        "y": 150,
+        "width": 50,
+        "height": 300
     }
 ]

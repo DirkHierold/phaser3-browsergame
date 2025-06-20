@@ -24,13 +24,13 @@ export default class ChampScene extends Phaser.Scene {
 
     create() {
         this.levelData = this.cache.json.get('level'); // Oder direkt ein Array
-        this.currentLevelX = 0; // Start bei 0
+        this.currentLevelX = Number(this.game.config.width); // Start am rechten rand des Bildschirms
         this.nextElementIndex = 0;
 
-        this.physics.world.setBounds(0, 0, 800, 580);
+        this.physics.world.setBounds(0, 0, 800, 600);
 
         this.player = new Player(this);
-        this.player.setPosition(100, 550);
+        this.player.setOrigin(0).setPosition(100, 550);
         // Set gravity for the dino
         const body = this.player.body as Phaser.Physics.Arcade.Body | null;
         if (body) {
@@ -70,22 +70,15 @@ export default class ChampScene extends Phaser.Scene {
     update(time: number, delta: number) {
         this.player.setVelocityX(2);
         if (this.player.x > 200) this.player.setVelocityX(0); // stop moving after 200px
-        if (time > this.nextEnemy) {
-            this.enemies.addEnemy(800, 550, DirectionKeys.Still); // spawn at right edge
-            this.nextEnemy = time + Phaser.Math.Between(2000, 3000); // more apart
-        }
-        this.enemies.children.iterate((enemy: Phaser.GameObjects.GameObject | undefined) => {
+
+        // Check if any enemies have gone off the screen and destroy them        
+        this.enemies.getChildren().forEach((enemy: Phaser.GameObjects.GameObject) => {
             const ene = enemy as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-            if (ene) {
-                ene.body.setVelocityX(-this.scrollSpeed);
-                // Remove obstacle if it collides with the left world border
-                if (ene.x - ene.displayWidth / 2 <= 0) {
-                    ene.destroy();
-                    this.score += 1;
-                    this.scoreText.setText('Score: ' + this.score);
-                }
+            if (ene.x - ene.displayWidth / 2 <= 0) {
+                ene.destroy();
+                this.score += 1;
+                this.scoreText.setText('Score: ' + this.score);
             }
-            return null; // Fix: must return boolean | null
         });
 
 
@@ -99,11 +92,9 @@ export default class ChampScene extends Phaser.Scene {
         // Level vorwärts scrollen (currentLevelX repräsentiert die Position des rechten Rands des aktuellen Bildschirms in der Welt)
         this.currentLevelX += this.scrollSpeed * (delta / 1000); // delta ist Millisekunden
 
-        // Hindernisse bewegen und neue generieren
+        // Hindernisse entfernen, die den Bildschirm verlassen haben
         this.obstacles.getChildren().forEach((obstacle) => {
             const obs = obstacle as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-            obs.body.setVelocityX(-this.scrollSpeed); // Wichtig: Setzen Sie die Geschwindigkeit hier basierend auf scrollSpeed
-
             // Wenn Hindernis den Bildschirm verlassen hat, recyceln/zurücksetzen
             if (obs.x < -obs.displayWidth / 2) { // displayWidth/2, da x der Mittelpunkt ist
                 obs.destroy(); // Entfernen Sie das Hindernis, wenn es den Bildschirm verlässt
@@ -111,30 +102,41 @@ export default class ChampScene extends Phaser.Scene {
         });
 
         // Neue Level-Elemente generieren basierend auf levelData
-        while (this.nextElementIndex < this.levelData.length) {
-            const elementData = this.levelData[this.nextElementIndex];
-            // Überprüfen, ob das Element erscheinen sollte
-            // elementData.time ist die Welt-X-Koordinate, wann das Element ins Bild kommen soll
-            // (this.game.config.width / 2) ist die Mitte des Bildschirms
-            // currentLevelX muss so weit gescrollt sein, dass elementData.time erreicht ist
-            // Achtung: Wenn elementData.time sehr klein ist, muss currentLevelX negativ werden (da wir von rechts nach links scrollen)
-            // oder Sie passen die Logik an Ihre Level-Definition an.
+        const elementData = this.levelData[this.nextElementIndex];
 
-            // Eine einfachere Logik: wenn der "Erzeugungspunkt" des Elements (z.B. elementData.xWorld)
-            // erreicht ist, basierend auf der aktuellen Scroll-Position.
-            // Angenommen, elementData.x ist die X-Koordinate relativ zum Spieler (am rechten Rand sichtbar)
-            const spawnXThreshold = Number(this.game.config.width) - (this.scrollSpeed * (delta / 1000) * 10); // Spawnen etwas früher
-            if (elementData.xWorld < (this.currentLevelX + spawnXThreshold)) { // Wenn das Element fast im Bild ist
+        if (elementData.xWorld < this.currentLevelX) { // Wenn das Element fast im Bild ist
+            const xToAdd: number = Number(this.game.config.width) + (elementData.xWorld - this.currentLevelX) // X-Position relativ zum rechten Rand
+            if (elementData.type == 'platform') {
                 // Erzeugen Sie das Element am rechten Rand
                 this.obstacles.addObstacle(
-                    Number(this.game.config.width) + (elementData.xWorld - this.currentLevelX), // X-Position relativ zum rechten Rand
-                    elementData.y
-                );
+                    xToAdd,
+                    elementData.y,
+                    elementData.width,
+                    elementData.height
+                )
+                    .setOrigin(0)
+                    .body.setVelocityX(-this.scrollSpeed);
+
                 this.nextElementIndex++;
-            } else {
-                break; // Noch nicht an der Reihe
+
+            } else if (elementData.type == 'spike') {
+                this.enemies.addEnemy(
+                    xToAdd,
+                    elementData.y,
+                    DirectionKeys.Still)
+                    .setOrigin(0)
+                    .body.setVelocityX(-this.scrollSpeed);
+
+                this.nextElementIndex++;
+
+            } else if (elementData.type == 'goal') {
+                // stoppe das spiel, zeige den highscore an und einen button um das Spiel neu zu starten
+                this.add.text(400, 300, 'You reached the goal!', { fontSize: '32px', color: '#000' })
+                    .setOrigin(0.5);
+                this.gameOver()
             }
         }
+
     }
 
     handlePixelPerfectCollision(
