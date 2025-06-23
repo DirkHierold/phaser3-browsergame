@@ -1,13 +1,10 @@
 import Phaser from 'phaser';
 import { pixelPerfectOverlap } from './pixelPerfectUtil';
 import Player from '../../shared/Player';
-import Enemies from '../../shared/Enemy';
-import { DirectionKeys } from '../../shared/utils/consts/DirectionKeys';
 import Obstacles from '../../shared/Obstacles';
 
 export default class ChampScene extends Phaser.Scene {
     player!: Player;
-    enemies!: Enemies;
     score: number = 0;
     scoreText!: Phaser.GameObjects.Text;
     nextEnemy: number = 0;
@@ -17,6 +14,7 @@ export default class ChampScene extends Phaser.Scene {
     private nextElementIndex: number = 0;
     private scrollSpeed: number = 240; // Pixel pro Sekunde
     private currentLevelX: number = 0; // Aktuelle Position in der "Welt" (relevant für Level-Daten)
+    private lastObjectX: number = 0;
 
     preload() {
         this.load.json('level', '/level.json');
@@ -25,6 +23,7 @@ export default class ChampScene extends Phaser.Scene {
     create() {
         this.levelData = this.cache.json.get('level'); // Oder direkt ein Array
         this.currentLevelX = Number(this.game.config.width); // Start am rechten rand des Bildschirms
+        this.lastObjectX = 0
         this.nextElementIndex = 0;
 
         this.physics.world.setBounds(0, 0, 800, 600);
@@ -34,20 +33,11 @@ export default class ChampScene extends Phaser.Scene {
         // Set gravity for the dino
         const body = this.player.body as Phaser.Physics.Arcade.Body | null;
         if (body) {
-            body.setGravityY(1000);
+            body.setGravityY(2000);
         }
 
         // Add decorative trees that move from right to left at ground level, not as obstacles
         this.obstacles = new Obstacles(this);
-
-        this.enemies = new Enemies(this);
-        this.physics.add.overlap(
-            this.player,
-            this.enemies,
-            this.handlePixelPerfectCollision as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
-            undefined,
-            this
-        );
 
         this.input.on('pointerdown', this.jump, this);
         this.input.keyboard?.on('keydown-SPACE', this.jump, this);
@@ -57,13 +47,27 @@ export default class ChampScene extends Phaser.Scene {
         this.scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '24px', color: '#000' });
         this.nextEnemy = 0;
 
-        this.physics.add.collider(this.player, this.obstacles);
+        this.physics.add.collider(this.player, this.obstacles, (playerObj, obstacleObj) => {
+            const player = playerObj as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+            const obstacle = obstacleObj as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+            // Only allow standing on top of blocks, not spikes
+            if (obstacle.texture.key.startsWith('obstacle-')) {
+                if (player.body.touching.down && obstacle.body.touching.up) {
+                    // Landed on top of a block, do nothing special
+                } else {
+                    this.gameOver();
+                }
+            } else {
+                // Handle collision for spikes
+                this.gameOver();
+            }
+        });
     }
 
     jump() {
         const body = this.player.body as Phaser.Physics.Arcade.Body | null;
         if (body && body.onFloor()) {
-            this.player.setVelocityY(-900); // much higher jump
+            this.player.setVelocityY(-600); // much higher jump
         }
     }
 
@@ -71,23 +75,11 @@ export default class ChampScene extends Phaser.Scene {
         this.player.setVelocityX(2);
         if (this.player.x > 200) this.player.setVelocityX(0); // stop moving after 200px
 
-        // Check if any enemies have gone off the screen and destroy them        
-        this.enemies.getChildren().forEach((enemy: Phaser.GameObjects.GameObject) => {
-            const ene = enemy as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-            if (ene.x - ene.displayWidth / 2 <= 0) {
-                ene.destroy();
-                this.score += 1;
-                this.scoreText.setText('Score: ' + this.score);
-            }
-        });
-
-
         // Gradually slow down horizontal velocity after jump
         const body = this.player.body as Phaser.Physics.Arcade.Body | null;
         if (body && body.velocity.x > 0 && body.onFloor()) {
             this.player.setVelocityX(0);
         }
-        this.enemies.changeDirection(this.player);
 
         // Level vorwärts scrollen (currentLevelX repräsentiert die Position des rechten Rands des aktuellen Bildschirms in der Welt)
         this.currentLevelX += this.scrollSpeed * (delta / 1000); // delta ist Millisekunden
@@ -103,12 +95,11 @@ export default class ChampScene extends Phaser.Scene {
 
         // Neue Level-Elemente generieren basierend auf levelData
         const elementData = this.levelData[this.nextElementIndex];
-
-        if (elementData.xWorld < this.currentLevelX) { // Wenn das Element fast im Bild ist
-            const xToAdd: number = Number(this.game.config.width) + (elementData.xWorld - this.currentLevelX) // X-Position relativ zum rechten Rand
+        if (this.lastObjectX + elementData.xWorld < this.currentLevelX) { // Wenn das Element fast im Bild ist
+            const xToAdd: number = Number(this.game.config.width) + (this.lastObjectX + elementData.xWorld - this.currentLevelX)
             if (elementData.type == 'platform') {
                 // Erzeugen Sie das Element am rechten Rand
-                this.obstacles.addObstacle(
+                this.obstacles.addBlock(
                     xToAdd,
                     elementData.y,
                     elementData.width,
@@ -118,16 +109,34 @@ export default class ChampScene extends Phaser.Scene {
                     .body.setVelocityX(-this.scrollSpeed);
 
                 this.nextElementIndex++;
-
-            } else if (elementData.type == 'spike') {
-                this.enemies.addEnemy(
+                this.lastObjectX += elementData.xWorld; // Aktualisieren Sie die Position des letzten Objekts
+            } else if (elementData.type == 'spike-up') {
+                this.obstacles.addSpike(
                     xToAdd,
                     elementData.y,
-                    DirectionKeys.Still)
+                    elementData.width,
+                    elementData.height,
+                    true // true für Spike nach oben
+                )
                     .setOrigin(0)
                     .body.setVelocityX(-this.scrollSpeed);
 
                 this.nextElementIndex++;
+                this.lastObjectX += elementData.xWorld; // Aktualisieren Sie die Position des letzten Objekts
+            }
+            else if (elementData.type == 'spike-down') {
+                this.obstacles.addSpike(
+                    xToAdd,
+                    elementData.y,
+                    elementData.width,
+                    elementData.height,
+                    false // false für Spike nach unten
+                )
+                    .setOrigin(0)
+                    .body.setVelocityX(-this.scrollSpeed);
+
+                this.nextElementIndex++;
+                this.lastObjectX += elementData.xWorld; // Aktualisieren Sie die Position des letzten Objekts
 
             } else if (elementData.type == 'goal') {
                 // stoppe das spiel, zeige den highscore an und einen button um das Spiel neu zu starten
@@ -172,7 +181,7 @@ const config: Phaser.Types.Core.GameConfig = {
         default: 'arcade',
         arcade: {
             gravity: { x: 0, y: 0 },
-            debug: false
+            debug: true
         }
     },
     scale: {
