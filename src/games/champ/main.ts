@@ -1,12 +1,11 @@
 import Phaser from 'phaser';
 import { pixelPerfectOverlap } from './pixelPerfectUtil';
+import { Button } from "../../shared/utils/Button";
 import Player from '../../shared/Player';
 import Obstacles from '../../shared/Obstacles';
 
 export default class ChampScene extends Phaser.Scene {
     player!: Player;
-    score: number = 0;
-    scoreText!: Phaser.GameObjects.Text;
     nextEnemy: number = 0;
     obstacles!: Obstacles;
 
@@ -15,6 +14,9 @@ export default class ChampScene extends Phaser.Scene {
     private scrollSpeed: number = 240; // Pixel pro Sekunde
     private currentLevelX: number = 0; // Aktuelle Position in der "Welt" (relevant für Level-Daten)
     private lastObjectX: number = 0;
+
+    private gameOver: boolean = false;
+    private newGameButton!: Button;
 
     preload() {
         this.load.json('level', '/level.json');
@@ -43,8 +45,6 @@ export default class ChampScene extends Phaser.Scene {
         this.input.keyboard?.on('keydown-SPACE', this.jump, this);
         this.input.keyboard?.on('keydown-ENTER', this.jump, this);
 
-        this.score = 0;
-        this.scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '24px', color: '#000' });
         this.nextEnemy = 0;
 
         this.physics.add.collider(this.player, this.obstacles, (playerObj, obstacleObj) => {
@@ -55,11 +55,11 @@ export default class ChampScene extends Phaser.Scene {
                 if (player.body.touching.down && obstacle.body.touching.up) {
                     // Landed on top of a block, do nothing special
                 } else {
-                    this.gameOver();
+                    this.handleGameOver();
                 }
             } else {
                 // Handle collision for spikes
-                this.gameOver();
+                this.handleGameOver();
             }
         });
     }
@@ -72,6 +72,8 @@ export default class ChampScene extends Phaser.Scene {
     }
 
     update(time: number, delta: number) {
+        if (this.gameOver) return;
+
         this.player.setVelocityX(2);
         if (this.player.x > 200) this.player.setVelocityX(0); // stop moving after 200px
 
@@ -142,7 +144,7 @@ export default class ChampScene extends Phaser.Scene {
                 // stoppe das spiel, zeige den highscore an und einen button um das Spiel neu zu starten
                 this.add.text(400, 300, 'You reached the goal!', { fontSize: '32px', color: '#000' })
                     .setOrigin(0.5);
-                this.gameOver()
+                this.handleGameOver()
             }
         }
 
@@ -159,13 +161,37 @@ export default class ChampScene extends Phaser.Scene {
                 this
             )
         ) {
-            this.gameOver();
+            this.handleGameOver();
         }
     }
 
-    gameOver = () => {
-        this.scene.restart();
-    };
+    private handleGameOver() {
+        this.gameOver = true;
+        this.physics.pause();
+        
+                // Disable drag input after game over
+        this.input.off("pointerdown");
+        this.input.off("pointerup");
+        this.input.off("pointermove");
+        this.input.keyboard?.off('keydown-SPACE', this.jump, this);
+        this.input.keyboard?.off('keydown-ENTER', this.jump, this);
+        
+                // Show NEW GAME button in the center of the game using the Button class (like rescue)
+        const centerX = this.game.scale.width / 2;
+        const centerY = this.game.scale.height / 2;
+        
+        if (this.newGameButton) {
+            this.newGameButton.destroy();
+        }
+        
+        this.newGameButton = new Button(centerX, centerY, "NEW GAME", this, () => {
+            this.newGameButton.destroy();
+                    // Reset gameOver and resume physics before restart
+               this.gameOver = false;
+               this.scene.restart();
+        });
+        this.newGameButton.setOrigin(0.5, 0.5).setDepth(1000);
+    }
 }
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -181,7 +207,7 @@ const config: Phaser.Types.Core.GameConfig = {
         default: 'arcade',
         arcade: {
             gravity: { x: 0, y: 0 },
-            debug: true
+            debug: false
         }
     },
     scale: {
