@@ -168,27 +168,45 @@ export default class ChampScene extends Phaser.Scene {
     private handleGameOver() {
         this.gameOver = true;
         this.physics.pause();
-        
-                // Disable drag input after game over
+
+        // Explosion effect on player
+        const playerCenterX = this.player.x + this.player.displayWidth / 2;
+        const playerCenterY = this.player.y + this.player.displayHeight / 2;
+        const explosion = this.add.particles(0, 0, 'explosion', {
+            x: playerCenterX,
+            y: playerCenterY,
+            speed: { min: -200, max: 200 },
+            angle: { min: 0, max: 360 },
+            scale: { start: 1, end: 0 },
+            alpha: { start: 1, end: 0 },
+            lifespan: 600,
+            quantity: 30,
+            blendMode: 'ADD',
+        });
+        this.player.setVisible(false);
+        // Remove explosion after a short time
+        this.time.delayedCall(700, () => explosion.stop(), [], this);
+
+        // Disable drag input after game over
         this.input.off("pointerdown");
         this.input.off("pointerup");
         this.input.off("pointermove");
         this.input.keyboard?.off('keydown-SPACE', this.jump, this);
         this.input.keyboard?.off('keydown-ENTER', this.jump, this);
-        
-                // Show NEW GAME button in the center of the game using the Button class (like rescue)
+
+        // Show NEW GAME button in the center of the game using the Button class (like rescue)
         const centerX = this.game.scale.width / 2;
         const centerY = this.game.scale.height / 2;
-        
+
         if (this.newGameButton) {
             this.newGameButton.destroy();
         }
-        
+
         this.newGameButton = new Button(centerX, centerY, "NEW GAME", this, () => {
             this.newGameButton.destroy();
-                    // Reset gameOver and resume physics before restart
-               this.gameOver = false;
-               this.scene.restart();
+            // Reset gameOver and resume physics before restart
+            this.gameOver = false;
+            this.scene.restart();
         });
         this.newGameButton.setOrigin(0.5, 0.5).setDepth(1000);
     }
