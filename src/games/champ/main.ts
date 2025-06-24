@@ -3,6 +3,8 @@ import { pixelPerfectOverlap } from './pixelPerfectUtil';
 import { Button } from "../../shared/utils/Button";
 import Player from '../../shared/Player';
 import Obstacles from '../../shared/Obstacles';
+import AudioKeys from "../../shared/utils/consts/AudioKeys";
+import EventKeys from "../../shared/utils/consts/EventKeys";
 
 export default class ChampScene extends Phaser.Scene {
     player!: Player;
@@ -18,11 +20,43 @@ export default class ChampScene extends Phaser.Scene {
     private gameOver: boolean = false;
     private newGameButton!: Button;
 
+    private bgMusic!: Phaser.Sound.BaseSound;
+    private musicOn: boolean = false;
+    private musicRegistered: boolean = false;
+
     preload() {
         this.load.json('level', '/level.json');
+        this.load.audio(AudioKeys.BG_Music, "/audios/anomaly.mp3");
     }
 
     create() {
+        // Music
+        this.musicRegistered = this.registry.get("musicRegistered");
+
+        if (!this.musicRegistered) {
+            this.bgMusic = this.sound.add(AudioKeys.BG_Music, {
+                volume: 0.2,
+                loop: true,
+            });
+            this.registry.set("musicRegistered", true);
+            this.bgMusic.play();
+            this.bgMusic.pause();
+        }
+
+        this.musicOn = this.registry.get("musicOn");
+
+        // MusicToggle Button
+        const musicOnButton = new Button(0, 0, "Music", this, () => { });
+        musicOnButton.on(EventKeys.PointerUp, () => {
+            this.musicOn = !this.musicOn;
+            this.registry.set("musicOn", this.musicOn);
+            if (this.musicOn) {
+                this.bgMusic.resume();
+            } else {
+                this.bgMusic.pause();
+            }
+        });
+
         this.levelData = this.cache.json.get('level'); // Oder direkt ein Array
         this.currentLevelX = Number(this.game.config.width); // Start am rechten rand des Bildschirms
         this.lastObjectX = 0
@@ -55,10 +89,12 @@ export default class ChampScene extends Phaser.Scene {
                 if (player.body.touching.down && obstacle.body.touching.up) {
                     // Landed on top of a block, do nothing special
                 } else {
+                    this.explode();
                     this.handleGameOver();
                 }
             } else {
                 // Handle collision for spikes
+                this.explode();
                 this.handleGameOver();
             }
         });
@@ -165,10 +201,7 @@ export default class ChampScene extends Phaser.Scene {
         }
     }
 
-    private handleGameOver() {
-        this.gameOver = true;
-        this.physics.pause();
-
+    private explode() {
         // Explosion effect on player
         const playerCenterX = this.player.x + this.player.displayWidth / 2;
         const playerCenterY = this.player.y + this.player.displayHeight / 2;
@@ -186,6 +219,11 @@ export default class ChampScene extends Phaser.Scene {
         this.player.setVisible(false);
         // Remove explosion after a short time
         this.time.delayedCall(700, () => explosion.stop(), [], this);
+    }
+
+    private handleGameOver() {
+        this.gameOver = true;
+        this.physics.pause();
 
         // Disable drag input after game over
         this.input.off("pointerdown");
@@ -196,7 +234,7 @@ export default class ChampScene extends Phaser.Scene {
 
         // Show NEW GAME button in the center of the game using the Button class (like rescue)
         const centerX = this.game.scale.width / 2;
-        const centerY = this.game.scale.height / 2;
+        const centerY = this.game.scale.height / 2 + 100; // Adjusted for better visibility
 
         if (this.newGameButton) {
             this.newGameButton.destroy();
