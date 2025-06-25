@@ -4,7 +4,6 @@ import { Button } from "../../shared/utils/Button";
 import Player from '../../shared/Player';
 import Obstacles from '../../shared/Obstacles';
 import AudioKeys from "../../shared/utils/consts/AudioKeys";
-import EventKeys from "../../shared/utils/consts/EventKeys";
 
 export default class ChampScene extends Phaser.Scene {
     player!: Player;
@@ -17,45 +16,57 @@ export default class ChampScene extends Phaser.Scene {
     private currentLevelX: number = 0; // Aktuelle Position in der "Welt" (relevant für Level-Daten)
     private lastObjectX: number = 0;
 
-    private gameOver: boolean = false;
+    private gameFinished: boolean = false;
     private newGameButton!: Button;
 
     private bgMusic!: Phaser.Sound.BaseSound;
-    private musicOn: boolean = false;
-    private musicRegistered: boolean = false;
+    private musicOn: boolean = true;
+
+    private moveParticles!: Phaser.GameObjects.Particles.ParticleEmitter
+
 
     preload() {
         this.load.json('level', '/level.json');
         this.load.audio(AudioKeys.BG_Music, "/audios/anomaly.mp3");
+
+        this.sound.volume = 0.2; // Set initial volume
+    }
+
+    showMusicButton() {
+        new Button(0, 0, "Music", this, () => {
+
+            this.musicOn = !this.musicOn;
+            if (this.musicOn) {
+                this.sound.volume = 0.2
+            } else {
+                this.sound.volume = 0
+            }
+        });
     }
 
     create() {
+
         // Music
-        this.musicRegistered = this.registry.get("musicRegistered");
+        this.sound.removeAll();
 
-        if (!this.musicRegistered) {
-            this.bgMusic = this.sound.add(AudioKeys.BG_Music, {
-                volume: 0.2,
-                loop: true,
-            });
-            this.registry.set("musicRegistered", true);
-            this.bgMusic.play();
-            this.bgMusic.pause();
-        }
-
-        this.musicOn = this.registry.get("musicOn");
-
-        // MusicToggle Button
-        const musicOnButton = new Button(0, 0, "Music", this, () => { });
-        musicOnButton.on(EventKeys.PointerUp, () => {
-            this.musicOn = !this.musicOn;
-            this.registry.set("musicOn", this.musicOn);
-            if (this.musicOn) {
-                this.bgMusic.resume();
-            } else {
-                this.bgMusic.pause();
-            }
+        this.bgMusic = this.sound.add(AudioKeys.BG_Music, {
+            loop: true,
         });
+
+        this.showMusicButton()
+
+        if (this.sound.locked) {
+            var text = this.add.text(this.game.canvas.width / 2, this.game.canvas.height / 2, 'Tap to unlock audio', { fontSize: '32px', color: '#000' });
+
+            var bgMusic = this.bgMusic;
+            this.sound.once('unlocked', function () {
+                text.destroy();
+                bgMusic.play()
+            });
+        }
+        else {
+            this.bgMusic.play()
+        }
 
         this.levelData = this.cache.json.get('level'); // Oder direkt ein Array
         this.currentLevelX = Number(this.game.config.width); // Start am rechten rand des Bildschirms
@@ -72,8 +83,21 @@ export default class ChampScene extends Phaser.Scene {
             body.setGravityY(2000);
         }
 
-        // Add decorative trees that move from right to left at ground level, not as obstacles
         this.obstacles = new Obstacles(this);
+
+        // Add move particles (dust) behind player
+        this.moveParticles = this.add.particles(0, 0, 'particle', {
+            speed: { min: -40, max: -80 },
+            angle: { min: 160, max: 200 },
+            scale: { start: 0.3, end: 0 },
+            alpha: { start: 1, end: 0 },
+            lifespan: 400,
+            quantity: 1,
+            frequency: 40,
+            follow: this.player,
+            followOffset: { x: -10, y: this.player.displayHeight / 2 },
+            blendMode: 'ADD',
+        });
 
         this.input.on('pointerdown', this.jump, this);
         this.input.keyboard?.on('keydown-SPACE', this.jump, this);
@@ -90,12 +114,12 @@ export default class ChampScene extends Phaser.Scene {
                     // Landed on top of a block, do nothing special
                 } else {
                     this.explode();
-                    this.handleGameOver();
+                    this.scene.restart();
                 }
             } else {
                 // Handle collision for spikes
                 this.explode();
-                this.handleGameOver();
+                this.scene.restart();
             }
         });
     }
@@ -108,7 +132,7 @@ export default class ChampScene extends Phaser.Scene {
     }
 
     update(time: number, delta: number) {
-        if (this.gameOver) return;
+        if (this.gameFinished) return;
 
         this.player.setVelocityX(2);
         if (this.player.x > 200) this.player.setVelocityX(0); // stop moving after 200px
@@ -161,8 +185,7 @@ export default class ChampScene extends Phaser.Scene {
 
                 this.nextElementIndex++;
                 this.lastObjectX += elementData.xWorld; // Aktualisieren Sie die Position des letzten Objekts
-            }
-            else if (elementData.type == 'spike-down') {
+            } else if (elementData.type == 'spike-down') {
                 this.obstacles.addSpike(
                     xToAdd,
                     elementData.y,
@@ -180,7 +203,13 @@ export default class ChampScene extends Phaser.Scene {
                 // stoppe das spiel, zeige den highscore an und einen button um das Spiel neu zu starten
                 this.add.text(400, 300, 'You reached the goal!', { fontSize: '32px', color: '#000' })
                     .setOrigin(0.5);
-                this.handleGameOver()
+                this.handleGameFinished()
+            } else if (elementData.type.startsWith('color-')) {
+                // Dynamically change background color
+                const color = elementData.type.replace('color-', '');
+                this.cameras.main.setBackgroundColor(color);
+                this.nextElementIndex++;
+                this.lastObjectX += elementData.xWorld;
             }
         }
 
@@ -197,7 +226,7 @@ export default class ChampScene extends Phaser.Scene {
                 this
             )
         ) {
-            this.handleGameOver();
+            this.handleGameFinished();
         }
     }
 
@@ -218,11 +247,14 @@ export default class ChampScene extends Phaser.Scene {
         });
         this.player.setVisible(false);
         // Remove explosion after a short time
-        this.time.delayedCall(700, () => explosion.stop(), [], this);
+        this.time.delayedCall(700, () => {
+            explosion.stop()
+            this.moveParticles.stop()
+        }, [], this);
     }
 
-    private handleGameOver() {
-        this.gameOver = true;
+    private handleGameFinished() {
+        this.gameFinished = true;
         this.physics.pause();
 
         // Disable drag input after game over
@@ -243,7 +275,7 @@ export default class ChampScene extends Phaser.Scene {
         this.newGameButton = new Button(centerX, centerY, "NEW GAME", this, () => {
             this.newGameButton.destroy();
             // Reset gameOver and resume physics before restart
-            this.gameOver = false;
+            this.gameFinished = false;
             this.scene.restart();
         });
         this.newGameButton.setOrigin(0.5, 0.5).setDepth(1000);
@@ -255,7 +287,7 @@ const config: Phaser.Types.Core.GameConfig = {
     width: 800,
     height: 600,
     parent: 'game',
-    backgroundColor: '#87CEEB', // Sky blue background
+    backgroundColor: '#ffffff',
     dom: {
         createContainer: true,
     },
