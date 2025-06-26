@@ -28,8 +28,6 @@ export default class ChampScene extends Phaser.Scene {
     preload() {
         this.load.json('level', '/level.json');
         this.load.audio(AudioKeys.BG_Music, "/audios/anomaly.mp3");
-
-        this.sound.volume = 0.2; // Set initial volume
     }
 
     showMusicButton() {
@@ -51,6 +49,7 @@ export default class ChampScene extends Phaser.Scene {
         this.sound.removeAll();
 
         this.bgMusic = this.sound.add(AudioKeys.BG_Music, {
+            volume: 0.2,
             loop: true,
         });
 
@@ -256,6 +255,9 @@ export default class ChampScene extends Phaser.Scene {
     }
 
     private handleGameFinished() {
+        this.gameFinished = true;
+        this.physics.pause();
+
         // Disable drag input after game over
         this.input.off("pointerdown");
         this.input.off("pointerup");
