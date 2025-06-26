@@ -45,6 +45,7 @@ export default class ChampScene extends Phaser.Scene {
     }
 
     create() {
+        this.gameFinished = false
 
         // Music
         this.sound.removeAll();
@@ -114,12 +115,10 @@ export default class ChampScene extends Phaser.Scene {
                     // Landed on top of a block, do nothing special
                 } else {
                     this.explode();
-                    this.scene.restart();
                 }
             } else {
                 // Handle collision for spikes
                 this.explode();
-                this.scene.restart();
             }
         });
     }
@@ -231,6 +230,8 @@ export default class ChampScene extends Phaser.Scene {
     }
 
     private explode() {
+        this.gameFinished = true;
+        this.physics.pause();
         // Explosion effect on player
         const playerCenterX = this.player.x + this.player.displayWidth / 2;
         const playerCenterY = this.player.y + this.player.displayHeight / 2;
@@ -250,13 +251,11 @@ export default class ChampScene extends Phaser.Scene {
         this.time.delayedCall(700, () => {
             explosion.stop()
             this.moveParticles.stop()
+            this.scene.restart();
         }, [], this);
     }
 
     private handleGameFinished() {
-        this.gameFinished = true;
-        this.physics.pause();
-
         // Disable drag input after game over
         this.input.off("pointerdown");
         this.input.off("pointerup");
@@ -274,8 +273,6 @@ export default class ChampScene extends Phaser.Scene {
 
         this.newGameButton = new Button(centerX, centerY, "NEW GAME", this, () => {
             this.newGameButton.destroy();
-            // Reset gameOver and resume physics before restart
-            this.gameFinished = false;
             this.scene.restart();
         });
         this.newGameButton.setOrigin(0.5, 0.5).setDepth(1000);
