@@ -56,7 +56,8 @@ export default class ChampScene extends Phaser.Scene {
         this.showMusicButton()
 
         if (this.sound.locked) {
-            var text = this.add.text(this.game.canvas.width / 2, this.game.canvas.height / 2, 'Tap to unlock audio', { fontSize: '32px', color: '#000' });
+            var text = this.add.text(this.game.canvas.width / 2, this.game.canvas.height / 2, 'Tap to unlock audio',
+                { fontSize: '32px', color: '#000' }).setOrigin(0.5, 0.5);
 
             var bgMusic = this.bgMusic;
             this.sound.once('unlocked', function () {
