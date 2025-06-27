@@ -6,13 +6,13 @@ import Obstacles from '../../shared/Obstacles';
 import AudioKeys from "../../shared/utils/consts/AudioKeys";
 
 export default class ChampScene extends Phaser.Scene {
-    player!: Player;
-    nextEnemy: number = 0;
-    obstacles!: Obstacles;
+    private player!: Player;
+
+    private obstacles!: Obstacles;
 
     private levelData: any[]; // Level-Daten laden (z.B. aus JSON)
     private nextElementIndex: number = 0;
-    private scrollSpeed: number = 240; // Pixel pro Sekunde
+    private scrollSpeed: number = 350; // Pixel pro Sekunde
     private currentLevelX: number = 0; // Aktuelle Position in der "Welt" (relevant für Level-Daten)
     private lastObjectX: number = 0;
 
@@ -23,6 +23,8 @@ export default class ChampScene extends Phaser.Scene {
     private musicOn: boolean = true;
 
     private moveParticles!: Phaser.GameObjects.Particles.ParticleEmitter
+
+    private attemptScore: number = 0;
 
 
     preload() {
@@ -43,7 +45,14 @@ export default class ChampScene extends Phaser.Scene {
     }
 
     create() {
-        this.gameFinished = false
+        this.gameFinished = false;
+        this.attemptScore += 1;
+
+        const attemptText = this.add.text(this.game.canvas.width / 2, this.game.canvas.height / 2 - 100, 'Attempt ' + this.attemptScore, { fontSize: '32px', color: '#000' }).setOrigin(0.5, 0.5).setDepth(1000);
+        // Remove attemptScoreText after a short time
+        this.time.delayedCall(700, () => {
+            attemptText.destroy();
+        }, [], this);
 
         // Music
         this.sound.removeAll();
@@ -103,8 +112,6 @@ export default class ChampScene extends Phaser.Scene {
         this.input.on('pointerdown', this.jump, this);
         this.input.keyboard?.on('keydown-SPACE', this.jump, this);
         this.input.keyboard?.on('keydown-ENTER', this.jump, this);
-
-        this.nextEnemy = 0;
 
         this.physics.add.collider(this.player, this.obstacles, (playerObj, obstacleObj) => {
             const player = playerObj as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
@@ -200,7 +207,7 @@ export default class ChampScene extends Phaser.Scene {
 
             } else if (elementData.type == 'goal') {
                 // stoppe das spiel, zeige den highscore an und einen button um das Spiel neu zu starten
-                this.add.text(400, 300, 'You reached the goal!', { fontSize: '32px', color: '#000' })
+                this.add.text(400, 300, 'You reached the goal with ' + this.attemptScore + ' attempt' + (this.attemptScore == 1 ? '!' : 's!'), { fontSize: '32px', color: '#000' })
                     .setOrigin(0.5);
                 this.handleGameFinished()
             } else if (elementData.type.startsWith('color-')) {
@@ -279,6 +286,8 @@ export default class ChampScene extends Phaser.Scene {
             this.scene.restart();
         });
         this.newGameButton.setOrigin(0.5, 0.5).setDepth(1000);
+
+        this.attemptScore = 0; // Reset attempt score for the next game
     }
 }
 
@@ -287,7 +296,7 @@ const config: Phaser.Types.Core.GameConfig = {
     width: 800,
     height: 600,
     parent: 'game',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#87CEEB',
     dom: {
         createContainer: true,
     },
