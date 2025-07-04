@@ -14,11 +14,32 @@ export default class Obstacles extends Phaser.Physics.Arcade.Group {
    * @returns Das hinzugefügte Hindernis
    */
   addBlock(x: number, y: number, width: number, height: number): Phaser.Types.Physics.Arcade.ImageWithDynamicBody {
-
     const uniqueFaceKey = `obstacle-${width}-${height}-${Date.now()}-${Math.random()}`;
     const gfx = this.scene.make.graphics({ x: 0, y: 0 });
     gfx.setVisible(false);
-    gfx.lineStyle(2, 0x000000, 1);
+    // Wood base color
+    gfx.fillStyle(0xdeb887, 1); // light brown
+    gfx.fillRect(0, 0, width, height);
+    // Draw wood grain (simple lines and knots)
+    gfx.lineStyle(1, 0xc68642, 0.5); // darker brown
+    for (let i = 0; i < 4; i++) {
+      const y = (height / 5) * (i + 1) + Phaser.Math.Between(-2, 2);
+      gfx.beginPath();
+      gfx.moveTo(4, y);
+      gfx.lineTo(width - 4, y + Phaser.Math.Between(-2, 2));
+      gfx.strokePath();
+    }
+    // Draw a few knots
+    for (let i = 0; i < 2; i++) {
+      const knotX = Phaser.Math.Between(width * 0.2, width * 0.8);
+      const knotY = Phaser.Math.Between(height * 0.2, height * 0.8);
+      gfx.fillStyle(0xc68642, 0.7);
+      gfx.fillCircle(knotX, knotY, Phaser.Math.Between(2, 4));
+      gfx.lineStyle(1, 0x8b5c2a, 0.7);
+      gfx.strokeCircle(knotX, knotY, Phaser.Math.Between(2, 4));
+    }
+    // Outline
+    gfx.lineStyle(2, 0x8b5c2a, 1);
     gfx.strokeRect(0, 0, width, height);
     gfx.generateTexture(uniqueFaceKey, width, height);
     gfx.destroy();
@@ -75,7 +96,39 @@ export default class Obstacles extends Phaser.Physics.Arcade.Group {
       gfx.lineTo(points[2].x, points[2].y);
     }
     gfx.closePath();
-    gfx.lineStyle(1, 0x000000, 1);
+    // Simulate shiny metal: base fill, highlight, shadow
+    gfx.fillStyle(0xb0b0b0, 1); // base metallic gray
+    gfx.fillPath();
+    // Highlight (white triangle)
+    gfx.beginPath();
+    if (up) {
+      gfx.moveTo(width / 2, height * 0.15);
+      gfx.lineTo(width * 0.7, height * 0.85);
+      gfx.lineTo(width * 0.3, height * 0.85);
+    } else {
+      gfx.moveTo(width * 0.3, height * 0.15);
+      gfx.lineTo(width * 0.7, height * 0.15);
+      gfx.lineTo(width / 2, height * 0.85);
+    }
+    gfx.closePath();
+    gfx.fillStyle(0xffffff, 0.7);
+    gfx.fillPath();
+    // Shadow (dark gray triangle)
+    gfx.beginPath();
+    if (up) {
+      gfx.moveTo(width / 2, height * 0.6);
+      gfx.lineTo(width * 0.9, height);
+      gfx.lineTo(width * 0.1, height);
+    } else {
+      gfx.moveTo(width * 0.1, 0);
+      gfx.lineTo(width * 0.9, 0);
+      gfx.lineTo(width / 2, height * 0.4);
+    }
+    gfx.closePath();
+    gfx.fillStyle(0x888888, 0.7);
+    gfx.fillPath();
+    // Outline
+    gfx.lineStyle(2, 0xcccccc, 1);
     gfx.strokePath();
     gfx.generateTexture(uniqueSpikeKey, width, height);
     gfx.destroy();

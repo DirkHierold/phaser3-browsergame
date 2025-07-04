@@ -20,11 +20,12 @@ export default class ChampScene extends Phaser.Scene {
     private newGameButton!: Button;
 
     private bgMusic!: Phaser.Sound.BaseSound;
-    private musicOn: boolean = true;
+    private musicOn: boolean = false;
 
     private moveParticles!: Phaser.GameObjects.Particles.ParticleEmitter
 
     private attemptScore: number = 0;
+    private volume: number = 0;
 
 
     preload() {
@@ -37,8 +38,10 @@ export default class ChampScene extends Phaser.Scene {
 
             this.musicOn = !this.musicOn;
             if (this.musicOn) {
+                this.volume = 0.2; // Set volume to 0.2 when music is on
                 this.sound.volume = 0.2
             } else {
+                this.volume = 0; // Set volume to 0.2 when music is off
                 this.sound.volume = 0
             }
         });
@@ -56,6 +59,7 @@ export default class ChampScene extends Phaser.Scene {
 
         // Music
         this.sound.removeAll();
+        this.sound.volume = this.volume; // Set adjusted volume for the music
 
         this.bgMusic = this.sound.add(AudioKeys.BG_Music, {
             volume: 0.2,
@@ -65,12 +69,8 @@ export default class ChampScene extends Phaser.Scene {
         this.showMusicButton()
 
         if (this.sound.locked) {
-            var text = this.add.text(this.game.canvas.width / 2, this.game.canvas.height / 2, 'Tap to unlock audio',
-                { fontSize: '32px', color: '#000' }).setOrigin(0.5, 0.5);
-
             var bgMusic = this.bgMusic;
             this.sound.once('unlocked', function () {
-                text.destroy();
                 bgMusic.play()
             });
         }
