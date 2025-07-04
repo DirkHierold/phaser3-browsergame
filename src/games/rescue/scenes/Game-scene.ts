@@ -112,7 +112,7 @@ export default class GameScene extends Phaser.Scene {
     this.menuGrid.placeAtIndexAndScale(6, this.deathText, 2, 1);
 
     switch (this.level) {
-      case 1:
+      case 1: {
         // Grid
         this.grid = new AlignGrid(
           this,
@@ -123,6 +123,12 @@ export default class GameScene extends Phaser.Scene {
           3,
           3
         );
+
+        // Create green background rectangle and place it using grid logic
+        const gridBg1 = this.add.rectangle(0, 0, this.grid.width, this.grid.height, 0x008000)
+          .setOrigin(0, 0)
+          .setDepth(-10);
+        this.grid.placeAtIndexAndScale(0, gridBg1, this.grid.columns, this.grid.rows);
 
         // WorldBounds
         this.grid.placeAtIndexAndScale(0, this.physics.world, 3, 3);
@@ -155,7 +161,8 @@ export default class GameScene extends Phaser.Scene {
         const asteroid1 = this.asteroids.addEnemyWithDirection(DirectionKeys.Right);
         this.grid.placeAtIndexAndScale(4, asteroid1, 1, 1);
         break;
-      case 2:
+      }
+      case 2: {
         // Grid
         this.grid = new AlignGrid(
           this,
@@ -166,6 +173,11 @@ export default class GameScene extends Phaser.Scene {
           5,
           7
         );
+        // Create green background rectangle and place it using grid logic
+        const gridBg2 = this.add.rectangle(0, 0, this.grid.width, this.grid.height, 0x008000)
+          .setOrigin(0, 0)
+          .setDepth(-10);
+        this.grid.placeAtIndexAndScale(0, gridBg2, this.grid.columns, this.grid.rows);
 
         // WorldBounds
         this.grid.placeAtIndexAndScale(0, this.physics.world, 5, 7);
@@ -217,7 +229,8 @@ export default class GameScene extends Phaser.Scene {
         asteroidB.setDepth && asteroidB.setDepth(3);
         asteroidC.setDepth && asteroidC.setDepth(3);
         break;
-      case 3:
+      }
+      case 3: {
         this.grid = new AlignGrid(
           this,
           0,
@@ -227,6 +240,11 @@ export default class GameScene extends Phaser.Scene {
           11,
           11
         );
+        // Create green background rectangle and place it using grid logic
+        const gridBg3 = this.add.rectangle(0, 0, this.grid.width, this.grid.height, 0x008000)
+          .setOrigin(0, 0)
+          .setDepth(-10);
+        this.grid.placeAtIndexAndScale(0, gridBg3, this.grid.columns, this.grid.rows);
 
         // WorldBounds
         this.grid.placeAtIndexAndScale(0, this.physics.world, 11, 11);
@@ -288,7 +306,8 @@ export default class GameScene extends Phaser.Scene {
         );
         this.trees.setDepth && this.trees.setDepth(1);
         break;
-      case 4:
+      }
+      case 4: {
         this.grid = new AlignGrid(
           this,
           0,
@@ -298,6 +317,12 @@ export default class GameScene extends Phaser.Scene {
           11,
           11
         );
+
+        // Create green background rectangle and place it using grid logic
+        const gridBg4 = this.add.rectangle(0, 0, this.grid.width, this.grid.height, 0x008000)
+          .setOrigin(0, 0)
+          .setDepth(-10);
+        this.grid.placeAtIndexAndScale(0, gridBg4, this.grid.columns, this.grid.rows);
 
         // WorldBounds
         this.grid.placeAtIndexAndScale(0, this.physics.world, 11, 11);
@@ -354,7 +379,8 @@ export default class GameScene extends Phaser.Scene {
         );
         this.trees.setDepth && this.trees.setDepth(1);
         break;
-      default:
+      }
+      default: {
         this.grid = new AlignGrid(
           this,
           0,
@@ -364,6 +390,12 @@ export default class GameScene extends Phaser.Scene {
           11,
           11
         );
+
+        // Create green background rectangle and place it using grid logic
+        const gridBgDefault = this.add.rectangle(0, 0, this.grid.width, this.grid.height, 0x008000)
+          .setOrigin(0, 0)
+          .setDepth(-10);
+        this.grid.placeAtIndexAndScale(0, gridBgDefault, this.grid.columns, this.grid.rows);
 
         // WorldBounds
         this.grid.placeAtIndexAndScale(0, this.physics.world, 11, 11);
@@ -385,6 +417,7 @@ export default class GameScene extends Phaser.Scene {
         const endText = this.add.text(0, 0, endTextString, style);
         this.grid.placeAtIndexAndScale(67, endText, 9, 5);
         break;
+      }
     }
 
     // Player hit by asteroid?
