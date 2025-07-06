@@ -1,10 +1,10 @@
 import Phaser from "phaser";
 import { Button } from "../../../shared/utils/Button";
 import Player from "../../../shared/Player";
-import Targets from "../model/../../../shared/Targets";
+import Targets from "../../../shared/Targets";
 import Enemies from "../../../shared/Enemy";
 
-export default class AsteroidScene extends Phaser.Scene {
+export default class GameScene extends Phaser.Scene {
     private player!: Player;
     private targets!: Targets;
     private target!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
@@ -20,7 +20,7 @@ export default class AsteroidScene extends Phaser.Scene {
     private newGameButton!: Button;
 
     constructor() {
-        super("AsteroidScene");
+        super("GameScene");
     }
 
     preload() {

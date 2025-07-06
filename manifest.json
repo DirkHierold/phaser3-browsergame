@@ -1,7 +1,7 @@
 {
-  "name": "Don't die dino!",
+  "name": "Don't die square!",
   "short_name": "Dirk Hierold",
-  "description": "Phaser3 PWA Game about a little dino by Dirk Hierold",
+  "description": "Phaser3 PWA Games about a little square by Dirk Hierold",
   "start_url": "/index.html",
   "background_color": "white",
   "theme_color": "white",

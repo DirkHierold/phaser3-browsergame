@@ -64,7 +64,7 @@ export default class MainMenuScene extends Phaser.Scene {
       font: "20px Arial",
       align: "center",
     };
-    const title = this.add.text(0, 0, "Don't die dino!", textStyle);
+    const title = this.add.text(0, 0, "Don't die square!", textStyle);
     grid.placeAtIndexAndScale(23, title, 9, 1);
 
     // MusicToogle Button

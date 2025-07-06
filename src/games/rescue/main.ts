@@ -1,7 +1,7 @@
 import Phaser from "phaser";
-import MainMenuScene from "./scenes/MainMenu-scene";
-import Preloader from "./scenes/Preloader-scene";
-import GameScene from "./scenes/Game-scene";
+import MainMenuScene from "./scenes/MainMenuScene";
+import Preloader from "./scenes/PreloaderScene";
+import GameScene from "./scenes/GameScene";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.CANVAS,

@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import AsteroidScene from "./scenes/AsteroidScene";
+import GameScene from "./scenes/GameScene";
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.CANVAS,
@@ -21,7 +21,7 @@ const config: Phaser.Types.Core.GameConfig = {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [AsteroidScene],
+    scene: [GameScene],
 };
 
 new Phaser.Game(config);

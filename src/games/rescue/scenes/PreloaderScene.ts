@@ -24,7 +24,7 @@ export default class Preloader extends Phaser.Scene {
       font: "20px Arial",
       align: "center",
     };
-    const title = this.add.text(0, 0, "Don't die dino!", textStyle);
+    const title = this.add.text(0, 0, "Don't die square!", textStyle);
     this.grid.placeAtIndexAndScale(23, title, 9, 1);
 
     let progressBox = this.add.rectangle(0, 0, 5, 1);

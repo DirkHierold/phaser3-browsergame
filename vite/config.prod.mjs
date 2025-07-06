@@ -25,8 +25,8 @@ export default defineConfig({
             input: {
                 main: path.resolve(__dirname, '../index.html'),
                 dino: path.resolve(__dirname, '../src/games/rescue/index.html'),
-                asteroid: path.resolve(__dirname, '../src/games/asteroid/index.html'),
-                champ: path.resolve(__dirname, '../src/games/champ/index.html'),
+                asteroid: path.resolve(__dirname, '../src/games/evade/index.html'),
+                champ: path.resolve(__dirname, '../src/games/dash/index.html'),
                 // weitere Spiele hier hinzufügen
             },
             output: {
