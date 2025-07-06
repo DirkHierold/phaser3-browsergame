@@ -1,0 +1,8 @@
+[
+  { "type": "platform-pair", "y": 500, "width": 120, "height": 30, "gap": 160, "breakLeft": true, "xWorld": 0 },
+  { "type": "platform-pair", "y": 400, "width": 120, "height": 30, "gap": 160, "breakLeft": false, "xWorld": 120 },
+  { "type": "platform-pair", "y": 300, "width": 120, "height": 30, "gap": 160, "breakLeft": true, "xWorld": 120 },
+  { "type": "platform-pair", "y": 200, "width": 120, "height": 30, "gap": 160, "breakLeft": false, "xWorld": 120 },
+  { "type": "platform-pair", "y": 100, "width": 120, "height": 30, "gap": 160, "breakLeft": true, "xWorld": 120 },
+  { "type": "goal", "y": 40, "width": 120, "height": 30, "xWorld": 120 }
+]

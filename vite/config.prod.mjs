@@ -27,6 +27,7 @@ export default defineConfig({
                 dino: path.resolve(__dirname, '../src/games/rescue/index.html'),
                 asteroid: path.resolve(__dirname, '../src/games/evade/index.html'),
                 champ: path.resolve(__dirname, '../src/games/dash/index.html'),
+                leftOrRight: path.resolve(__dirname, '../src/games/left-or-right/index.html'),
                 // weitere Spiele hier hinzufügen
             },
             output: {
