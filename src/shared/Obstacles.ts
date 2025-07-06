@@ -22,7 +22,7 @@ export default class Obstacles extends Phaser.Physics.Arcade.Group {
     gfx.fillRect(0, 0, width, height);
 
     // Outline
-    gfx.lineStyle(2, 0x8b5c2a, 1);
+    gfx.lineStyle(2, 0x000000, 1);
     gfx.strokeRect(0, 0, width, height);
     gfx.generateTexture(uniqueFaceKey, width, height);
     gfx.destroy();
@@ -83,7 +83,7 @@ export default class Obstacles extends Phaser.Physics.Arcade.Group {
     gfx.fillStyle(0xb0b0b0, 1); // base metallic gray
     gfx.fillPath();
     // Outline
-    gfx.lineStyle(2, 0xcccccc, 1);
+    gfx.lineStyle(1, 0x000000, 1);
     gfx.strokePath();
     gfx.generateTexture(uniqueSpikeKey, width, height);
     gfx.destroy();
