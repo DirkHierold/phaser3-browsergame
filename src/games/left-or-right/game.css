@@ -1,6 +1,11 @@
 /* Styles for Left or Right */
 body {
-    background: #fff;
+    background: #87CEEB;
     color: #fff;
     font-family: Arial, sans-serif;
+    pointer-events: none;
+}
+
+button {
+    pointer-events: auto;
 }

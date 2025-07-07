@@ -34,8 +34,15 @@ export default class MainMenuScene extends Phaser.Scene {
       12,
       false
     );
+
     //turn on the lines for testing and layout
     // grid.showNumbers();
+
+    // Create green background rectangle and place it using grid logic
+    const gridBg1 = this.add.rectangle(0, 0, grid.width, grid.height, 0x008000)
+      .setOrigin(0, 0)
+      .setDepth(-10);
+    grid.placeAtIndexAndScale(0, gridBg1, grid.columns, grid.rows);
 
     this.musicRegistered = this.registry.get("musicRegistered");
 

@@ -19,6 +19,12 @@ export default class Preloader extends Phaser.Scene {
     //turn on the lines for testing layout
     // this.grid.showNumbers();
 
+    // Create green background rectangle and place it using grid logic
+    const gridBg1 = this.add.rectangle(0, 0, this.grid.width, this.grid.height, 0x008000)
+      .setOrigin(0, 0)
+      .setDepth(-10);
+    this.grid.placeAtIndexAndScale(0, gridBg1, this.grid.columns, this.grid.rows);
+
     // Title
     const textStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       font: "20px Arial",

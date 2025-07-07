@@ -5,7 +5,6 @@ import GameScene from "./scenes/GameScene";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.CANVAS,
-  //green background
   backgroundColor: '#87CEEB',
   parent: "app",
   width: 1280,

@@ -2,7 +2,13 @@ body {
     margin: 0;
     padding: 0;
     background: #e0f7fa;
+    pointer-events: none;
 }
+
+button {
+    pointer-events: auto;
+}
+
 #game {
     position: absolute;
     left: 0;
