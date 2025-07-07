@@ -67,7 +67,7 @@ class LeftOrRightGame extends Phaser.Scene {
 
     this.input.keyboard?.on('keydown-LEFT', () => this.choose('left'));
     this.input.keyboard?.on('keydown-RIGHT', () => this.choose('right'));
-    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+    document.addEventListener('pointerdown', (pointer) => {
       if (!this.canChoose) return;
       if (pointer.x < this.game.canvas.width / 2) {
         this.choose('left');

@@ -3,6 +3,8 @@ import { Button } from "../../../shared/utils/Button";
 import Player from "../../../shared/Player";
 import Targets from "../../../shared/Targets";
 import Enemies from "../../../shared/Enemy";
+import MousePlayerController from "../../../shared/utils/MousePlayerController"; // Import the new controller
+
 
 export default class GameScene extends Phaser.Scene {
     private player!: Player;
@@ -18,6 +20,8 @@ export default class GameScene extends Phaser.Scene {
 
     private gameOver: boolean = false;
     private newGameButton!: Button;
+    private playerController!: MousePlayerController; // Declare the controller
+
 
     constructor() {
         super("GameScene");
@@ -59,6 +63,9 @@ export default class GameScene extends Phaser.Scene {
         this.player = new Player(this);
         this.player.setDepth(30)
 
+        // Instantiate the controller and pass the player
+        this.playerController = new MousePlayerController(this, this.player);
+
         // Target
         this.targets = new Targets(this);
         this.target = this.targets.addTarget(0, 0);
@@ -80,8 +87,6 @@ export default class GameScene extends Phaser.Scene {
 
     update() {
         if (this.gameOver) return;
-
-        this.player.move(this.input.activePointer);
 
         // Pixel-perfect collision check between player and each enemy
         let hit = false;
@@ -224,6 +229,11 @@ export default class GameScene extends Phaser.Scene {
     private handlePlayerHit() {
         this.gameOver = true;
         this.physics.pause();
+
+        // Important: Destroy the controller when the game is over
+        if (this.playerController) {
+            this.playerController.destroy();
+        }
 
         // Disable drag input after game over
         this.input.off("pointerdown");

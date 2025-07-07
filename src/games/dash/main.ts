@@ -109,7 +109,9 @@ export default class GameScene extends Phaser.Scene {
             blendMode: 'ADD',
         });
 
-        this.input.on('pointerdown', this.jump, this);
+        document.addEventListener('pointerdown', () => {
+            this.jump();
+        })
         this.input.keyboard?.on('keydown-SPACE', this.jump, this);
         this.input.keyboard?.on('keydown-ENTER', this.jump, this);
 
@@ -267,7 +269,7 @@ export default class GameScene extends Phaser.Scene {
         this.physics.pause();
 
         // Disable drag input after game over
-        this.input.off("pointerdown");
+        document.removeEventListener('pointerdown', this.jump);
         this.input.off("pointerup");
         this.input.off("pointermove");
         this.input.keyboard?.off('keydown-SPACE', this.jump, this);
