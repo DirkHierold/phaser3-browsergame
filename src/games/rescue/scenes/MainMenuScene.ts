@@ -5,6 +5,7 @@ import { AlignGrid } from "../../../shared/utils/AlignGrid";
 import { Button } from "../../../shared/utils/Button";
 // import DataHandler from "../utils/DataHandler";
 import AudioKeys from "../../../shared/utils/consts/AudioKeys";
+import MousePlayerController from "../../../shared/utils/MousePlayerController";
 
 export default class MainMenuScene extends Phaser.Scene {
   musicOn: boolean = false;
@@ -13,6 +14,7 @@ export default class MainMenuScene extends Phaser.Scene {
   player!: Player;
   gamewidth!: number;
   gameHeight!: number;
+  private playerController!: MousePlayerController; // Declare the controller
 
   constructor() {
     super(SceneKeys.MainMenu);
@@ -53,6 +55,10 @@ export default class MainMenuScene extends Phaser.Scene {
 
     // Image Dinosaur
     this.player = new Player(this);
+
+    // Instantiate the controller and pass the player
+    this.playerController = new MousePlayerController(this, this.player);
+
     grid.placeAtIndexAndScale(48, this.player, 3, 3);
 
     // Image Cow
@@ -83,6 +89,11 @@ export default class MainMenuScene extends Phaser.Scene {
 
     // Play Game Button
     const gameButton = new Button(0, 0, "Play", this, () => {
+
+      // Important: Destroy the controller when the game is over
+      if (this.playerController) {
+        this.playerController.destroy();
+      }
       this.scene.start(SceneKeys.Game, { music: this.bgMusic, level: 1 });
 
       // this.scene.launch(SceneKeys.Game, { music: this.bgMusic });
@@ -102,9 +113,5 @@ export default class MainMenuScene extends Phaser.Scene {
     }
     const controlText = this.add.text(0, 0, controlTextString, textStyle);
     grid.placeAtIndexAndScale(100, controlText, 9, 1);
-  }
-
-  update(): void {
-    this.player.move(this.input.activePointer);
   }
 }

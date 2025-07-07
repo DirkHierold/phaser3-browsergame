@@ -8,6 +8,7 @@ import Targets from "../../../shared/Targets";
 import Obstacles from "../../../shared/Obstacles";
 import { AlignGrid } from "../../../shared/utils/AlignGrid";
 import { Button } from "../../../shared/utils/Button";
+import MousePlayerController from "../../../shared/utils/MousePlayerController";
 
 export default class GameScene extends Phaser.Scene {
   private gameWidth = 0;
@@ -34,6 +35,7 @@ export default class GameScene extends Phaser.Scene {
   private targetIndex: number = 0;
   private dieCounter: number = 0;
   private deathText!: Phaser.GameObjects.Text;
+  private playerController!: MousePlayerController; // Declare the controller
 
   constructor() {
     console.log("constructor");
@@ -448,6 +450,9 @@ export default class GameScene extends Phaser.Scene {
     //turn on the lines for testing and layout
     // this.menuGrid.showNumbers();
     // this.grid.showNumbers();
+
+    // Instantiate the controller and pass the player
+    this.playerController = new MousePlayerController(this, this.player);
   }
 
   // Fix overlap/collider callback signatures for Phaser 3 ArcadePhysicsCallback
@@ -467,7 +472,6 @@ export default class GameScene extends Phaser.Scene {
     if (this.gameOver) return;
 
     // Control
-    this.player.move(this.input.activePointer);
     this.targets.changeDirection(this.player);
     this.asteroids.changeDirection(this.player);
   }
@@ -509,6 +513,10 @@ export default class GameScene extends Phaser.Scene {
       undefined,
       (_camera: any, progress: number) => {
         if (progress === 1) {
+          // Important: Destroy the controller when the game is over
+          if (this.playerController) {
+            this.playerController.destroy();
+          }
           this.scene.restart({
             music: this.bgMusic,
             level: newLevel ? ++this.level : this.level,
