@@ -41,15 +41,15 @@ class LeftOrRightGame extends Phaser.Scene {
     const attemptText = this.add.text(this.game.canvas.width / 2, 80, 'Attempt ' + this.attemptScore, { fontSize: '32px', color: '#000' }).setOrigin(0.5, 0.5).setDepth(1000);
     this.time.delayedCall(700, () => attemptText.destroy(), [], this);
 
-    this.physics.world.setBounds(0, 0, 800, 600);
+    this.physics.world.setBounds(0, 0, 600, 800);
     this.obstacles = new Obstacles(this);
     this.targets = new Targets(this);
 
     // Startplattform
-    const startPlatform = this.obstacles.addBlock(300, 550, 200, 50).setOrigin(0, 0);
+    const startPlatform = this.obstacles.addBlock(200, 750, 200, 50).setOrigin(0, 0);
 
     this.player = new Player(this);
-    this.player.setOrigin(0, 0).setPosition(375, 500);
+    this.player.setOrigin(0, 0).setPosition(275, 700);
 
     // Partikel
     this.moveParticles = this.add.particles(0, 0, 'particle', {
@@ -69,7 +69,7 @@ class LeftOrRightGame extends Phaser.Scene {
     this.input.keyboard?.on('keydown-RIGHT', () => this.choose('right'));
     document.addEventListener('pointerdown', (pointer) => {
       if (!this.canChoose) return;
-      if (pointer.clientX < this.game.scale.width / 2) {
+      if (pointer.clientX < 300) {
         this.choose('left');
       } else {
         this.choose('right');
@@ -88,8 +88,8 @@ class LeftOrRightGame extends Phaser.Scene {
     const data = this.levelData[this.nextElementIndex];
     if (data.type === 'platform-pair') {
       // Spawn two platforms: left and right
-      const leftX = 150;
-      const rightX = 500;
+      const leftX = 50;
+      const rightX = 400;
       const y = data.y;
       const left = this.obstacles.addBlock(leftX, y, data.width, data.height).setOrigin(0, 0);
       const right = this.obstacles.addBlock(rightX, y, data.width, data.height).setOrigin(0, 0);
@@ -98,7 +98,7 @@ class LeftOrRightGame extends Phaser.Scene {
       this.canChoose = true;
     } else if (data.type === 'goal') {
       // Zielplattform + Target
-      const x = 300;
+      const x = 200;
       const y = data.y;
       const goal = this.obstacles.addBlock(x, y, data.width, data.height).setOrigin(0, 0);
 
@@ -172,7 +172,7 @@ class LeftOrRightGame extends Phaser.Scene {
   win() {
     this.gameFinished = true;
     this.physics.pause();
-    this.add.text(400, 300, 'You reached the goal with ' + this.attemptScore + ' attempt' + (this.attemptScore == 1 ? '!' : 's!'), { fontSize: '32px', color: '#000' })
+    this.add.text(300, 400, 'You reached the goal with ' + this.attemptScore + ' attempt' + (this.attemptScore == 1 ? '!' : 's!'), { fontSize: '26px', color: '#000' })
       .setOrigin(0.5);
     this.handleGameFinished();
   }
@@ -221,13 +221,16 @@ class LeftOrRightGame extends Phaser.Scene {
       this.scene.restart();
     });
     this.attemptScore = 0;
+    this.levelData.forEach(element => {
+      element.breakLeft = Phaser.Math.Between(0, 1) === 0; // Randomly set breakLeft for each level element      
+    });
   }
 }
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.CANVAS,
-  width: 800,
-  height: 600,
+  width: 600,
+  height: 800,
   parent: 'game',
   backgroundColor: '#87CEEB',
   dom: { createContainer: true },

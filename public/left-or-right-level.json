@@ -1,6 +1,20 @@
 [
   {
     "type": "platform-pair",
+    "y": 650,
+    "width": 150,
+    "height": 50,
+    "breakLeft": true
+  },
+  {
+    "type": "platform-pair",
+    "y": 550,
+    "width": 150,
+    "height": 50,
+    "breakLeft": false
+  },
+  {
+    "type": "platform-pair",
     "y": 450,
     "width": 150,
     "height": 50,
@@ -18,14 +32,14 @@
     "y": 250,
     "width": 150,
     "height": 50,
-    "breakLeft": true
+    "breakLeft": false
   },
   {
     "type": "platform-pair",
     "y": 150,
     "width": 150,
     "height": 50,
-    "breakLeft": false
+    "breakLeft": true
   },
   {
     "type": "goal",
