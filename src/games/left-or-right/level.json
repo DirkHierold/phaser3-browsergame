@@ -1,8 +1,36 @@
 [
-  { "type": "platform-pair", "y": 500, "width": 120, "height": 30, "gap": 160, "breakLeft": true, "xWorld": 0 },
-  { "type": "platform-pair", "y": 400, "width": 120, "height": 30, "gap": 160, "breakLeft": false, "xWorld": 120 },
-  { "type": "platform-pair", "y": 300, "width": 120, "height": 30, "gap": 160, "breakLeft": true, "xWorld": 120 },
-  { "type": "platform-pair", "y": 200, "width": 120, "height": 30, "gap": 160, "breakLeft": false, "xWorld": 120 },
-  { "type": "platform-pair", "y": 100, "width": 120, "height": 30, "gap": 160, "breakLeft": true, "xWorld": 120 },
-  { "type": "goal", "y": 40, "width": 120, "height": 30, "xWorld": 120 }
+  {
+    "type": "platform-pair",
+    "y": 450,
+    "width": 150,
+    "height": 50,
+    "breakLeft": true
+  },
+  {
+    "type": "platform-pair",
+    "y": 350,
+    "width": 150,
+    "height": 50,
+    "breakLeft": false
+  },
+  {
+    "type": "platform-pair",
+    "y": 250,
+    "width": 150,
+    "height": 50,
+    "breakLeft": true
+  },
+  {
+    "type": "platform-pair",
+    "y": 150,
+    "width": 150,
+    "height": 50,
+    "breakLeft": false
+  },
+  {
+    "type": "goal",
+    "y": 50,
+    "width": 200,
+    "height": 50
+  }
 ]

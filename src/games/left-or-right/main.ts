@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import Player from '../../shared/Player';
 import Obstacles from '../../shared/Obstacles';
 import Targets from '../../shared/Targets';
+import { Button } from '../../shared/utils/Button';
 
 
 
@@ -17,7 +18,7 @@ class LeftOrRightGame extends Phaser.Scene {
   private gameFinished: boolean = false;
   private attemptScore: number = 0;
   private moveParticles!: Phaser.GameObjects.Particles.ParticleEmitter;
-  private newGameButton!: Phaser.GameObjects.GameObject;
+  private newGameButton!: Button;
   private canChoose: boolean = true;
   private jumpCount: number = 0;
   private lastPlatformPair: any = null;
@@ -45,14 +46,10 @@ class LeftOrRightGame extends Phaser.Scene {
     this.targets = new Targets(this);
 
     // Startplattform
-    const startPlatform = this.obstacles.addBlock(340, 570, 120, 30).setOrigin(0, 0);
-    (startPlatform.body as Phaser.Physics.Arcade.Body).setImmovable(true);
+    const startPlatform = this.obstacles.addBlock(300, 550, 200, 50).setOrigin(0, 0);
+
     this.player = new Player(this);
-    this.player.setOrigin(0, 0).setPosition(370, 520);
-    const body = this.player.body as Phaser.Physics.Arcade.Body | null;
-    if (body) {
-      body.setGravityY(2000);
-    }
+    this.player.setOrigin(0, 0).setPosition(375, 500);
 
     // Partikel
     this.moveParticles = this.add.particles(0, 0, 'particle', {
@@ -79,17 +76,6 @@ class LeftOrRightGame extends Phaser.Scene {
       }
     });
 
-    this.physics.add.collider(this.player, this.obstacles, (playerObj, obstacleObj) => {
-      const player = playerObj as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-      const obstacle = obstacleObj as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-      if (obstacle.texture.key.startsWith('obstacle-')) {
-        if (player.body.touching.down && obstacle.body.touching.up) {
-          // Landed on top
-        } else {
-          this.explode();
-        }
-      }
-    });
 
     // Leveldaten laden wie bei Dash
     this.levelData = this.cache.json.get('level');
@@ -102,23 +88,22 @@ class LeftOrRightGame extends Phaser.Scene {
     const data = this.levelData[this.nextElementIndex];
     if (data.type === 'platform-pair') {
       // Spawn two platforms: left and right
-      const leftX = 160;
-      const rightX = 520;
+      const leftX = 150;
+      const rightX = 500;
       const y = data.y;
       const left = this.obstacles.addBlock(leftX, y, data.width, data.height).setOrigin(0, 0);
       const right = this.obstacles.addBlock(rightX, y, data.width, data.height).setOrigin(0, 0);
-      (left.body as Phaser.Physics.Arcade.Body).setImmovable(true);
-      (right.body as Phaser.Physics.Arcade.Body).setImmovable(true);
+
       this.lastPlatformPair = { left, right, breakLeft: data.breakLeft };
       this.canChoose = true;
     } else if (data.type === 'goal') {
       // Zielplattform + Target
-      const x = 340;
+      const x = 300;
       const y = data.y;
       const goal = this.obstacles.addBlock(x, y, data.width, data.height).setOrigin(0, 0);
-      (goal.body as Phaser.Physics.Arcade.Body).setImmovable(true);
-      const target = this.targets.addTarget(x + 35, y - 40);
-      this.physics.add.overlap(this.player, target, () => this.win(), undefined, this);
+
+      const target = this.targets.addTarget(x + 75, y - 50).setOrigin(0, 0);
+      this.win()
     }
     this.nextElementIndex++;
   }
@@ -136,14 +121,17 @@ class LeftOrRightGame extends Phaser.Scene {
       broken = breakLeft ? left : right;
     }
     if ((side === 'left' && breakLeft) || (side === 'right' && !breakLeft)) {
-      // Falsche Plattform gewählt
-      this.breakPlatform(broken, true);
-      this.explode();
+      // Falsche Plattform gewählt      
+      this.tweenPlayerTo(chosen.x + 50, chosen.y - 50, () => {
+        this.breakPlatform(broken, true);
+        this.explode();
+      });
+
     } else {
       // Richtige Plattform gewählt
       this.breakPlatform(broken, false);
       this.jumpCount++;
-      this.tweenPlayerTo(chosen.x, chosen.y - 50, () => {
+      this.tweenPlayerTo(chosen.x + 50, chosen.y - 50, () => {
         if (this.jumpCount >= 5) {
           this.spawnNextPair();
         } else {
@@ -175,13 +163,6 @@ class LeftOrRightGame extends Phaser.Scene {
       y,
       duration: 300,
       ease: 'Power2',
-      onStart: () => {
-        // Sprungimpuls nach oben für mehr Höhe
-        const body = this.player.body as Phaser.Physics.Arcade.Body | null;
-        if (body) {
-          body.setVelocityY(-700); // Deutlich höherer Sprung
-        }
-      },
       onComplete: () => {
         onComplete();
       }
@@ -191,7 +172,8 @@ class LeftOrRightGame extends Phaser.Scene {
   win() {
     this.gameFinished = true;
     this.physics.pause();
-    this.add.text(400, 300, 'You win!', { fontSize: '32px', color: '#008000' }).setOrigin(0.5);
+    this.add.text(400, 300, 'You reached the goal with ' + this.attemptScore + ' attempt' + (this.attemptScore == 1 ? '!' : 's!'), { fontSize: '32px', color: '#000' })
+      .setOrigin(0.5);
     this.handleGameFinished();
   }
 
@@ -227,10 +209,13 @@ class LeftOrRightGame extends Phaser.Scene {
     const centerX = this.game.scale.width / 2;
     const centerY = this.game.scale.height / 2 + 100;
     if (this.newGameButton) this.newGameButton.destroy();
-    this.newGameButton = this.add.text(centerX, centerY, 'NEW GAME', { fontSize: '28px', color: '#000', backgroundColor: '#fff', padding: { x: 20, y: 10 } })
-      .setOrigin(0.5, 0.5)
-      .setInteractive()
-      .setDepth(1000);
+
+    this.newGameButton = new Button(centerX, centerY, "NEW GAME", this, () => {
+      this.newGameButton.destroy();
+      this.scene.restart();
+    });
+    this.newGameButton.setOrigin(0.5, 0.5).setDepth(1000);
+
     this.newGameButton.on('pointerdown', () => {
       this.newGameButton.destroy();
       this.scene.restart();
