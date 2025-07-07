@@ -109,12 +109,6 @@ You can change the dev server's port number by modifying the `vite.config.ts` fi
 
 Change 8000 to whatever you want.
 
-## New Game: Left or Right
-
-- All files for the new game are in `src/games/left-or-right/`.
-- The game name is defined in `gameName.ts` as a variable. Change it there to update everywhere.
-- Entry point: `main.ts`, HTML: `index.html`, Manifest: `manifest.json`, Styles: `game.css`, Scenes: `scenes.ts`, Levels: `level.json`.
-
 ## License
 
 [MIT License](https://github.com/ourcade/phaser3-vite-template/blob/master/LICENSE)
