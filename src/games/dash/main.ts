@@ -29,7 +29,7 @@ export default class GameScene extends Phaser.Scene {
 
 
     preload() {
-        this.load.json('level', '/level.json');
+        this.load.json('level', '/dash-level.json');
         this.load.audio(AudioKeys.BG_Music, "/audios/anomaly.mp3");
     }
 

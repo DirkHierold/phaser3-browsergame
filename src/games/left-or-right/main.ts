@@ -25,7 +25,7 @@ class LeftOrRightGame extends Phaser.Scene {
   private lastSafeSide: 'left' | 'right' = 'left';
 
   preload() {
-    this.load.json('level', './level.json');
+    this.load.json('level', './left-or-right-level.json');
   }
 
   create() {
