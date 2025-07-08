@@ -69,7 +69,9 @@ class LeftOrRightGame extends Phaser.Scene {
     this.input.keyboard?.on('keydown-RIGHT', () => this.choose('right'));
     document.addEventListener('pointerdown', (pointer) => {
       if (!this.canChoose) return;
-      if (pointer.clientX < 300) {
+      // Use the actual screen width to determine left/right
+      const middle = window.innerWidth / 2;
+      if (pointer.clientX < middle) {
         this.choose('left');
       } else {
         this.choose('right');

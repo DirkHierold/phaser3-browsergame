@@ -5,11 +5,9 @@ body {
   justify-content: center;
   align-items: center;
   font-family: Arial, Helvetica, sans-serif;
+  touch-action: none;
 }
 
-button {
-  pointer-events: auto;
-}
 
 /* The Modal (background) */
 .modal {
