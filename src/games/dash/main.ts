@@ -11,6 +11,7 @@ export default class GameScene extends Phaser.Scene {
     private obstacles!: Obstacles;
 
     private levelData: any[]; // Level-Daten laden (z.B. aus JSON)
+    private nextLevelIndex: number = 0; // Index des nächsten Levels
     private nextElementIndex: number = 0;
     private scrollSpeed: number = 350; // Pixel pro Sekunde
     private currentLevelX: number = 0; // Aktuelle Position in der "Welt" (relevant für Level-Daten)
@@ -81,6 +82,7 @@ export default class GameScene extends Phaser.Scene {
         this.levelData = this.cache.json.get('level'); // Oder direkt ein Array
         this.currentLevelX = Number(this.game.config.width); // Start am rechten rand des Bildschirms
         this.lastObjectX = 0
+        this.nextLevelIndex = 0; // Start mit dem ersten Level
         this.nextElementIndex = 0;
 
         this.physics.world.setBounds(0, 0, 800, 600);
@@ -164,7 +166,13 @@ export default class GameScene extends Phaser.Scene {
         });
 
         // Neue Level-Elemente generieren basierend auf levelData
-        const elementData = this.levelData[this.nextElementIndex];
+        const levelDataLength = this.levelData[this.nextLevelIndex].length;
+        if (this.nextElementIndex >= levelDataLength) {
+            this.nextLevelIndex++
+            this.nextElementIndex = 0; // Reset index for next level
+        }
+
+        const elementData = this.levelData[this.nextLevelIndex][this.nextElementIndex]; // Keine weiteren Elemente
         if (this.lastObjectX + elementData.xWorld < this.currentLevelX) { // Wenn das Element fast im Bild ist
             const xToAdd: number = Number(this.game.config.width) + (this.lastObjectX + elementData.xWorld - this.currentLevelX)
             if (elementData.type == 'platform') {
