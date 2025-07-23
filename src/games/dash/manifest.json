@@ -8,17 +8,17 @@
   "display": "fullscreen",
   "icons": [
     {
-      "src": "/images/square.png",
+      "src": "/images/dash.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/images/square.png",
+      "src": "/images/dash.png",
       "sizes": "256x256",
       "type": "image/png"
     },
     {
-      "src": "/images/square.png",
+      "src": "/images/dash.png",
       "sizes": "512x512",
       "type": "image/png"
     }
