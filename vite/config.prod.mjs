@@ -28,6 +28,7 @@ export default defineConfig({
                 asteroid: path.resolve(__dirname, '../src/games/evade/index.html'),
                 champ: path.resolve(__dirname, '../src/games/dash/index.html'),
                 leftOrRight: path.resolve(__dirname, '../src/games/left-or-right/index.html'),
+                jump: path.resolve(__dirname, '../src/games/jump/index.html'),
                 // weitere Spiele hier hinzufügen
             },
             output: {

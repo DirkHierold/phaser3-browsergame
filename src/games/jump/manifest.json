@@ -1,0 +1,26 @@
+{
+    "name": "Jump",
+    "short_name": "Jump",
+    "description": "Phaser3 PWA Game about a little square by Dirk Hierold",
+    "start_url": "/src/games/jump/index.html",
+    "background_color": "white",
+    "theme_color": "white",
+    "display": "fullscreen",
+    "icons": [
+        {
+            "src": "/images/leftOrRight.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/images/leftOrRight.png",
+            "sizes": "256x256",
+            "type": "image/png"
+        },
+        {
+            "src": "/images/leftOrRight.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
