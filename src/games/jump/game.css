@@ -1,6 +1,77 @@
 body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
     background: #87eba8;
     color: #fff;
     font-family: Arial, sans-serif;
     touch-action: none;
+}
+
+#game-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    /* Nutze Flexbox, um den Canvas zu zentrieren */
+    justify-content: center;
+    align-items: center;
+    /* Hintergrundfarbe, falls Canvas nicht den gesamten Container ausfüllt */
+    background-color: #000;
+}
+
+/* Style für den Canvas, damit er flexibel innerhalb des Containers ist */
+#game-container canvas {
+    display: block;
+    /* Wichtig: Entfernt zusätzlichen Platz unter dem Canvas */
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* Overlay für "Please turn device" message */
+#turn {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 2em;
+    display: flex;
+    /* Immer Flexbox für Zentrierung verwenden */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    /* Verstecke standardmäßig über display: none; */
+    display: none;
+    /* Dies ist die Ausgangsstellung */
+}
+
+/* Media Queries zur Steuerung der Sichtbarkeit und des Canvas */
+/* Gerät ist im Portrait-Modus (Spiel soll Landscape sein) */
+@media screen and (orientation: portrait) {
+    #turn {
+        display: flex;
+        /* Zeige die Nachricht und zentriere sie mit Flexbox */
+    }
+
+    #game-container canvas {
+        display: none;
+        /* Verstecke den Spiel-Canvas */
+    }
+}
+
+/* Gerät ist im Landscape-Modus (Spiel ist auch Landscape) */
+@media screen and (orientation: landscape) {
+    #turn {
+        display: none;
+        /* Verstecke die Nachricht */
+    }
+
+    #game-container canvas {
+        display: block;
+        /* Zeige den Spiel-Canvas */
+    }
 }
