@@ -9,12 +9,8 @@ body {
 }
 
 #game-container {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    /* Nutze Flexbox, um den Canvas zu zentrieren */
-    justify-content: center;
-    align-items: center;
+    width: 100%;
+    height: 100%;
     /* Hintergrundfarbe, falls Canvas nicht den gesamten Container ausfüllt */
     background-color: #000;
 }
@@ -22,10 +18,12 @@ body {
 /* Style für den Canvas, damit er flexibel innerhalb des Containers ist */
 #game-container canvas {
     display: block;
+    /* Ensure canvas is a block element */
     /* Wichtig: Entfernt zusätzlichen Platz unter dem Canvas */
     max-width: 100%;
     max-height: 100%;
 }
+
 
 /* Overlay für "Please turn device" message */
 #turn {

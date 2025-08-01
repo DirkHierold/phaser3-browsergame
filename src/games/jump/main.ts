@@ -16,9 +16,6 @@ class JumpGame extends Phaser.Scene {
   playerSpeed: number = 2;
   cursorDebugText: Phaser.GameObjects.Text;
 
-  // UI element for the "Please turn device" message
-  private turnDeviceOverlay!: HTMLElement | null;
-
   init() {
     this.gameWidth = Number(this.game.config.width);
     this.gameHeight = Number(this.game.config.height);
@@ -27,6 +24,9 @@ class JumpGame extends Phaser.Scene {
   }
 
   preload() {
+
+    this.load.image('base', '/images/base.png');
+    this.load.image('thumb', '/images/thumb.png');
 
     this.load.spritesheet("playerIdle", "/images/Swordsman_lvl1_Idle_full.png", {
       frameWidth: 64,
@@ -45,8 +45,7 @@ class JumpGame extends Phaser.Scene {
 
   create() {
 
-    // Get the HTML element for the overlay
-    this.turnDeviceOverlay = document.getElementById("turn");
+    this.setTurnMessage();
 
     // Orientation handling (Phaser 3 handles this largely automatically with scale modes)
     // If you still need specific UI for incorrect orientation:
@@ -66,29 +65,31 @@ class JumpGame extends Phaser.Scene {
 
   // This method is called by the scale manager when orientation changes
   private handleOrientationChange(orientation: Phaser.Scale.Orientation) {
-    if (!this.turnDeviceOverlay) return;
-
     // Determine if the current device is a desktop (no need for message)
     const isDesktop = this.sys.game.device.os.desktop;
 
     // Check if the current orientation is incorrect (e.g., if we want landscape, but it's portrait)
     const isIncorrectOrientation = (orientation.toString() === Phaser.Scale.PORTRAIT);
 
+    // The CSS handles showing/hiding the overlay.
+    // This function will only handle pausing/resuming the scene's logic.
     if (!isDesktop && isIncorrectOrientation) {
-      this.turnDeviceOverlay.style.display = "block";
-      // Optional: Pause game logic if you want
-      // this.scene.pause();
+      this.scene.pause();
     } else {
-      this.turnDeviceOverlay.style.display = "none";
-      // Optional: Resume game logic if it was paused
-      // this.scene.resume();
+      this.scene.resume();
     }
+  }
 
-    // IMPORTANT: No manual game.width/height or this.scene.restart() needed here.
-    // Phaser.Scale.FIT automatically handles fitting and scaling the canvas.
-    // If you need to reposition UI elements based on the *actual display size* after scaling,
-    // you would listen to `this.scale.on('resize', (gameSize, baseSize) => { ... })`
-    // and update positions here, but it's rarely needed for simple layouts.
+  private setTurnMessage() {
+    const turnMessageElement = document.getElementById('turn-message');
+    if (turnMessageElement) {
+      const isGerman = navigator.language.toLowerCase().startsWith('de');
+      if (isGerman) {
+        turnMessageElement.textContent = 'Bitte drehe dein Gerät ins Querformat!';
+      } else {
+        turnMessageElement.textContent = 'Please turn your device to landscape!';
+      }
+    }
   }
 
   createPlayer() {
@@ -203,8 +204,8 @@ class JumpGame extends Phaser.Scene {
       x: 100,
       y: 500,
       radius: 60,
-      //base: baseGameObject,
-      //thumb: thumbGameObject,
+      base: this.add.image(0, 0, 'base').setDisplaySize(110, 110),
+      thumb: this.add.image(0, 0, 'thumb').setDisplaySize(48, 48),
       // dir: '8dir',
       // forceMin: 16,
       // fixed: true,
