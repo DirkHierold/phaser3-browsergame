@@ -17,14 +17,14 @@ class JumpGame extends Phaser.Scene {
   cursorDebugText: Phaser.GameObjects.Text;
 
   init() {
-    this.gameWidth = Number(this.game.config.width);
-    this.gameHeight = Number(this.game.config.height);
+    this.gameWidth = 800;
+    this.gameHeight = 600;
     this.gameWidthMiddle = this.gameWidth / 2;
     this.gameHeightMiddle = this.gameHeight / 2;
   }
 
   preload() {
-
+    this.load.image('background', '/images/background-template-2776x1440.png');
     this.load.image('base', '/images/base.png');
     this.load.image('thumb', '/images/thumb.png');
 
@@ -44,35 +44,86 @@ class JumpGame extends Phaser.Scene {
   }
 
   create() {
-
     this.setTurnMessage();
 
-    // Orientation handling (Phaser 3 handles this largely automatically with scale modes)
-    // If you still need specific UI for incorrect orientation:
+    // Handle resize events
+    this.scale.on('resize', this.handleResize, this);
+
+    // Orientation handling
     this.scale.on('orientationchange', (orientation: Phaser.Scale.Orientation) => {
       this.handleOrientationChange(orientation);
     });
-    // Initial check
     this.handleOrientationChange(this.scale.orientation);
 
-    this.physics.world.bounds.width = this.gameWidth;
-    this.physics.world.bounds.height = this.gameHeight;
+    this.physics.world.bounds.width = this.scale.width;
+    this.physics.world.bounds.height = this.scale.height;
+    this.createBackground();
     this.cursorDebugText = this.add.text(10, 10, '');
     this.createAnimations();
     this.createPlayer();
     this.createVirtualJoystick();
+    this.createWorldBorder();
+
+
   }
 
-  // This method is called by the scale manager when orientation changes
-  private handleOrientationChange(orientation: Phaser.Scale.Orientation) {
-    // Determine if the current device is a desktop (no need for message)
-    const isDesktop = this.sys.game.device.os.desktop;
+  handleResize() {
+    // Store relative player position before resize
+    const relativeX = this.player ? this.player.x / this.physics.world.bounds.width : 0.5;
+    const relativeY = this.player ? this.player.y / this.physics.world.bounds.height : 0.5;
 
-    // Check if the current orientation is incorrect (e.g., if we want landscape, but it's portrait)
+    this.updateBackground();
+    this.updateWorldBounds();
+    this.updateWorldBorder();
+
+    // Restore player position and scale relative to new dimensions
+    if (this.player) {
+      this.player.x = relativeX * this.physics.world.bounds.width;
+      this.player.y = relativeY * this.physics.world.bounds.height;
+      
+      // Update player scale
+      const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
+      this.player.setScale(3 * baseScale);
+    }
+
+    this.updateJoystickPosition();
+  }
+
+  updateBackground() {
+    const bg = this.children.getByName('background');
+    if (bg) {
+      bg.setDisplaySize(this.scale.width, this.scale.height);
+    }
+  }
+
+  updateWorldBounds() {
+    this.physics.world.bounds.width = this.scale.width;
+    this.physics.world.bounds.height = this.scale.height;
+  }
+
+  updateWorldBorder() {
+    const border = this.children.getByName('worldBorder');
+    if (border) {
+      border.clear();
+      border.lineStyle(4, 0x000000);
+      border.strokeRect(0, 0, this.scale.width, this.scale.height);
+    }
+  }
+
+  updateJoystickPosition() {
+    if (this.joyStick) {
+      this.joyStick.setPosition(100, this.scale.height - 100);
+    }
+  }
+
+
+
+
+
+  private handleOrientationChange(orientation: Phaser.Scale.Orientation) {
+    const isDesktop = this.sys.game.device.os.desktop;
     const isIncorrectOrientation = (orientation.toString() === Phaser.Scale.PORTRAIT);
 
-    // The CSS handles showing/hiding the overlay.
-    // This function will only handle pausing/resuming the scene's logic.
     if (!isDesktop && isIncorrectOrientation) {
       this.scene.pause();
     } else {
@@ -92,11 +143,17 @@ class JumpGame extends Phaser.Scene {
     }
   }
 
+
+
   createPlayer() {
-    this.player = this.physics.add.sprite(this.gameWidthMiddle, this.gameHeightMiddle, 'playerIdle', 0);
+    this.player = this.physics.add.sprite(this.scale.width / 2, this.scale.height / 2, 'playerIdle', 0);
     this.physics.add.existing(this.player);
     this.player.body.setCollideWorldBounds(true);
-    this.player.setScale(3);
+    
+    // Scale player based on screen size
+    const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
+    this.player.setScale(3 * baseScale);
+    
     this.player.anims.play('idle-down');
   }
 
@@ -199,19 +256,29 @@ class JumpGame extends Phaser.Scene {
   }
 
   createVirtualJoystick() {
-    // https://rexrainbow.github.io/phaser3-rex-notes/docs/site/virtualjoystick/
     this.joyStick = new VirtualJoystick(this, {
       x: 100,
-      y: 500,
+      y: this.scale.height - 100,
       radius: 60,
       base: this.add.image(0, 0, 'base').setDisplaySize(110, 110),
       thumb: this.add.image(0, 0, 'thumb').setDisplaySize(48, 48),
-      // dir: '8dir',
-      // forceMin: 16,
-      // fixed: true,
-      // enable: true
     });
     this.cursorKeys = this.joyStick.createCursorKeys();
+  }
+
+  createBackground() {
+    const bg = this.add.image(0, 0, 'background');
+    bg.setOrigin(0, 0);
+    bg.setDisplaySize(this.scale.width, this.scale.height);
+    bg.setDepth(-1);
+    bg.setName('background');
+  }
+
+  createWorldBorder() {
+    const graphics = this.add.graphics();
+    graphics.lineStyle(4, 0x000000);
+    graphics.strokeRect(0, 0, this.scale.width, this.scale.height);
+    graphics.setName('worldBorder');
   }
 
   update(time: number, delta: number): void {
@@ -339,18 +406,19 @@ const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   width: 800,
   height: 600,
-  parent: 'game-container',// ID of the HTML element where the game canvas will be injected
-  backgroundColor: '#87CEEB',
+  parent: 'game-container',
+  transparent: true,
   dom: {
     createContainer: true
   },
   physics: {
     default: 'arcade',
-    arcade: { gravity: { x: 0, y: 0 }, debug: false }
+    arcade: { gravity: { x: 0, y: 0 }, debug: true }
   },
   scale: {
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH
+    mode: Phaser.Scale.RESIZE,
+    width: '100%',
+    height: '100%'
   },
   scene: JumpGame,
 };
