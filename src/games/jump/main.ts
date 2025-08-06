@@ -31,6 +31,7 @@ class JumpGame extends Phaser.Scene {
   worldBorder: Phaser.GameObjects.Graphics;
   attackButton: Phaser.GameObjects.Graphics;
   slime: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  swordHitbox: Phaser.GameObjects.Zone;
 
   playerState: PlayerState = PlayerState.IDLE;
   facingDirection: Direction = Direction.DOWN;
@@ -182,12 +183,14 @@ class JumpGame extends Phaser.Scene {
     this.player = this.physics.add.sprite(this.scale.width / 2, this.scale.height / 2, 'playerIdle', 0);
     this.physics.add.existing(this.player);
     this.player.body.setCollideWorldBounds(true);
+    this.player.body.setSize(24, 32, true);
 
     // Scale player based on screen size
     const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
     this.player.setScale(3 * baseScale);
 
     this.player.anims.play('idle-down');
+    this.createSwordHitbox();
   }
 
   createAnimations() {
@@ -393,6 +396,7 @@ class JumpGame extends Phaser.Scene {
     this.updatePlayerState();
     this.handleMovement();
     this.updateAnimation();
+    this.updateSwordHitbox();
   }
 
   updateJoystickState() {
@@ -488,16 +492,50 @@ class JumpGame extends Phaser.Scene {
     } else {
       this.slime = this.physics.add.sprite(x, y, 'slimeIdle', 0);
       this.slime.setScale(2);
+      this.slime.body.setSize(28, 20, true);
     }
     this.slime.anims.play(`slime-idle-${randomDirection}`);
   }
 
+  createSwordHitbox() {
+    this.swordHitbox = this.add.zone(0, 0, 60, 60);
+    this.physics.add.existing(this.swordHitbox);
+    (this.swordHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
+  }
+
   setupCollisions() {
-    this.physics.add.overlap(this.player, this.slime, () => {
-      if (this.playerState === PlayerState.ATTACKING) {
-        this.respawnSlime();
-      }
+    this.physics.add.overlap(this.swordHitbox, this.slime, () => {
+      this.respawnSlime();
     });
+  }
+
+  updateSwordHitbox() {
+    if (!this.swordHitbox?.body) return;
+
+    const body = this.swordHitbox.body as Phaser.Physics.Arcade.Body;
+
+    if (this.playerState !== PlayerState.ATTACKING) {
+      body.enable = false;
+      return;
+    }
+
+    const currentFrame = this.player.anims.currentFrame?.index || 0;
+    if (currentFrame >= 2 && currentFrame <= 4) {
+      body.enable = true;
+
+      const offset = 10;
+      const positions = {
+        [Direction.DOWN]: { x: this.player.x, y: this.player.y + offset },
+        [Direction.UP]: { x: this.player.x, y: this.player.y - offset },
+        [Direction.LEFT]: { x: this.player.x - offset, y: this.player.y },
+        [Direction.RIGHT]: { x: this.player.x + offset, y: this.player.y }
+      };
+
+      const pos = positions[this.facingDirection];
+      this.swordHitbox.setPosition(pos.x, pos.y);
+    } else {
+      body.enable = false;
+    }
   }
 
   performAttack() {
