@@ -198,7 +198,7 @@ class JumpGame extends Phaser.Scene {
     this.player = this.physics.add.sprite(this.scale.width / 2, this.scale.height / 2, 'playerIdle', 0);
     this.physics.add.existing(this.player);
     this.player.body.setCollideWorldBounds(true);
-    this.player.body.setSize(24, 32, true);
+    this.player.body.setSize(16, 24, true);
 
     // Scale player based on screen size
     const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
@@ -580,7 +580,7 @@ class JumpGame extends Phaser.Scene {
     } else {
       this.slime = this.physics.add.sprite(x, y, 'slimeIdle', 0);
       this.slime.setScale(2);
-      this.slime.body.setSize(28, 20, true);
+      this.slime.body.setCircle(10, 22, 22);
     }
     this.slime.anims.play(`slime-idle-${randomDirection}`);
   }
@@ -595,7 +595,7 @@ class JumpGame extends Phaser.Scene {
     this.physics.add.overlap(this.swordHitbox, this.slime, () => {
       this.killSlime();
     });
-    
+
     this.physics.add.overlap(this.player, this.slime, () => {
       if (this.playerState !== PlayerState.ATTACKING && this.playerState !== PlayerState.HURT) {
         this.hurtPlayer();
@@ -603,24 +603,24 @@ class JumpGame extends Phaser.Scene {
     });
   }
 
+
+
   hurtPlayer() {
     this.playerState = PlayerState.HURT;
     this.player.anims.play(`hurt-${this.facingDirection}`);
-    
+
     this.cameras.main.shake(200, 0.01);
-    
+
     const pushDistance = 30;
-    const pushBack = {
-      [Direction.DOWN]: { x: 0, y: -pushDistance },
-      [Direction.UP]: { x: 0, y: pushDistance },
-      [Direction.LEFT]: { x: pushDistance, y: 0 },
-      [Direction.RIGHT]: { x: -pushDistance, y: 0 }
-    };
-    
-    const push = pushBack[this.facingDirection];
-    this.player.x += push.x;
-    this.player.y += push.y;
-    
+    const dx = this.player.x - this.slime.x;
+    const dy = this.player.y - this.slime.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance > 0) {
+      this.player.x += (dx / distance) * pushDistance;
+      this.player.y += (dy / distance) * pushDistance;
+    }
+
     this.player.once('animationcomplete', () => {
       this.playerState = PlayerState.IDLE;
     });
