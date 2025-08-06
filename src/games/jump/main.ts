@@ -75,6 +75,13 @@ class JumpGame extends Phaser.Scene {
       startFrame: 0,
       endFrame: 24
     });
+
+    this.load.spritesheet("slimeDeath", "/images/Slime1_Death_full.png", {
+      frameWidth: 64,
+      frameHeight: 64,
+      startFrame: 0,
+      endFrame: 40
+    });
   }
 
   create() {
@@ -128,7 +135,7 @@ class JumpGame extends Phaser.Scene {
   }
 
   updateBackground() {
-    this.bg.setDisplaySize(this.scale.width, this.scale.height);
+    // this.bg.setDisplaySize(this.scale.width, this.scale.height);
   }
 
   updateWorldBounds() {
@@ -353,6 +360,42 @@ class JumpGame extends Phaser.Scene {
       frameRate: 8,
       repeat: -1
     });
+
+    this.anims.create({
+      key: 'slime-death-down',
+      frames: this.anims.generateFrameNames('slimeDeath', {
+        frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'slime-death-up',
+      frames: this.anims.generateFrameNames('slimeDeath', {
+        frames: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'slime-death-left',
+      frames: this.anims.generateFrameNames('slimeDeath', {
+        frames: [20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'slime-death-right',
+      frames: this.anims.generateFrameNames('slimeDeath', {
+        frames: [30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
   }
 
   createVirtualJoystick() {
@@ -379,10 +422,11 @@ class JumpGame extends Phaser.Scene {
   }
 
   createBackground() {
-    this.bg = this.add.image(0, 0, 'background');
-    this.bg.setOrigin(0, 0);
-    this.bg.setDisplaySize(this.scale.width, this.scale.height);
-    this.bg.setDepth(-1);
+    // this.bg = this.add.image(0, 0, 'background');
+    // this.bg.setOrigin(0, 0);
+    // this.bg.setDisplaySize(this.scale.width, this.scale.height);
+    // this.bg.setDepth(-1);
+    this.cameras.main.setBackgroundColor('#228B22');
   }
 
   createWorldBorder() {
@@ -505,6 +549,16 @@ class JumpGame extends Phaser.Scene {
 
   setupCollisions() {
     this.physics.add.overlap(this.swordHitbox, this.slime, () => {
+      this.killSlime();
+    });
+  }
+
+  killSlime() {
+    const currentAnim = this.slime.anims.currentAnim?.key || 'slime-idle-down';
+    const direction = currentAnim.split('-')[2] || 'down';
+
+    this.slime.anims.play(`slime-death-${direction}`);
+    this.slime.once('animationcomplete', () => {
       this.respawnSlime();
     });
   }
@@ -562,7 +616,7 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   physics: {
     default: 'arcade',
-    arcade: { gravity: { x: 0, y: 0 }, debug: true }
+    arcade: { gravity: { x: 0, y: 0 }, debug: false }
   },
   scale: {
     mode: Phaser.Scale.RESIZE,
