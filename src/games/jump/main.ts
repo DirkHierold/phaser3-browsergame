@@ -1,6 +1,19 @@
 import Phaser from 'phaser';
 import VirtualJoystick from 'phaser3-rex-plugins/plugins/virtualjoystick.js';
 
+enum PlayerState {
+  IDLE = 'idle',
+  WALKING = 'walking',
+  ATTACKING = 'attacking'
+}
+
+enum Direction {
+  UP = 'up',
+  DOWN = 'down',
+  LEFT = 'left',
+  RIGHT = 'right'
+}
+
 class JumpGame extends Phaser.Scene {
 
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -12,9 +25,14 @@ class JumpGame extends Phaser.Scene {
   cursorKeys: { up: Phaser.Input.Keyboard.Key; down: Phaser.Input.Keyboard.Key; left: Phaser.Input.Keyboard.Key; right: Phaser.Input.Keyboard.Key; };
 
   newCursorDirection: string = '';
-  lastCursorDirection: string = '';
   playerSpeed: number = 2;
   cursorDebugText: Phaser.GameObjects.Text;
+  bg: Phaser.GameObjects.Image;
+  worldBorder: Phaser.GameObjects.Graphics;
+  attackButton: Phaser.GameObjects.Graphics;
+  
+  playerState: PlayerState = PlayerState.IDLE;
+  facingDirection: Direction = Direction.DOWN;
 
   init() {
     this.gameWidth = 800;
@@ -41,6 +59,13 @@ class JumpGame extends Phaser.Scene {
       startFrame: 0,
       endFrame: 24
     });
+
+    this.load.spritesheet("playerAttack", "/images/Swordsman_lvl1_attack_full.png", {
+      frameWidth: 64,
+      frameHeight: 64,
+      startFrame: 0,
+      endFrame: 32
+    });
   }
 
   create() {
@@ -62,6 +87,7 @@ class JumpGame extends Phaser.Scene {
     this.createAnimations();
     this.createPlayer();
     this.createVirtualJoystick();
+    this.createAttackButton();
     this.createWorldBorder();
 
 
@@ -80,20 +106,18 @@ class JumpGame extends Phaser.Scene {
     if (this.player) {
       this.player.x = relativeX * this.physics.world.bounds.width;
       this.player.y = relativeY * this.physics.world.bounds.height;
-      
+
       // Update player scale
       const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
       this.player.setScale(3 * baseScale);
     }
 
     this.updateJoystickPosition();
+    this.updateAttackButtonPosition();
   }
 
   updateBackground() {
-    const bg = this.children.getByName('background');
-    if (bg) {
-      bg.setDisplaySize(this.scale.width, this.scale.height);
-    }
+    this.bg.setDisplaySize(this.scale.width, this.scale.height);
   }
 
   updateWorldBounds() {
@@ -102,12 +126,9 @@ class JumpGame extends Phaser.Scene {
   }
 
   updateWorldBorder() {
-    const border = this.children.getByName('worldBorder');
-    if (border) {
-      border.clear();
-      border.lineStyle(4, 0x000000);
-      border.strokeRect(0, 0, this.scale.width, this.scale.height);
-    }
+    this.worldBorder.clear();
+    this.worldBorder.lineStyle(4, 0x000000);
+    this.worldBorder.strokeRect(0, 0, this.scale.width, this.scale.height);
   }
 
   updateJoystickPosition() {
@@ -116,9 +137,11 @@ class JumpGame extends Phaser.Scene {
     }
   }
 
-
-
-
+  updateAttackButtonPosition() {
+    if (this.attackButton) {
+      this.attackButton.setPosition(this.scale.width - 100, this.scale.height - 100);
+    }
+  }
 
   private handleOrientationChange(orientation: Phaser.Scale.Orientation) {
     const isDesktop = this.sys.game.device.os.desktop;
@@ -149,11 +172,11 @@ class JumpGame extends Phaser.Scene {
     this.player = this.physics.add.sprite(this.scale.width / 2, this.scale.height / 2, 'playerIdle', 0);
     this.physics.add.existing(this.player);
     this.player.body.setCollideWorldBounds(true);
-    
+
     // Scale player based on screen size
     const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
     this.player.setScale(3 * baseScale);
-    
+
     this.player.anims.play('idle-down');
   }
 
@@ -253,6 +276,42 @@ class JumpGame extends Phaser.Scene {
       frameRate: 12,
       repeat: -1
     });
+
+    this.anims.create({
+      key: 'attack-down',
+      frames: this.anims.generateFrameNames('playerAttack', {
+        frames: [0, 1, 2, 3, 4, 5, 6, 7]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'attack-left',
+      frames: this.anims.generateFrameNames('playerAttack', {
+        frames: [8, 9, 10, 11, 12, 13, 14, 15]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'attack-right',
+      frames: this.anims.generateFrameNames('playerAttack', {
+        frames: [16, 17, 18, 19, 20, 21, 22, 23]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'attack-up',
+      frames: this.anims.generateFrameNames('playerAttack', {
+        frames: [24, 25, 26, 27, 28, 29, 30, 31]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
   }
 
   createVirtualJoystick() {
@@ -266,23 +325,36 @@ class JumpGame extends Phaser.Scene {
     this.cursorKeys = this.joyStick.createCursorKeys();
   }
 
+  createAttackButton() {
+    this.attackButton = this.add.graphics();
+    this.attackButton.fillStyle(0xff0000);
+    this.attackButton.fillCircle(0, 0, 55);
+    this.attackButton.setPosition(this.scale.width - 100, this.scale.height - 100);
+    this.attackButton.setInteractive(new Phaser.Geom.Circle(0, 0, 55), Phaser.Geom.Circle.Contains);
+
+    this.attackButton.on('pointerdown', () => {
+      this.performAttack();
+    });
+  }
+
   createBackground() {
-    const bg = this.add.image(0, 0, 'background');
-    bg.setOrigin(0, 0);
-    bg.setDisplaySize(this.scale.width, this.scale.height);
-    bg.setDepth(-1);
-    bg.setName('background');
+    this.bg = this.add.image(0, 0, 'background');
+    this.bg.setOrigin(0, 0);
+    this.bg.setDisplaySize(this.scale.width, this.scale.height);
+    this.bg.setDepth(-1);
   }
 
   createWorldBorder() {
-    const graphics = this.add.graphics();
-    graphics.lineStyle(4, 0x000000);
-    graphics.strokeRect(0, 0, this.scale.width, this.scale.height);
-    graphics.setName('worldBorder');
+    this.worldBorder = this.add.graphics();
+    this.worldBorder.lineStyle(4, 0x000000);
+    this.worldBorder.strokeRect(0, 0, this.scale.width, this.scale.height);
   }
 
   update(time: number, delta: number): void {
     this.updateJoystickState();
+    this.updatePlayerState();
+    this.handleMovement();
+    this.updateAnimation();
   }
 
   updateJoystickState() {
@@ -294,28 +366,8 @@ class JumpGame extends Phaser.Scene {
         this.newCursorDirection += key;
       }
     }
-
-    // If no direction if provided then stop
-    // the player animations and exit the method
-    // if (direction.length === 0) {
-    //   this.stopPlayerAnimations();
-    //   return;
-    // }
-
-    // If last cursor direction is different
-    //  the stop all player animations
-    if (this.newCursorDirection !== this.lastCursorDirection) {
-      this.stopPlayerAnimations();
-    }
-
-    // Handle the player moving
-    this.movePlayer();
-
     // Set debug info about the cursor
     // this.setCursorDebugInfo();
-
-    // Set the new cursor direction
-    this.lastCursorDirection = this.newCursorDirection;
   }
 
   setCursorDebugInfo() {
@@ -335,79 +387,73 @@ class JumpGame extends Phaser.Scene {
     // this.player.anims.stop('walking-down');
   }
 
-  movePlayer() {
-    if (this.newCursorDirection === "up") {
-      this.player.y -= this.playerSpeed;
-      if (!this.player.anims.isPlaying)
-        this.player.anims.play('walking-up');
-    } else if (this.newCursorDirection === "down") {
-      this.player.y += this.playerSpeed;
-      if (!this.player.anims.isPlaying)
-        this.player.anims.play('walking-down');
-    } else if (this.newCursorDirection === "right") {
-      this.player.x += this.playerSpeed;
-      if (!this.player.anims.isPlaying)
-        this.player.anims.play('walking-right');
-    } else if (this.newCursorDirection === "left") {
-      this.player.x -= this.playerSpeed;
-      if (!this.player.anims.isPlaying)
-        this.player.anims.play('walking-left');
-    } else if (this.newCursorDirection === "upright") {
-      this.player.x += this.playerSpeed;
-      this.player.y -= this.playerSpeed;
-      if (!this.player.anims.isPlaying)
-        this.player.anims.play('walking-right');
-    } else if (this.newCursorDirection === "downright") {
-      this.player.x += this.playerSpeed;
-      this.player.y += this.playerSpeed;
-      if (!this.player.anims.isPlaying)
-        this.player.anims.play('walking-right');
-    } else if (this.newCursorDirection === "downleft") {
-      this.player.x -= this.playerSpeed;
-      this.player.y += this.playerSpeed;
-      if (!this.player.anims.isPlaying)
-        this.player.anims.play('walking-left');
-    } else if (this.newCursorDirection === "upleft") {
-      this.player.x -= this.playerSpeed;
-      this.player.y -= this.playerSpeed;
-      if (!this.player.anims.isPlaying)
-        this.player.anims.play('walking-left');
-    } else if (this.newCursorDirection === '') {
-      if (this.lastCursorDirection === "down") {
-
-        if (!this.player.anims.isPlaying) {
-          this.player.anims.play('idle-down');
-        }
-      } else if (this.lastCursorDirection === "left" || this.lastCursorDirection === "downleft" || this.lastCursorDirection === "upleft") {
-
-        if (!this.player.anims.isPlaying) {
-          this.player.anims.play('idle-left');
-        }
-      } else if (this.lastCursorDirection === "right" || this.lastCursorDirection === "downright" || this.lastCursorDirection === "upright") {
-
-        if (!this.player.anims.isPlaying) {
-          this.player.anims.play('idle-right');
-        }
-      } else if (this.lastCursorDirection === "up") {
-
-        if (!this.player.anims.isPlaying) {
-          this.player.anims.play('idle-up');
-        }
-      }
-    } else {
-      // If no direction is pressed, stop the player animations
-      this.stopPlayerAnimations();
+  updatePlayerState() {
+    if (this.playerState === PlayerState.ATTACKING) return;
+    
+    this.playerState = this.newCursorDirection !== '' ? PlayerState.WALKING : PlayerState.IDLE;
+    
+    if (this.newCursorDirection !== '') {
+      this.facingDirection = this.getDirectionFromInput(this.newCursorDirection);
     }
+  }
+
+  getDirectionFromInput(input: string): Direction {
+    if (input === 'up') return Direction.UP;
+    if (input === 'down') return Direction.DOWN;
+    if (input.includes('right')) return Direction.RIGHT;
+    if (input.includes('left')) return Direction.LEFT;
+    return this.facingDirection;
+  }
+
+  handleMovement() {
+    if (this.playerState !== PlayerState.WALKING) return;
+
+    const movements: Record<string, { x: number; y: number }> = {
+      'up': { x: 0, y: -this.playerSpeed },
+      'down': { x: 0, y: this.playerSpeed },
+      'left': { x: -this.playerSpeed, y: 0 },
+      'right': { x: this.playerSpeed, y: 0 },
+      'upright': { x: this.playerSpeed, y: -this.playerSpeed },
+      'downright': { x: this.playerSpeed, y: this.playerSpeed },
+      'downleft': { x: -this.playerSpeed, y: this.playerSpeed },
+      'upleft': { x: -this.playerSpeed, y: -this.playerSpeed }
+    };
+
+    const movement = movements[this.newCursorDirection];
+    if (movement) {
+      this.player.x += movement.x;
+      this.player.y += movement.y;
+    }
+  }
+
+  updateAnimation() {
+    if (this.player.anims.isPlaying && this.playerState === PlayerState.ATTACKING) return;
+
+    const animKey = `${this.playerState}-${this.facingDirection}`;
+    if (!this.player.anims.isPlaying || this.player.anims.currentAnim?.key !== animKey) {
+      this.player.anims.play(animKey);
+    }
+  }
+
+  performAttack() {
+    if (this.playerState === PlayerState.ATTACKING) return;
+
+    this.playerState = PlayerState.ATTACKING;
+    const attackAnim = `attack-${this.facingDirection}`;
+    this.player.anims.play(attackAnim);
+
+    this.player.once('animationcomplete', () => {
+      this.playerState = PlayerState.IDLE;
+    });
   }
 
 }
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  width: 800,
+  width: 900,
   height: 600,
   parent: 'game-container',
-  transparent: true,
   dom: {
     createContainer: true
   },
