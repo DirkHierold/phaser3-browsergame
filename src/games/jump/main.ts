@@ -4,7 +4,8 @@ import VirtualJoystick from 'phaser3-rex-plugins/plugins/virtualjoystick.js';
 enum PlayerState {
   IDLE = 'idle',
   WALKING = 'walking',
-  ATTACKING = 'attacking'
+  ATTACKING = 'attacking',
+  HURT = 'hurt'
 }
 
 enum Direction {
@@ -67,6 +68,13 @@ class JumpGame extends Phaser.Scene {
       frameHeight: 64,
       startFrame: 0,
       endFrame: 32
+    });
+
+    this.load.spritesheet("playerHurt", "/images/Swordsman_lvl1_Hurt_full.png", {
+      frameWidth: 64,
+      frameHeight: 64,
+      startFrame: 0,
+      endFrame: 20
     });
 
     this.load.spritesheet("slimeIdle", "/images/Slime1_Idle_full.png", {
@@ -326,6 +334,42 @@ class JumpGame extends Phaser.Scene {
     });
 
     this.anims.create({
+      key: 'hurt-down',
+      frames: this.anims.generateFrameNames('playerHurt', {
+        frames: [0, 1, 2, 3, 4]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'hurt-left',
+      frames: this.anims.generateFrameNames('playerHurt', {
+        frames: [5, 6, 7, 8, 9]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'hurt-right',
+      frames: this.anims.generateFrameNames('playerHurt', {
+        frames: [10, 11, 12, 13, 14]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'hurt-up',
+      frames: this.anims.generateFrameNames('playerHurt', {
+        frames: [15, 16, 17, 18, 19]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
+
+    this.anims.create({
       key: 'slime-idle-down',
       frames: this.anims.generateFrameNames('slimeIdle', {
         frames: [0, 1, 2, 3, 4, 5]
@@ -474,7 +518,7 @@ class JumpGame extends Phaser.Scene {
   }
 
   updatePlayerState() {
-    if (this.playerState === PlayerState.ATTACKING) return;
+    if (this.playerState === PlayerState.ATTACKING || this.playerState === PlayerState.HURT) return;
 
     this.playerState = this.newCursorDirection !== '' ? PlayerState.WALKING : PlayerState.IDLE;
 
@@ -551,6 +595,35 @@ class JumpGame extends Phaser.Scene {
     this.physics.add.overlap(this.swordHitbox, this.slime, () => {
       this.killSlime();
     });
+    
+    this.physics.add.overlap(this.player, this.slime, () => {
+      if (this.playerState !== PlayerState.ATTACKING && this.playerState !== PlayerState.HURT) {
+        this.hurtPlayer();
+      }
+    });
+  }
+
+  hurtPlayer() {
+    this.playerState = PlayerState.HURT;
+    this.player.anims.play(`hurt-${this.facingDirection}`);
+    
+    this.cameras.main.shake(200, 0.01);
+    
+    const pushDistance = 30;
+    const pushBack = {
+      [Direction.DOWN]: { x: 0, y: -pushDistance },
+      [Direction.UP]: { x: 0, y: pushDistance },
+      [Direction.LEFT]: { x: pushDistance, y: 0 },
+      [Direction.RIGHT]: { x: -pushDistance, y: 0 }
+    };
+    
+    const push = pushBack[this.facingDirection];
+    this.player.x += push.x;
+    this.player.y += push.y;
+    
+    this.player.once('animationcomplete', () => {
+      this.playerState = PlayerState.IDLE;
+    });
   }
 
   killSlime() {
@@ -593,7 +666,7 @@ class JumpGame extends Phaser.Scene {
   }
 
   performAttack() {
-    if (this.playerState === PlayerState.ATTACKING) return;
+    if (this.playerState === PlayerState.ATTACKING || this.playerState === PlayerState.HURT) return;
 
     this.playerState = PlayerState.ATTACKING;
     const attackAnim = `attack-${this.facingDirection}`;
