@@ -4,6 +4,7 @@ import VirtualJoystick from 'phaser3-rex-plugins/plugins/virtualjoystick.js';
 enum PlayerState {
   IDLE = 'idle',
   WALKING = 'walking',
+  WALKING_ATTACK = 'walking-attack',
   ATTACKING = 'attacking',
   HURT = 'hurt'
 }
@@ -36,6 +37,7 @@ class JumpGame extends Phaser.Scene {
 
   playerState: PlayerState = PlayerState.IDLE;
   facingDirection: Direction = Direction.DOWN;
+  isWalkingAttack: boolean = false;
 
   init() {
     this.gameWidth = 800;
@@ -75,6 +77,13 @@ class JumpGame extends Phaser.Scene {
       frameHeight: 64,
       startFrame: 0,
       endFrame: 20
+    });
+
+    this.load.spritesheet("playerWalkAttack", "/images/Swordsman_lvl1_Walk_Attack_full.png", {
+      frameWidth: 64,
+      frameHeight: 64,
+      startFrame: 0,
+      endFrame: 24
     });
 
     this.load.spritesheet("slimeIdle", "/images/Slime1_Idle_full.png", {
@@ -198,7 +207,7 @@ class JumpGame extends Phaser.Scene {
     this.player = this.physics.add.sprite(this.scale.width / 2, this.scale.height / 2, 'playerIdle', 0);
     this.physics.add.existing(this.player);
     this.player.body.setCollideWorldBounds(true);
-    this.player.body.setSize(16, 24, true);
+    this.player.body.setCircle(8, 24, 32);
 
     // Scale player based on screen size
     const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
@@ -440,6 +449,42 @@ class JumpGame extends Phaser.Scene {
       frameRate: 12,
       repeat: 0
     });
+
+    this.anims.create({
+      key: 'walking-attack-down',
+      frames: this.anims.generateFrameNames('playerWalkAttack', {
+        frames: [0, 1, 2, 3, 4, 5]
+      }),
+      frameRate: 10,
+      repeat: -1
+    });
+
+    this.anims.create({
+      key: 'walking-attack-left',
+      frames: this.anims.generateFrameNames('playerWalkAttack', {
+        frames: [6, 7, 8, 9, 10, 11]
+      }),
+      frameRate: 10,
+      repeat: -1
+    });
+
+    this.anims.create({
+      key: 'walking-attack-right',
+      frames: this.anims.generateFrameNames('playerWalkAttack', {
+        frames: [12, 13, 14, 15, 16, 17]
+      }),
+      frameRate: 10,
+      repeat: -1
+    });
+
+    this.anims.create({
+      key: 'walking-attack-up',
+      frames: this.anims.generateFrameNames('playerWalkAttack', {
+        frames: [18, 19, 20, 21, 22, 23]
+      }),
+      frameRate: 10,
+      repeat: -1
+    });
   }
 
   createVirtualJoystick() {
@@ -461,9 +506,19 @@ class JumpGame extends Phaser.Scene {
     this.attackButton.setInteractive(new Phaser.Geom.Circle(0, 0, 55), Phaser.Geom.Circle.Contains);
 
     this.attackButton.on('pointerdown', () => {
-      this.performAttack();
+      if (this.playerState === PlayerState.WALKING) {
+        this.isWalkingAttack = true;
+      } else {
+        this.performAttack();
+      }
+    });
+
+    this.attackButton.on('pointerup', () => {
+      this.isWalkingAttack = false;
     });
   }
+
+
 
   createBackground() {
     // this.bg = this.add.image(0, 0, 'background');
@@ -520,10 +575,12 @@ class JumpGame extends Phaser.Scene {
   updatePlayerState() {
     if (this.playerState === PlayerState.ATTACKING || this.playerState === PlayerState.HURT) return;
 
-    this.playerState = this.newCursorDirection !== '' ? PlayerState.WALKING : PlayerState.IDLE;
-
     if (this.newCursorDirection !== '') {
+      this.playerState = this.isWalkingAttack ? PlayerState.WALKING_ATTACK : PlayerState.WALKING;
       this.facingDirection = this.getDirectionFromInput(this.newCursorDirection);
+    } else {
+      this.playerState = PlayerState.IDLE;
+      this.isWalkingAttack = false;
     }
   }
 
@@ -536,7 +593,7 @@ class JumpGame extends Phaser.Scene {
   }
 
   handleMovement() {
-    if (this.playerState !== PlayerState.WALKING) return;
+    if (this.playerState !== PlayerState.WALKING && this.playerState !== PlayerState.WALKING_ATTACK) return;
 
     const movements: Record<string, { x: number; y: number }> = {
       'up': { x: 0, y: -this.playerSpeed },
@@ -580,7 +637,7 @@ class JumpGame extends Phaser.Scene {
     } else {
       this.slime = this.physics.add.sprite(x, y, 'slimeIdle', 0);
       this.slime.setScale(2);
-      this.slime.body.setCircle(10, 22, 22);
+      this.slime.body.setCircle(7, 26, 26);
     }
     this.slime.anims.play(`slime-idle-${randomDirection}`);
   }
@@ -641,6 +698,20 @@ class JumpGame extends Phaser.Scene {
 
     const body = this.swordHitbox.body as Phaser.Physics.Arcade.Body;
 
+    if (this.playerState === PlayerState.WALKING_ATTACK) {
+      body.enable = true;
+      const offset = 10;
+      const positions = {
+        [Direction.DOWN]: { x: this.player.x, y: this.player.y + offset },
+        [Direction.UP]: { x: this.player.x, y: this.player.y - offset },
+        [Direction.LEFT]: { x: this.player.x - offset, y: this.player.y },
+        [Direction.RIGHT]: { x: this.player.x + offset, y: this.player.y }
+      };
+      const pos = positions[this.facingDirection];
+      this.swordHitbox.setPosition(pos.x, pos.y);
+      return;
+    }
+
     if (this.playerState !== PlayerState.ATTACKING) {
       body.enable = false;
       return;
@@ -689,7 +760,7 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   physics: {
     default: 'arcade',
-    arcade: { gravity: { x: 0, y: 0 }, debug: false }
+    arcade: { gravity: { x: 0, y: 0 }, debug: true }
   },
   scale: {
     mode: Phaser.Scale.RESIZE,
