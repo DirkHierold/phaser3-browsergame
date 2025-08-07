@@ -25,6 +25,8 @@ class JumpGame extends Phaser.Scene {
   gameHeightMiddle: number;
   joyStick: VirtualJoystick;
   cursorKeys: { up: Phaser.Input.Keyboard.Key; down: Phaser.Input.Keyboard.Key; left: Phaser.Input.Keyboard.Key; right: Phaser.Input.Keyboard.Key; };
+  wasdKeys: { up: Phaser.Input.Keyboard.Key; down: Phaser.Input.Keyboard.Key; left: Phaser.Input.Keyboard.Key; right: Phaser.Input.Keyboard.Key; };
+  attackKeys: { space: Phaser.Input.Keyboard.Key; enter: Phaser.Input.Keyboard.Key; };
 
   newCursorDirection: string = '';
   playerSpeed: number = 2;
@@ -120,8 +122,12 @@ class JumpGame extends Phaser.Scene {
     this.createAnimations();
     this.createPlayer();
     this.createSlime();
-    this.createVirtualJoystick();
-    this.createAttackButton();
+    if (this.sys.game.device.os.desktop) {
+      this.createKeyboardControls();
+    } else {
+      this.createVirtualJoystick();
+      this.createAttackButton();
+    }
     this.createWorldBorder();
     this.setupCollisions();
 
@@ -129,26 +135,44 @@ class JumpGame extends Phaser.Scene {
   }
 
   handleResize() {
-    // Store relative player position before resize
-    const relativeX = this.player ? this.player.x / this.physics.world.bounds.width : 0.5;
-    const relativeY = this.player ? this.player.y / this.physics.world.bounds.height : 0.5;
+    // Store relative positions before resize
+    const relativePlayerX = this.player ? this.player.x / this.physics.world.bounds.width : 0.5;
+    const relativePlayerY = this.player ? this.player.y / this.physics.world.bounds.height : 0.5;
+    const relativeSlimeX = this.slime ? this.slime.x / this.physics.world.bounds.width : 0.5;
+    const relativeSlimeY = this.slime ? this.slime.y / this.physics.world.bounds.height : 0.5;
 
     this.updateBackground();
     this.updateWorldBounds();
     this.updateWorldBorder();
 
-    // Restore player position and scale relative to new dimensions
-    if (this.player) {
-      this.player.x = relativeX * this.physics.world.bounds.width;
-      this.player.y = relativeY * this.physics.world.bounds.height;
+    const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
 
-      // Update player scale
-      const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
+    // Restore player position and scale
+    if (this.player) {
+      this.player.x = relativePlayerX * this.physics.world.bounds.width;
+      this.player.y = relativePlayerY * this.physics.world.bounds.height;
       this.player.setScale(3 * baseScale);
     }
 
-    this.updateJoystickPosition();
-    this.updateAttackButtonPosition();
+    // Restore slime position and scale
+    if (this.slime) {
+      this.slime.x = relativeSlimeX * this.physics.world.bounds.width;
+      this.slime.y = relativeSlimeY * this.physics.world.bounds.height;
+      this.slime.setScale(2 * baseScale);
+    }
+
+
+
+    // Update sword hitbox size for desktop
+    if (this.swordHitbox && this.sys.game.device.os.desktop) {
+      const hitboxSize = 120 * baseScale;
+      this.swordHitbox.setSize(hitboxSize, hitboxSize);
+    }
+
+    if (!this.sys.game.device.os.desktop) {
+      this.updateJoystickPosition();
+      this.updateAttackButtonPosition();
+    }
   }
 
   updateBackground() {
@@ -167,15 +191,11 @@ class JumpGame extends Phaser.Scene {
   }
 
   updateJoystickPosition() {
-    if (this.joyStick) {
-      this.joyStick.setPosition(100, this.scale.height - 100);
-    }
+    this.joyStick?.setPosition(100, this.scale.height - 100);
   }
 
   updateAttackButtonPosition() {
-    if (this.attackButton) {
-      this.attackButton.setPosition(this.scale.width - 100, this.scale.height - 100);
-    }
+    this.attackButton?.setPosition(this.scale.width - 100, this.scale.height - 100);
   }
 
   private handleOrientationChange(orientation: Phaser.Scale.Orientation) {
@@ -456,7 +476,7 @@ class JumpGame extends Phaser.Scene {
         frames: [0, 1, 2, 3, 4, 5]
       }),
       frameRate: 10,
-      repeat: -1
+      repeat: 0
     });
 
     this.anims.create({
@@ -465,7 +485,7 @@ class JumpGame extends Phaser.Scene {
         frames: [6, 7, 8, 9, 10, 11]
       }),
       frameRate: 10,
-      repeat: -1
+      repeat: 0
     });
 
     this.anims.create({
@@ -474,7 +494,7 @@ class JumpGame extends Phaser.Scene {
         frames: [12, 13, 14, 15, 16, 17]
       }),
       frameRate: 10,
-      repeat: -1
+      repeat: 0
     });
 
     this.anims.create({
@@ -483,7 +503,7 @@ class JumpGame extends Phaser.Scene {
         frames: [18, 19, 20, 21, 22, 23]
       }),
       frameRate: 10,
-      repeat: -1
+      repeat: 0
     });
   }
 
@@ -498,6 +518,38 @@ class JumpGame extends Phaser.Scene {
     this.cursorKeys = this.joyStick.createCursorKeys();
   }
 
+  createKeyboardControls() {
+    if (!this.input.keyboard) return;
+    
+    this.wasdKeys = {
+      up: this.input.keyboard.addKey('W'),
+      down: this.input.keyboard.addKey('S'),
+      left: this.input.keyboard.addKey('A'),
+      right: this.input.keyboard.addKey('D')
+    };
+    
+    this.attackKeys = {
+      space: this.input.keyboard.addKey('SPACE'),
+      enter: this.input.keyboard.addKey('ENTER')
+    };
+
+    this.attackKeys.space.on('down', () => {
+      if (this.newCursorDirection !== '') {
+        this.performWalkingAttack();
+      } else {
+        this.performAttack();
+      }
+    });
+
+    this.attackKeys.enter.on('down', () => {
+      if (this.newCursorDirection !== '') {
+        this.performWalkingAttack();
+      } else {
+        this.performAttack();
+      }
+    });
+  }
+
   createAttackButton() {
     this.attackButton = this.add.graphics();
     this.attackButton.lineStyle(1, 0xff0000);
@@ -507,14 +559,10 @@ class JumpGame extends Phaser.Scene {
 
     this.attackButton.on('pointerdown', () => {
       if (this.playerState === PlayerState.WALKING) {
-        this.isWalkingAttack = true;
+        this.performWalkingAttack();
       } else {
         this.performAttack();
       }
-    });
-
-    this.attackButton.on('pointerup', () => {
-      this.isWalkingAttack = false;
     });
   }
 
@@ -543,19 +591,28 @@ class JumpGame extends Phaser.Scene {
   }
 
   updateJoystickState() {
-
     this.newCursorDirection = ''
-    // Use Object.keys with type assertion for safer iteration
-    for (let key of Object.keys(this.cursorKeys) as Array<keyof typeof this.cursorKeys>) {
-      if (this.cursorKeys[key].isDown) {
-        this.newCursorDirection += key;
+    
+    if (this.sys.game.device.os.desktop && this.input.keyboard) {
+      // Check WASD and arrow keys
+      if (this.wasdKeys?.up.isDown || this.input.keyboard.addKey('UP').isDown) this.newCursorDirection += 'up';
+      if (this.wasdKeys?.down.isDown || this.input.keyboard.addKey('DOWN').isDown) this.newCursorDirection += 'down';
+      if (this.wasdKeys?.left.isDown || this.input.keyboard.addKey('LEFT').isDown) this.newCursorDirection += 'left';
+      if (this.wasdKeys?.right.isDown || this.input.keyboard.addKey('RIGHT').isDown) this.newCursorDirection += 'right';
+    } else {
+      // Check joystick
+      if (this.cursorKeys) {
+        for (let key of Object.keys(this.cursorKeys) as Array<keyof typeof this.cursorKeys>) {
+          if (this.cursorKeys[key].isDown) {
+            this.newCursorDirection += key;
+          }
+        }
       }
     }
-    // Set debug info about the cursor
-    // this.setCursorDebugInfo();
   }
 
   setCursorDebugInfo() {
+    if (!this.joyStick || !this.cursorDebugText) return;
     const force = Math.floor(this.joyStick.force * 100) / 100;
     const angle = Math.floor(this.joyStick.angle * 100) / 100;
     let text = `Direction: ${this.newCursorDirection}\n`;
@@ -573,14 +630,13 @@ class JumpGame extends Phaser.Scene {
   }
 
   updatePlayerState() {
-    if (this.playerState === PlayerState.ATTACKING || this.playerState === PlayerState.HURT) return;
+    if (this.playerState === PlayerState.ATTACKING || this.playerState === PlayerState.HURT || this.playerState === PlayerState.WALKING_ATTACK) return;
 
     if (this.newCursorDirection !== '') {
-      this.playerState = this.isWalkingAttack ? PlayerState.WALKING_ATTACK : PlayerState.WALKING;
+      this.playerState = PlayerState.WALKING;
       this.facingDirection = this.getDirectionFromInput(this.newCursorDirection);
     } else {
       this.playerState = PlayerState.IDLE;
-      this.isWalkingAttack = false;
     }
   }
 
@@ -632,18 +688,23 @@ class JumpGame extends Phaser.Scene {
     const directions = ['down', 'up', 'left', 'right'];
     const randomDirection = Phaser.Utils.Array.GetRandom(directions);
 
+    const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
+
     if (this.slime) {
       this.slime.setPosition(x, y);
+      this.slime.setScale(2 * baseScale);
     } else {
       this.slime = this.physics.add.sprite(x, y, 'slimeIdle', 0);
-      this.slime.setScale(2);
+      this.slime.setScale(2 * baseScale);
       this.slime.body.setCircle(7, 26, 26);
     }
     this.slime.anims.play(`slime-idle-${randomDirection}`);
   }
 
   createSwordHitbox() {
-    this.swordHitbox = this.add.zone(0, 0, 60, 60);
+    const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
+    const hitboxSize = this.sys.game.device.os.desktop ? 120 * baseScale : 60;
+    this.swordHitbox = this.add.zone(0, 0, hitboxSize, hitboxSize);
     this.physics.add.existing(this.swordHitbox);
     (this.swordHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
   }
@@ -697,10 +758,11 @@ class JumpGame extends Phaser.Scene {
     if (!this.swordHitbox?.body) return;
 
     const body = this.swordHitbox.body as Phaser.Physics.Arcade.Body;
+    const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
+    const offset = 10 * baseScale;
 
     if (this.playerState === PlayerState.WALKING_ATTACK) {
       body.enable = true;
-      const offset = 10;
       const positions = {
         [Direction.DOWN]: { x: this.player.x, y: this.player.y + offset },
         [Direction.UP]: { x: this.player.x, y: this.player.y - offset },
@@ -721,7 +783,6 @@ class JumpGame extends Phaser.Scene {
     if (currentFrame >= 2 && currentFrame <= 4) {
       body.enable = true;
 
-      const offset = 10;
       const positions = {
         [Direction.DOWN]: { x: this.player.x, y: this.player.y + offset },
         [Direction.UP]: { x: this.player.x, y: this.player.y - offset },
@@ -734,6 +795,18 @@ class JumpGame extends Phaser.Scene {
     } else {
       body.enable = false;
     }
+  }
+
+  performWalkingAttack() {
+    if (this.playerState === PlayerState.ATTACKING || this.playerState === PlayerState.HURT) return;
+
+    this.playerState = PlayerState.WALKING_ATTACK;
+    const attackAnim = `walking-attack-${this.facingDirection}`;
+    this.player.anims.play(attackAnim);
+
+    this.player.once('animationcomplete', () => {
+      this.playerState = PlayerState.WALKING;
+    });
   }
 
   performAttack() {
