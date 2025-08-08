@@ -35,6 +35,7 @@ class PrototypeGame extends Phaser.Scene {
   swordHitbox: Phaser.GameObjects.Zone;
   swingSounds: Phaser.Sound.BaseSound[];
   bloodSound: Phaser.Sound.BaseSound;
+  footstepSound: Phaser.Sound.BaseSound;
 
   playerState: PlayerState = PlayerState.IDLE;
   facingDirection: Direction = Direction.DOWN;
@@ -105,6 +106,7 @@ class PrototypeGame extends Phaser.Scene {
     this.load.audio('swing2', '/audios/swing2.wav');
     this.load.audio('swing3', '/audios/swing3.wav');
     this.load.audio('blood', '/audios/blood.wav');
+    this.load.audio('footstep', '/audios/footstep.ogg');
   }
 
   create() {
@@ -124,7 +126,7 @@ class PrototypeGame extends Phaser.Scene {
     this.createBackground();
     this.cursorDebugText = this.add.text(10, 10, '');
     this.createAnimations();
-    this.createSwingSounds();
+    this.createSounds();
     this.createPlayer();
     this.createSlime();
     this.inputController = new InputController(this);
@@ -534,6 +536,10 @@ class PrototypeGame extends Phaser.Scene {
   updateInputState() {
     const inputState = this.inputController.getInputState();
     this.currentDirection = inputState.direction;
+
+    if (this.currentDirection === '' && this.footstepSound.isPlaying) {
+      this.footstepSound.stop();
+    }
   }
 
   setCursorDebugInfo() {
@@ -556,8 +562,14 @@ class PrototypeGame extends Phaser.Scene {
     if (this.currentDirection !== '') {
       this.playerState = PlayerState.WALKING;
       this.facingDirection = this.getDirectionFromInput(this.currentDirection);
+      if (!this.footstepSound.isPlaying) {
+        this.footstepSound.play({ loop: true, volume: 0.2 });
+      }
     } else {
       this.playerState = PlayerState.IDLE;
+      if (this.footstepSound.isPlaying) {
+        this.footstepSound.stop();
+      }
     }
   }
 
@@ -699,13 +711,14 @@ class PrototypeGame extends Phaser.Scene {
     }
   }
 
-  createSwingSounds() {
+  createSounds() {
     this.swingSounds = [
       this.sound.add('swing1'),
       this.sound.add('swing2'),
       this.sound.add('swing3')
     ];
     this.bloodSound = this.sound.add('blood');
+    this.footstepSound = this.sound.add('footstep');
   }
 
   playRandomSwingSound() {
