@@ -36,6 +36,7 @@ class PrototypeGame extends Phaser.Scene {
   swingSounds: Phaser.Sound.BaseSound[];
   bloodSound: Phaser.Sound.BaseSound;
   footstepSound: Phaser.Sound.BaseSound;
+  backgroundMusic: Phaser.Sound.BaseSound;
 
   playerState: PlayerState = PlayerState.IDLE;
   facingDirection: Direction = Direction.DOWN;
@@ -107,6 +108,7 @@ class PrototypeGame extends Phaser.Scene {
     this.load.audio('swing3', '/audios/swing3.wav');
     this.load.audio('blood', '/audios/blood.wav');
     this.load.audio('footstep', '/audios/footstep.ogg');
+    this.load.audio('backgroundMusic', '/audios/Magic Elderwood Forest - Overworld.wav');
   }
 
   create() {
@@ -127,6 +129,7 @@ class PrototypeGame extends Phaser.Scene {
     this.cursorDebugText = this.add.text(10, 10, '');
     this.createAnimations();
     this.createSounds();
+    this.startBackgroundMusic();
     this.createPlayer();
     this.createSlime();
     this.inputController = new InputController(this);
@@ -182,7 +185,7 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   updateBackground() {
-    // this.bg.setDisplaySize(this.scale.width, this.scale.height);
+    // Background update logic would go here
   }
 
   updateWorldBounds() {
@@ -512,10 +515,6 @@ class PrototypeGame extends Phaser.Scene {
 
 
   createBackground() {
-    // this.bg = this.add.image(0, 0, 'background');
-    // this.bg.setOrigin(0, 0);
-    // this.bg.setDisplaySize(this.scale.width, this.scale.height);
-    // this.bg.setDepth(-1);
     this.cameras.main.setBackgroundColor('#228B22');
   }
 
@@ -537,7 +536,9 @@ class PrototypeGame extends Phaser.Scene {
     const inputState = this.inputController.getInputState();
     this.currentDirection = inputState.direction;
 
-    if (this.currentDirection === '' && this.footstepSound.isPlaying) {
+    if (this.currentDirection !== '' && !this.footstepSound.isPlaying) {
+      this.footstepSound.play({ loop: true, volume: 0.2 });
+    } else if (this.currentDirection === '' && this.footstepSound.isPlaying) {
       this.footstepSound.stop();
     }
   }
@@ -551,25 +552,34 @@ class PrototypeGame extends Phaser.Scene {
 
   stopPlayerAnimations() {
     this.player.anims.stop();
-    // this.player.anims.stop('walking-right');
-    // this.player.anims.stop('walking-up');
-    // this.player.anims.stop('walking-down');
   }
 
   updatePlayerState() {
-    if (this.playerState === PlayerState.ATTACKING || this.playerState === PlayerState.HURT || this.playerState === PlayerState.WALKING_ATTACK) return;
+    // Don't change state if animation is playing (except for transitions)
+    if (this.player.anims.isPlaying && 
+        (this.playerState === PlayerState.ATTACKING || 
+         this.playerState === PlayerState.HURT || 
+         this.playerState === PlayerState.WALKING_ATTACK)) {
+      
+      // Allow transition from ATTACKING to WALKING_ATTACK
+      if (this.playerState === PlayerState.ATTACKING && this.currentDirection !== '') {
+        this.playerState = PlayerState.WALKING_ATTACK;
+        this.facingDirection = this.getDirectionFromInput(this.currentDirection);
+        const currentFrame = this.player.anims.currentFrame?.index || 0;
+        this.player.anims.play(`walking-attack-${this.facingDirection}`);
+        if (this.player.anims.currentAnim?.frames) {
+          this.player.anims.setCurrentFrame(this.player.anims.currentAnim.frames[Math.min(currentFrame, 5)]);
+        }
+      }
+      return;
+    }
 
+    // Normal state transitions when no priority animation is playing
     if (this.currentDirection !== '') {
       this.playerState = PlayerState.WALKING;
       this.facingDirection = this.getDirectionFromInput(this.currentDirection);
-      if (!this.footstepSound.isPlaying) {
-        this.footstepSound.play({ loop: true, volume: 0.2 });
-      }
     } else {
       this.playerState = PlayerState.IDLE;
-      if (this.footstepSound.isPlaying) {
-        this.footstepSound.stop();
-      }
     }
   }
 
@@ -603,8 +613,14 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   updateAnimation() {
-    if (this.player.anims.isPlaying && this.playerState === PlayerState.ATTACKING) return;
-
+    // Only update animation if no priority animation is playing
+    if (this.player.anims.isPlaying && 
+        (this.playerState === PlayerState.ATTACKING || 
+         this.playerState === PlayerState.HURT || 
+         this.playerState === PlayerState.WALKING_ATTACK)) {
+      return;
+    }
+    
     const animKey = `${this.playerState}-${this.facingDirection}`;
     if (!this.player.anims.isPlaying || this.player.anims.currentAnim?.key !== animKey) {
       this.player.anims.play(animKey);
@@ -653,8 +669,6 @@ class PrototypeGame extends Phaser.Scene {
       }
     });
   }
-
-
 
   hurtPlayer() {
     this.playerState = PlayerState.HURT;
@@ -719,6 +733,11 @@ class PrototypeGame extends Phaser.Scene {
     ];
     this.bloodSound = this.sound.add('blood');
     this.footstepSound = this.sound.add('footstep');
+    this.backgroundMusic = this.sound.add('backgroundMusic');
+  }
+
+  startBackgroundMusic() {
+    this.backgroundMusic.play({ loop: true, volume: 0.3 });
   }
 
   playRandomSwingSound() {
