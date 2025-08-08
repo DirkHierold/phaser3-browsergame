@@ -665,8 +665,9 @@ class PrototypeGame extends Phaser.Scene {
 
   killSlime() {
     const currentAnim = this.slime.anims.currentAnim?.key || 'slime-idle-down';
-    const direction = currentAnim.split('-')[2] || 'down';
+    if (currentAnim.includes('death')) return;
 
+    const direction = currentAnim.split('-')[2] || 'down';
     this.slime.anims.play(`slime-death-${direction}`);
     this.slime.once('animationcomplete', () => {
       this.respawnSlime();
@@ -680,7 +681,7 @@ class PrototypeGame extends Phaser.Scene {
     const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
     const offset = 10 * baseScale;
 
-    if (this.playerState === PlayerState.WALKING_ATTACK) {
+    if (this.playerState === PlayerState.WALKING_ATTACK || this.playerState === PlayerState.ATTACKING) {
       body.enable = true;
       const positions = {
         [Direction.DOWN]: { x: this.player.x, y: this.player.y + offset },
@@ -688,27 +689,6 @@ class PrototypeGame extends Phaser.Scene {
         [Direction.LEFT]: { x: this.player.x - offset, y: this.player.y },
         [Direction.RIGHT]: { x: this.player.x + offset, y: this.player.y }
       };
-      const pos = positions[this.facingDirection];
-      this.swordHitbox.setPosition(pos.x, pos.y);
-      return;
-    }
-
-    if (this.playerState !== PlayerState.ATTACKING) {
-      body.enable = false;
-      return;
-    }
-
-    const currentFrame = this.player.anims.currentFrame?.index || 0;
-    if (currentFrame >= 2 && currentFrame <= 4) {
-      body.enable = true;
-
-      const positions = {
-        [Direction.DOWN]: { x: this.player.x, y: this.player.y + offset },
-        [Direction.UP]: { x: this.player.x, y: this.player.y - offset },
-        [Direction.LEFT]: { x: this.player.x - offset, y: this.player.y },
-        [Direction.RIGHT]: { x: this.player.x + offset, y: this.player.y }
-      };
-
       const pos = positions[this.facingDirection];
       this.swordHitbox.setPosition(pos.x, pos.y);
     } else {
