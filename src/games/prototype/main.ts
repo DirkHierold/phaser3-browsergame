@@ -33,6 +33,7 @@ class PrototypeGame extends Phaser.Scene {
   attackButton: Phaser.GameObjects.Graphics;
   slime: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   swordHitbox: Phaser.GameObjects.Zone;
+  swingSounds: Phaser.Sound.BaseSound[];
 
   playerState: PlayerState = PlayerState.IDLE;
   facingDirection: Direction = Direction.DOWN;
@@ -98,6 +99,10 @@ class PrototypeGame extends Phaser.Scene {
       startFrame: 0,
       endFrame: 40
     });
+
+    this.load.audio('swing1', '/audios/swing.wav');
+    this.load.audio('swing2', '/audios/swing2.wav');
+    this.load.audio('swing3', '/audios/swing3.wav');
   }
 
   create() {
@@ -117,6 +122,7 @@ class PrototypeGame extends Phaser.Scene {
     this.createBackground();
     this.cursorDebugText = this.add.text(10, 10, '');
     this.createAnimations();
+    this.createSwingSounds();
     this.createPlayer();
     this.createSlime();
     this.inputController = new InputController(this);
@@ -710,12 +716,26 @@ class PrototypeGame extends Phaser.Scene {
     }
   }
 
+  createSwingSounds() {
+    this.swingSounds = [
+      this.sound.add('swing1'),
+      this.sound.add('swing2'),
+      this.sound.add('swing3')
+    ];
+  }
+
+  playRandomSwingSound() {
+    const randomSound = Phaser.Utils.Array.GetRandom(this.swingSounds);
+    randomSound.play();
+  }
+
   performWalkingAttack() {
     if (this.playerState === PlayerState.ATTACKING || this.playerState === PlayerState.HURT) return;
 
     this.playerState = PlayerState.WALKING_ATTACK;
     const attackAnim = `walking-attack-${this.facingDirection}`;
     this.player.anims.play(attackAnim);
+    this.playRandomSwingSound();
 
     this.player.once('animationcomplete', () => {
       this.playerState = PlayerState.WALKING;
@@ -728,6 +748,7 @@ class PrototypeGame extends Phaser.Scene {
     this.playerState = PlayerState.ATTACKING;
     const attackAnim = `attack-${this.facingDirection}`;
     this.player.anims.play(attackAnim);
+    this.playRandomSwingSound();
 
     this.player.once('animationcomplete', () => {
       this.playerState = PlayerState.IDLE;
