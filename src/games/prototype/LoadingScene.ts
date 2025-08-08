@@ -5,8 +5,7 @@ export default class LoadingScene extends Phaser.Scene {
   private startButton!: Phaser.GameObjects.Text;
   private isLoadingComplete = false;
   private realLoadingComplete = false;
-  private manualProgress = 0;
-  private textTimer!: Phaser.Time.TimerEvent;
+  private lastTextChangeProgress = 0;
   private funnyTexts = [
     "Sharpening swords...",
     "Training slimes...",
@@ -43,38 +42,30 @@ export default class LoadingScene extends Phaser.Scene {
       color: "#ffffff"
     }).setOrigin(0.5);
 
-    this.textTimer = this.time.addEvent({
-      delay: 375,
-      callback: () => {
+    // Real progress tracking
+    this.load.on('progress', (progress: number) => {
+      const { width, height } = this.cameras.main;
+      const percentage = Math.round(progress * 100);
+      
+      this.percentText.setText(`${percentage}%`);
+      this.progressBar.clear().fillStyle(0x00ff00, 1).fillRect(width / 2 - 150, height / 2 - 15, 300 * progress, 30);
+      
+      // Change text every ~14% progress (7 texts total)
+      const textChangeThreshold = 0.14;
+      if (progress - this.lastTextChangeProgress >= textChangeThreshold) {
         this.currentTextIndex = (this.currentTextIndex + 1) % this.funnyTexts.length;
         this.loadingText.setText(this.funnyTexts[this.currentTextIndex]);
-
-        // Stop after one complete cycle if real loading is done
-        if (this.realLoadingComplete && this.currentTextIndex === 0) {
-          this.textTimer.destroy();
-          this.completeLoading();
-        }
-      },
-      loop: true
+        this.lastTextChangeProgress = progress;
+      }
     });
 
     this.load.on("complete", () => {
       this.realLoadingComplete = true;
+      this.completeLoading();
       this.sound.play('backgroundMusic', { loop: true, volume: 0.3 });
     });
 
-    // Manual progress control
-    this.time.addEvent({
-      delay: 100,
-      callback: () => {
-        if (this.manualProgress < 1) {
-          this.manualProgress += 0.04;
-          this.percentText.setText(`${Math.round(this.manualProgress * 100)}%`);
-          this.progressBar.clear().fillStyle(0x00ff00, 1).fillRect(width / 2 - 150, height / 2 - 15, 300 * this.manualProgress, 30);
-        }
-      },
-      loop: true
-    });
+
 
     this.load.image('background', '/images/background-template-2776x1440.png');
     this.load.image('base', '/images/base.png');
@@ -91,7 +82,7 @@ export default class LoadingScene extends Phaser.Scene {
     this.load.audio('swing3', '/audios/swing3.wav');
     this.load.audio('blood', '/audios/blood.wav');
     this.load.audio('footstep', '/audios/footstep.ogg');
-    this.load.audio('backgroundMusic', '/audios/Magic Elderwood Forest - Overworld.wav');
+    this.load.audio('backgroundMusic', '/audios/Magic Elderwood Forest - Overworld.mp3');
   }
 
   create() {
