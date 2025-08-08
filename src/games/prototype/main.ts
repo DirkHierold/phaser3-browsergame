@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { InputController } from '../../shared/InputController';
+import LoadingScene from './LoadingScene';
 
 enum PlayerState {
   IDLE = 'idle',
@@ -17,6 +18,9 @@ enum Direction {
 }
 
 class PrototypeGame extends Phaser.Scene {
+  constructor() {
+    super({ key: 'PrototypeGame' });
+  }
 
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   gameWidth: number;
@@ -50,65 +54,7 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('background', '/images/background-template-2776x1440.png');
-    this.load.image('base', '/images/base.png');
-    this.load.image('thumb', '/images/thumb.png');
-
-    this.load.spritesheet("playerIdle", "/images/Swordsman_lvl1_Idle_full.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-      startFrame: 0,
-      endFrame: 40
-    });
-
-    this.load.spritesheet("playerWalk", "/images/Swordsman_lvl1_Walk_full.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-      startFrame: 0,
-      endFrame: 24
-    });
-
-    this.load.spritesheet("playerAttack", "/images/Swordsman_lvl1_attack_full.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-      startFrame: 0,
-      endFrame: 32
-    });
-
-    this.load.spritesheet("playerHurt", "/images/Swordsman_lvl1_Hurt_full.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-      startFrame: 0,
-      endFrame: 20
-    });
-
-    this.load.spritesheet("playerWalkAttack", "/images/Swordsman_lvl1_Walk_Attack_full.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-      startFrame: 0,
-      endFrame: 24
-    });
-
-    this.load.spritesheet("slimeIdle", "/images/Slime1_Idle_full.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-      startFrame: 0,
-      endFrame: 24
-    });
-
-    this.load.spritesheet("slimeDeath", "/images/Slime1_Death_full.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-      startFrame: 0,
-      endFrame: 40
-    });
-
-    this.load.audio('swing1', '/audios/swing.wav');
-    this.load.audio('swing2', '/audios/swing2.wav');
-    this.load.audio('swing3', '/audios/swing3.wav');
-    this.load.audio('blood', '/audios/blood.wav');
-    this.load.audio('footstep', '/audios/footstep.ogg');
-    this.load.audio('backgroundMusic', '/audios/Magic Elderwood Forest - Overworld.wav');
+    // Assets are now loaded in LoadingScene
   }
 
   create() {
@@ -129,7 +75,6 @@ class PrototypeGame extends Phaser.Scene {
     this.cursorDebugText = this.add.text(10, 10, '');
     this.createAnimations();
     this.createSounds();
-    this.startBackgroundMusic();
     this.createPlayer();
     this.createSlime();
     this.inputController = new InputController(this);
@@ -556,11 +501,11 @@ class PrototypeGame extends Phaser.Scene {
 
   updatePlayerState() {
     // Don't change state if animation is playing (except for transitions)
-    if (this.player.anims.isPlaying && 
-        (this.playerState === PlayerState.ATTACKING || 
-         this.playerState === PlayerState.HURT || 
-         this.playerState === PlayerState.WALKING_ATTACK)) {
-      
+    if (this.player.anims.isPlaying &&
+      (this.playerState === PlayerState.ATTACKING ||
+        this.playerState === PlayerState.HURT ||
+        this.playerState === PlayerState.WALKING_ATTACK)) {
+
       // Allow transition from ATTACKING to WALKING_ATTACK
       if (this.playerState === PlayerState.ATTACKING && this.currentDirection !== '') {
         this.playerState = PlayerState.WALKING_ATTACK;
@@ -614,13 +559,13 @@ class PrototypeGame extends Phaser.Scene {
 
   updateAnimation() {
     // Only update animation if no priority animation is playing
-    if (this.player.anims.isPlaying && 
-        (this.playerState === PlayerState.ATTACKING || 
-         this.playerState === PlayerState.HURT || 
-         this.playerState === PlayerState.WALKING_ATTACK)) {
+    if (this.player.anims.isPlaying &&
+      (this.playerState === PlayerState.ATTACKING ||
+        this.playerState === PlayerState.HURT ||
+        this.playerState === PlayerState.WALKING_ATTACK)) {
       return;
     }
-    
+
     const animKey = `${this.playerState}-${this.facingDirection}`;
     if (!this.player.anims.isPlaying || this.player.anims.currentAnim?.key !== animKey) {
       this.player.anims.play(animKey);
@@ -736,10 +681,6 @@ class PrototypeGame extends Phaser.Scene {
     this.backgroundMusic = this.sound.add('backgroundMusic');
   }
 
-  startBackgroundMusic() {
-    this.backgroundMusic.play({ loop: true, volume: 0.3 });
-  }
-
   playRandomSwingSound() {
     const randomSound = Phaser.Utils.Array.GetRandom(this.swingSounds);
     randomSound.play();
@@ -790,7 +731,7 @@ const config: Phaser.Types.Core.GameConfig = {
     width: '100%',
     height: '100%'
   },
-  scene: PrototypeGame,
+  scene: [LoadingScene, PrototypeGame],
 };
 
 new Phaser.Game(config);
