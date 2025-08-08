@@ -34,6 +34,7 @@ class PrototypeGame extends Phaser.Scene {
   slime: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   swordHitbox: Phaser.GameObjects.Zone;
   swingSounds: Phaser.Sound.BaseSound[];
+  bloodSound: Phaser.Sound.BaseSound;
 
   playerState: PlayerState = PlayerState.IDLE;
   facingDirection: Direction = Direction.DOWN;
@@ -103,6 +104,7 @@ class PrototypeGame extends Phaser.Scene {
     this.load.audio('swing1', '/audios/swing.wav');
     this.load.audio('swing2', '/audios/swing2.wav');
     this.load.audio('swing3', '/audios/swing3.wav');
+    this.load.audio('blood', '/audios/blood.wav');
   }
 
   create() {
@@ -669,6 +671,7 @@ class PrototypeGame extends Phaser.Scene {
 
     const direction = currentAnim.split('-')[2] || 'down';
     this.slime.anims.play(`slime-death-${direction}`);
+    this.bloodSound.play({ volume: 0.3 });
     this.slime.once('animationcomplete', () => {
       this.respawnSlime();
     });
@@ -702,6 +705,7 @@ class PrototypeGame extends Phaser.Scene {
       this.sound.add('swing2'),
       this.sound.add('swing3')
     ];
+    this.bloodSound = this.sound.add('blood');
   }
 
   playRandomSwingSound() {
