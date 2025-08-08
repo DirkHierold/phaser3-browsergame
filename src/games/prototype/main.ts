@@ -16,7 +16,7 @@ enum Direction {
   RIGHT = 'right'
 }
 
-class JumpGame extends Phaser.Scene {
+class PrototypeGame extends Phaser.Scene {
 
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   gameWidth: number;
@@ -746,14 +746,14 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   physics: {
     default: 'arcade',
-    arcade: { gravity: { x: 0, y: 0 }, debug: true }
+    arcade: { gravity: { x: 0, y: 0 }, debug: false }
   },
   scale: {
     mode: Phaser.Scale.RESIZE,
     width: '100%',
     height: '100%'
   },
-  scene: JumpGame,
+  scene: PrototypeGame,
 };
 
 new Phaser.Game(config);
