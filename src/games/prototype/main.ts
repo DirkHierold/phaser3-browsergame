@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { InputController } from '../../shared/InputController';
+import { GameUtils } from '../../shared/utils/GameUtils';
 import LoadingScene from './LoadingScene';
 
 enum PlayerState {
@@ -58,17 +59,6 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   create() {
-    this.setTurnMessage();
-
-    // Handle resize events
-    this.scale.on('resize', this.handleResize, this);
-
-    // Orientation handling
-    this.scale.on('orientationchange', (orientation: Phaser.Scale.Orientation) => {
-      this.handleOrientationChange(orientation);
-    });
-    this.handleOrientationChange(this.scale.orientation);
-
     this.physics.world.bounds.width = this.scale.width;
     this.physics.world.bounds.height = this.scale.height;
     this.createBackground();
@@ -88,7 +78,8 @@ class PrototypeGame extends Phaser.Scene {
     this.createWorldBorder();
     this.setupCollisions();
 
-
+    // Setup responsive handling AFTER all objects are created
+    GameUtils.setupResponsiveHandling(this, this.handleResize.bind(this), this.handleOrientationChange.bind(this));
   }
 
   handleResize() {
@@ -139,6 +130,8 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   updateWorldBorder() {
+    if (!this.worldBorder) return;
+    
     this.worldBorder.clear();
     this.worldBorder.lineStyle(4, 0x000000);
     this.worldBorder.strokeRect(0, 0, this.scale.width, this.scale.height);
@@ -146,11 +139,12 @@ class PrototypeGame extends Phaser.Scene {
 
 
 
-  private handleOrientationChange(orientation: Phaser.Scale.Orientation) {
+  private handleOrientationChange() {
     const isDesktop = this.sys.game.device.os.desktop;
-    const isIncorrectOrientation = (orientation.toString() === Phaser.Scale.PORTRAIT);
+    const isIncorrectOrientation = (this.scale.orientation.toString() === Phaser.Scale.PORTRAIT);
 
     if (!isDesktop && isIncorrectOrientation) {
+      this.setTurnMessage();
       this.scene.pause();
     } else {
       this.scene.resume();
@@ -469,7 +463,7 @@ class PrototypeGame extends Phaser.Scene {
     this.worldBorder.strokeRect(0, 0, this.scale.width, this.scale.height);
   }
 
-  update(time: number, delta: number): void {
+  update(_time: number, _delta: number): void {
     this.updateInputState();
     this.updatePlayerState();
     this.handleMovement();

@@ -128,7 +128,7 @@ export class AlignGrid extends Phaser.GameObjects.Group {
       } else {
         obj.setDisplaySize(newHeight * 0.99, newHeight * 0.99);
       }
-      if (obj instanceof Phaser.Physics.Arcade.Image) {
+      if (obj instanceof Phaser.Physics.Arcade.Image && obj.body) {
         obj.body.updateFromGameObject();
       }
     } else if (obj instanceof Phaser.GameObjects.Rectangle) {

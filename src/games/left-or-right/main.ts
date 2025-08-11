@@ -11,31 +11,31 @@ class LeftOrRightGame extends Phaser.Scene {
   private player!: Player;
   private obstacles!: Obstacles;
   private targets!: Targets;
-  private scrollSpeed: number = 180;
-  private currentLevelY: number = 0;
+  // private _scrollSpeed: number = 180;
+  // private _currentLevelY: number = 0;
   private nextElementIndex: number = 0;
-  private lastObjectY: number = 0;
-  private gameFinished: boolean = false;
+  // private _lastObjectY: number = 0;
+  // private _gameFinished: boolean = false;
   private attemptScore: number = 0;
   private moveParticles!: Phaser.GameObjects.Particles.ParticleEmitter;
   private newGameButton!: Button;
   private canChoose: boolean = true;
   private jumpCount: number = 0;
   private lastPlatformPair: any = null;
-  private lastSafeSide: 'left' | 'right' = 'left';
+  // private _lastSafeSide: 'left' | 'right' = 'left';
 
   preload() {
     this.load.json('level', '/left-or-right-level.json');
   }
 
   create() {
-    this.gameFinished = false;
+    // this._gameFinished = false;
     this.canChoose = true;
     this.jumpCount = 0;
     this.attemptScore += 1;
     this.nextElementIndex = 0;
-    this.lastObjectY = 0;
-    this.currentLevelY = 0;
+    // this._lastObjectY = 0;
+    // this._currentLevelY = 0;
     this.cameras.main.setBackgroundColor('#87CEEB');
 
     const attemptText = this.add.text(this.game.canvas.width / 2, 80, 'Attempt ' + this.attemptScore, { fontSize: '32px', color: '#000' }).setOrigin(0.5, 0.5).setDepth(1000);
@@ -46,7 +46,7 @@ class LeftOrRightGame extends Phaser.Scene {
     this.targets = new Targets(this);
 
     // Startplattform
-    const startPlatform = this.obstacles.addBlock(200, 750, 200, 50).setOrigin(0, 0);
+    this.obstacles.addBlock(200, 750, 200, 50).setOrigin(0, 0);
 
     this.player = new Player(this);
     this.player.setOrigin(0, 0).setPosition(275, 700);
@@ -102,9 +102,9 @@ class LeftOrRightGame extends Phaser.Scene {
       // Zielplattform + Target
       const x = 200;
       const y = data.y;
-      const goal = this.obstacles.addBlock(x, y, data.width, data.height).setOrigin(0, 0);
+      this.obstacles.addBlock(x, y, data.width, data.height).setOrigin(0, 0);
 
-      const target = this.targets.addTarget(x + 75, y - 50).setOrigin(0, 0);
+      this.targets.addTarget(x + 75, y - 50).setOrigin(0, 0);
       this.win()
     }
     this.nextElementIndex++;
@@ -172,7 +172,7 @@ class LeftOrRightGame extends Phaser.Scene {
   }
 
   win() {
-    this.gameFinished = true;
+    // this._gameFinished = true;
     this.physics.pause();
     this.add.text(300, 400, 'You reached the goal with ' + this.attemptScore + ' attempt' + (this.attemptScore == 1 ? '!' : 's!'), { fontSize: '26px', color: '#000' })
       .setOrigin(0.5);
@@ -180,7 +180,7 @@ class LeftOrRightGame extends Phaser.Scene {
   }
 
   explode() {
-    this.gameFinished = true;
+    // this._gameFinished = true;
     this.physics.pause();
     const playerCenterX = this.player.x + this.player.displayWidth / 2;
     const playerCenterY = this.player.y + this.player.displayHeight / 2;
