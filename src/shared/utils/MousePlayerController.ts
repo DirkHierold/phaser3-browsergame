@@ -40,7 +40,7 @@ export default class MousePlayerController {
         this.currentPointerY = event.clientY;
     }
 
-    private onPointerUp = (event: PointerEvent) => {
+    private onPointerUp = (_event: PointerEvent) => {
         // Only proceed if the player object still exists and is active
         if (!this.player || !this.player.active) return;
 
@@ -62,13 +62,13 @@ export default class MousePlayerController {
     }
 
     // This update method will be called by the scene's event listener
-    update = (time: number, delta: number) => { // Also use arrow function for update if binding directly in constructor
+    update = (_time: number, _delta: number) => { // Also use arrow function for update if binding directly in constructor
         if (!this.player || !this.player.active || !this.player.visible) {
             return; // Don't move if player or controller is inactive or invisible
         }
 
         if (this.isPointerDown) {
-            const now = time;
+            const now = _time;
             const dt = (now - this.lastPointerTime) / 1000; // Seconds
 
             const dx = this.currentPointerX - this.oldPointerX;

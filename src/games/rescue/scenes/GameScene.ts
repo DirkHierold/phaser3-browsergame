@@ -458,7 +458,7 @@ export default class GameScene extends Phaser.Scene {
   // Fix overlap/collider callback signatures for Phaser 3 ArcadePhysicsCallback
   private asteroidOverlapTree(
     object1: any,
-    object2: any
+    _object2: any
   ): void {
     // asteroid hits tree
     const asteroid = object1 as Phaser.Physics.Arcade.Image;
@@ -477,7 +477,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private targetReached(
-    object1: any,
+    _object1: any,
     object2: any
   ): void {
     // Target reached!
@@ -494,7 +494,7 @@ export default class GameScene extends Phaser.Scene {
 
   private collideWithEnemy(
     object1: any,
-    object2: any
+    _object2: any
   ): void {
     // Player hit by enemy
     const player = object1 as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;

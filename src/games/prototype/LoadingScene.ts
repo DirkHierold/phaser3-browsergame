@@ -1,10 +1,12 @@
+import { GameUtils } from '../../shared/utils/GameUtils';
+
 export default class LoadingScene extends Phaser.Scene {
   private progressBar!: Phaser.GameObjects.Graphics;
   private loadingText!: Phaser.GameObjects.Text;
   private percentText!: Phaser.GameObjects.Text;
   private startButton!: Phaser.GameObjects.Text;
-  private isLoadingComplete = false;
-  private realLoadingComplete = false;
+  // private _isLoadingComplete = false;
+  // private _realLoadingComplete = false;
   private lastTextChangeProgress = 0;
   private funnyTexts = [
     "Sharpening swords...",
@@ -60,7 +62,7 @@ export default class LoadingScene extends Phaser.Scene {
     });
 
     this.load.on("complete", () => {
-      this.realLoadingComplete = true;
+      // this._realLoadingComplete = true;
       this.completeLoading();
       this.sound.play('backgroundMusic', { loop: true, volume: 0.3 });
     });
@@ -86,11 +88,82 @@ export default class LoadingScene extends Phaser.Scene {
   }
 
   create() {
+    // Setup responsive handling for loading scene
+    GameUtils.setupResponsiveHandling(this, this.handleResize.bind(this), this.handleOrientationChange.bind(this));
+    
     // Game starts only when start button is clicked
   }
 
+  private handleResize() {
+    // Recalculate positions for all UI elements
+    const { width, height } = this.cameras.main;
+    
+    // Update title position
+    const titleText = this.children.list.find(child => 
+      child instanceof Phaser.GameObjects.Text && child.text === "Prototype Adventure"
+    ) as Phaser.GameObjects.Text;
+    if (titleText) {
+      titleText.setPosition(width / 2, height * 0.3);
+    }
+    
+    // Update progress bar background
+    const progressBg = this.children.list.find(child => 
+      child instanceof Phaser.GameObjects.Graphics && child !== this.progressBar
+    ) as Phaser.GameObjects.Graphics;
+    if (progressBg) {
+      progressBg.clear().fillStyle(0x222222, 0.8).fillRect(width / 2 - 160, height / 2 - 25, 320, 50);
+    }
+    
+    // Update loading text position
+    if (this.loadingText) {
+      this.loadingText.setPosition(width / 2, height * 0.6);
+    }
+    
+    // Update percent text position
+    if (this.percentText) {
+      this.percentText.setPosition(width / 2, height / 2);
+    }
+    
+    // Update progress bar
+    if (this.progressBar) {
+      // Get current progress from the text
+      const currentProgress = parseInt(this.percentText.text.replace('%', '')) / 100;
+      this.progressBar.clear().fillStyle(0x00ff00, 1).fillRect(width / 2 - 150, height / 2 - 15, 300 * currentProgress, 30);
+    }
+    
+    // Update start button position if visible
+    if (this.startButton) {
+      this.startButton.setPosition(width / 2, height / 2);
+    }
+  }
+
+  private handleOrientationChange() {
+    const isDesktop = this.sys.game.device.os.desktop;
+    const isIncorrectOrientation = (this.scale.orientation.toString() === Phaser.Scale.PORTRAIT);
+    
+    if (!isDesktop && isIncorrectOrientation) {
+      // Show landscape message for mobile devices
+      this.setTurnMessage();
+      this.scene.pause();
+    } else {
+      this.scene.resume();
+    }
+  }
+
+  private setTurnMessage() {
+    const turnMessageElement = document.getElementById('turn-message');
+    if (turnMessageElement) {
+      const isGerman = navigator.language.toLowerCase().startsWith('de');
+      if (isGerman) {
+        turnMessageElement.textContent = 'Bitte drehe dein Gerät ins Querformat!';
+      } else {
+        turnMessageElement.textContent = 'Please turn your device to landscape!';
+      }
+    }
+  }
+
   private completeLoading() {
-    this.isLoadingComplete = true;
+    // this._isLoadingComplete = true;
     this.showStartButton();
   }
 
