@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { InputController } from '../../shared/InputController';
 import { OrientationManager } from '../../shared/OrientationManager';
 import { ResizeManager } from '../../shared/ResizeManager';
+
 import LoadingScene from './LoadingScene';
 
 enum PlayerState {
@@ -137,12 +138,6 @@ class PrototypeGame extends Phaser.Scene {
     this.worldBorder.lineStyle(4, 0x000000);
     this.worldBorder.strokeRect(0, 0, this.scale.width, this.scale.height);
   }
-
-
-
-
-
-
 
   createPlayer() {
     this.player = this.physics.add.sprite(this.scale.width / 2, this.scale.height / 2, 'playerIdle', 0);
@@ -428,10 +423,6 @@ class PrototypeGame extends Phaser.Scene {
     });
   }
 
-
-
-
-
   createBackground() {
     this.cameras.main.setBackgroundColor('#228B22');
   }
@@ -651,7 +642,6 @@ class PrototypeGame extends Phaser.Scene {
     ];
     this.bloodSound = this.sound.add('blood');
     this.footstepSound = this.sound.add('footstep');
-    this.backgroundMusic = this.sound.add('backgroundMusic');
   }
 
   playRandomSwingSound() {
@@ -694,6 +684,10 @@ const config: Phaser.Types.Core.GameConfig = {
   parent: 'game-container',
   dom: {
     createContainer: true
+  },
+  audio: {
+    disableWebAudio: false,
+    noAudio: false
   },
   physics: {
     default: 'arcade',

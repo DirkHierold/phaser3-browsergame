@@ -1,13 +1,12 @@
 import { OrientationManager } from '../../shared/OrientationManager';
 import { ResizeManager } from '../../shared/ResizeManager';
+import { SoundManager } from '../../shared/SoundManager';
 
 export default class LoadingScene extends Phaser.Scene {
   private progressBar!: Phaser.GameObjects.Graphics;
   private loadingText!: Phaser.GameObjects.Text;
   private percentText!: Phaser.GameObjects.Text;
   private startButton!: Phaser.GameObjects.Text;
-  // private _isLoadingComplete = false;
-  // private _realLoadingComplete = false;
   private lastTextChangeProgress = 0;
   private funnyTexts = [
     "Sharpening swords...",
@@ -62,22 +61,20 @@ export default class LoadingScene extends Phaser.Scene {
       }
     });
 
-    this.load.on("complete", () => {
+    this.load.on('complete', () => {
       this.completeLoading();
     });
-
-
 
     this.load.image('background', '/images/background-template-2776x1440.png');
     this.load.image('base', '/images/base.png');
     this.load.image('thumb', '/images/thumb.png');
-    this.load.spritesheet("playerIdle", "/images/Swordsman_lvl1_Idle_full.png", { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
-    this.load.spritesheet("playerWalk", "/images/Swordsman_lvl1_Walk_full.png", { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
-    this.load.spritesheet("playerAttack", "/images/Swordsman_lvl1_attack_full.png", { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 32 });
-    this.load.spritesheet("playerHurt", "/images/Swordsman_lvl1_Hurt_full.png", { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 20 });
-    this.load.spritesheet("playerWalkAttack", "/images/Swordsman_lvl1_Walk_Attack_full.png", { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
-    this.load.spritesheet("slimeIdle", "/images/Slime1_Idle_full.png", { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
-    this.load.spritesheet("slimeDeath", "/images/Slime1_Death_full.png", { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
+    this.load.spritesheet('playerIdle', '/images/Swordsman_lvl1_Idle_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
+    this.load.spritesheet('playerWalk', '/images/Swordsman_lvl1_Walk_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('playerAttack', '/images/Swordsman_lvl1_attack_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 32 });
+    this.load.spritesheet('playerHurt', '/images/Swordsman_lvl1_Hurt_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 20 });
+    this.load.spritesheet('playerWalkAttack', '/images/Swordsman_lvl1_Walk_Attack_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slimeIdle', '/images/Slime1_Idle_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slimeDeath', '/images/Slime1_Death_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
     this.load.audio('swing1', '/audios/swing.wav');
     this.load.audio('swing2', '/audios/swing2.wav');
     this.load.audio('swing3', '/audios/swing3.wav');
@@ -137,7 +134,6 @@ export default class LoadingScene extends Phaser.Scene {
 
 
   private completeLoading() {
-    // this._isLoadingComplete = true;
     this.showStartButton();
   }
 
@@ -156,8 +152,21 @@ export default class LoadingScene extends Phaser.Scene {
     }).setOrigin(0.5).setInteractive();
 
     this.startButton.on('pointerdown', () => {
-      this.sound.play('backgroundMusic', { loop: true, volume: 0.3 });
-      this.scene.start('PrototypeGame');
+      // Load audio assets after user interaction
+      this.load.audio('swing1', '/audios/swing.wav');
+      this.load.audio('swing2', '/audios/swing2.wav');
+      this.load.audio('swing3', '/audios/swing3.wav');
+      this.load.audio('blood', '/audios/blood.wav');
+      this.load.audio('footstep', '/audios/footstep.ogg');
+      this.load.audio('backgroundMusic', '/audios/Magic Elderwood Forest - Overworld.mp3');
+      
+      this.load.once('complete', () => {
+        const music = this.sound.add('backgroundMusic');
+        SoundManager.getInstance().setBackgroundMusic(music);
+        this.scene.start('PrototypeGame');
+      });
+      
+      this.load.start();
     });
   }
 }

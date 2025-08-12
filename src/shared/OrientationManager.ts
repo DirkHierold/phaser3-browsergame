@@ -1,6 +1,9 @@
+import { SoundManager } from './SoundManager';
+
 export class OrientationManager {
   private static instance: OrientationManager;
   private currentScene: Phaser.Scene | null = null;
+  private isPortraitMode: boolean = false;
 
   static getInstance(): OrientationManager {
     if (!OrientationManager.instance) {
@@ -21,7 +24,6 @@ export class OrientationManager {
     };
     
     window.addEventListener('orientationchange', handleOrientationChange);
-    window.addEventListener('resize', handleOrientationChange);
   }
 
   private checkOrientation() {
@@ -30,9 +32,11 @@ export class OrientationManager {
     const isDesktop = this.currentScene.sys.game.device.os.desktop;
     const isPortrait = window.innerHeight > window.innerWidth;
 
-    if (!isDesktop && isPortrait) {
+    if (!isDesktop && isPortrait && !this.isPortraitMode) {
+      this.isPortraitMode = true;
       this.pauseGame();
-    } else {
+    } else if (!isDesktop && !isPortrait && this.isPortraitMode) {
+      this.isPortraitMode = false;
       this.resumeGame();
     }
   }
@@ -40,28 +44,20 @@ export class OrientationManager {
   private pauseGame() {
     if (!this.currentScene) return;
     
-    try {
-      if (this.currentScene.scene.isActive()) {
-        this.currentScene.scene.pause();
-        this.currentScene.sound.pauseAll();
-      }
-    } catch (e) {
-      // Scene might have been destroyed, ignore error
+    if (this.currentScene.scene.isActive()) {
+      this.currentScene.scene.pause();
     }
+    SoundManager.getInstance().pauseBackgroundMusic();
     this.showTurnMessage();
   }
 
   private resumeGame() {
     if (!this.currentScene) return;
     
-    try {
-      if (this.currentScene.scene.isPaused()) {
-        this.currentScene.scene.resume();
-        this.currentScene.sound.resumeAll();
-      }
-    } catch (e) {
-      // Scene might have been destroyed, ignore error
+    if (this.currentScene.scene.isPaused()) {
+      this.currentScene.scene.resume();
     }
+    SoundManager.getInstance().resumeBackgroundMusic();
     this.hideTurnMessage();
   }
 
@@ -89,9 +85,6 @@ export class OrientationManager {
   }
 
   destroy() {
-    if (this.currentScene) {
-      this.currentScene.scale.off('orientationchange', this.handleOrientationChange, this);
-    }
     this.currentScene = null;
   }
 }

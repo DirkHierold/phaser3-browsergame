@@ -12,14 +12,14 @@ export class ResizeManager {
 
   initialize(scene: Phaser.Scene, callback?: () => void) {
     this.currentScene = scene;
-    this.resizeCallback = callback;
+    this.resizeCallback = callback || null;
     this.setupResizeListener();
     this.handleResize(); // Initial resize
   }
 
   updateScene(scene: Phaser.Scene, callback?: () => void) {
     this.currentScene = scene;
-    this.resizeCallback = callback;
+    this.resizeCallback = callback || null;
   }
 
   private setupResizeListener() {
