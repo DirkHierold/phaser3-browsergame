@@ -40,6 +40,10 @@ class PrototypeGame extends Phaser.Scene {
   playerState: PlayerState = PlayerState.IDLE;
   facingDirection: Direction = Direction.DOWN;
 
+  hearts: Phaser.GameObjects.Sprite[] = [];
+  maxHealth: number = 3;
+  currentHealth: number = 3;
+
   preload() {
     // Assets are now loaded in LoadingScene
   }
@@ -52,6 +56,7 @@ class PrototypeGame extends Phaser.Scene {
     this.createSounds();
     this.createPlayer();
     this.createSlime();
+    this.createHearts();
     this.inputController = new InputController(this);
     this.inputController.initialize((isMoving) => {
       if (isMoving) {
@@ -100,6 +105,11 @@ class PrototypeGame extends Phaser.Scene {
     }
 
     this.inputController.updatePositions();
+    
+    // Update hearts position
+    this.hearts.forEach((heart, i) => {
+      heart.setPosition(20 + i * 40, 20);
+    });
   }
 
   updateWorldBounds() {
@@ -549,6 +559,7 @@ class PrototypeGame extends Phaser.Scene {
     this.playerState = PlayerState.HURT;
     this.player.anims.play(`hurt-${this.facingDirection}`);
 
+    this.takeDamage();
     this.cameras.main.shake(200, 0.01);
 
     const pushDistance = 30;
@@ -640,6 +651,38 @@ class PrototypeGame extends Phaser.Scene {
     });
   }
 
+  createHearts() {
+    this.anims.create({
+      key: 'heart-damage',
+      frames: [{ key: 'heartFull' }, { key: 'heartHalf' }, { key: 'heartEmpty' }],
+      frameRate: 5,
+      repeat: 0
+    });
+
+    for (let i = 0; i < this.maxHealth; i++) {
+      const heart = this.add.sprite(20 + i * 40, 20, 'heartFull')
+        .setOrigin(0, 0)
+        .setScale(0.5)
+        .setScrollFactor(0)
+        .setDepth(100);
+      this.hearts.push(heart);
+    }
+  }
+
+  takeDamage() {
+    if (this.currentHealth > 0) {
+      this.currentHealth--;
+      this.updateHeartDisplay();
+    }
+  }
+
+  updateHeartDisplay() {
+    const heartIndex = this.currentHealth;
+    if (heartIndex >= 0 && heartIndex < this.maxHealth) {
+      this.hearts[heartIndex].play('heart-damage');
+    }
+  }
+
 }
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -656,7 +699,7 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   physics: {
     default: 'arcade',
-    arcade: { gravity: { x: 0, y: 0 }, debug: true }
+    arcade: { gravity: { x: 0, y: 0 }, debug: false }
   },
   scale: {
     mode: Phaser.Scale.RESIZE,

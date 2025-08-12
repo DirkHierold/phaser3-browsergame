@@ -81,6 +81,9 @@ export default class LoadingScene extends Phaser.Scene {
     this.load.audio('blood', '/audios/blood.wav');
     this.load.audio('footstep', '/audios/footstep.ogg');
     this.load.audio('backgroundMusic', '/audios/Magic Elderwood Forest - Overworld.mp3');
+    this.load.image('heartFull', '/images/hud_heartFull.png');
+    this.load.image('heartHalf', '/images/hud_heartHalf.png');
+    this.load.image('heartEmpty', '/images/hud_heartEmpty.png');
   }
 
   create() {
