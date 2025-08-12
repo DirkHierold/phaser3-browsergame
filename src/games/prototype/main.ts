@@ -4,6 +4,7 @@ import { OrientationManager } from '../../shared/OrientationManager';
 import { ResizeManager } from '../../shared/ResizeManager';
 
 import LoadingScene from './LoadingScene';
+import GameOverScene from './GameOverScene';
 
 enum PlayerState {
   IDLE = 'idle',
@@ -49,6 +50,8 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   create() {
+    this.currentHealth = this.maxHealth;
+    this.hearts = [];
     this.physics.world.bounds.width = this.scale.width;
     this.physics.world.bounds.height = this.scale.height;
     this.createBackground();
@@ -73,6 +76,8 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   handleResize() {
+    if (!this.physics?.world?.bounds) return;
+    
     // Store relative positions before resize
     const relativePlayerX = this.player ? this.player.x / this.physics.world.bounds.width : 0.5;
     const relativePlayerY = this.player ? this.player.y / this.physics.world.bounds.height : 0.5;
@@ -140,6 +145,8 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   createAnimations() {
+    if (this.anims.exists('idle-down')) return;
+    
     this.anims.create({
       key: 'idle-down',
       frames: this.anims.generateFrameNames('playerIdle', {
@@ -431,9 +438,9 @@ class PrototypeGame extends Phaser.Scene {
     const inputState = this.inputController.getInputState();
     this.currentDirection = inputState.direction;
 
-    if (this.currentDirection !== '' && !this.footstepSound.isPlaying) {
+    if (this.currentDirection !== '' && !this.footstepSound.isPlaying && this.currentHealth > 0) {
       this.footstepSound.play({ loop: true, volume: 0.2 });
-    } else if (this.currentDirection === '' && this.footstepSound.isPlaying) {
+    } else if ((this.currentDirection === '' || this.currentHealth === 0) && this.footstepSound.isPlaying) {
       this.footstepSound.stop();
     }
   }
@@ -524,13 +531,11 @@ class PrototypeGame extends Phaser.Scene {
     const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
 
     if (this.slime) {
-      this.slime.setPosition(x, y);
-      this.slime.setScale(2 * baseScale);
-    } else {
-      this.slime = this.physics.add.sprite(x, y, 'slimeIdle', 0);
-      this.slime.setScale(2 * baseScale);
-      this.slime.body.setCircle(7, 26, 26);
+      this.slime.destroy();
     }
+    this.slime = this.physics.add.sprite(x, y, 'slimeIdle', 0);
+    this.slime.setScale(2 * baseScale);
+    this.slime.body.setCircle(7, 26, 26);
     this.slime.anims.play(`slime-idle-${randomDirection}`);
   }
 
@@ -558,6 +563,7 @@ class PrototypeGame extends Phaser.Scene {
   hurtPlayer() {
     this.playerState = PlayerState.HURT;
     this.player.anims.play(`hurt-${this.facingDirection}`);
+    this.footstepSound.stop();
 
     this.takeDamage();
     this.cameras.main.shake(200, 0.01);
@@ -652,12 +658,14 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   createHearts() {
-    this.anims.create({
-      key: 'heart-damage',
-      frames: [{ key: 'heartFull' }, { key: 'heartHalf' }, { key: 'heartEmpty' }],
-      frameRate: 5,
-      repeat: 0
-    });
+    if (!this.anims.exists('heart-damage')) {
+      this.anims.create({
+        key: 'heart-damage',
+        frames: [{ key: 'heartFull' }, { key: 'heartHalf' }, { key: 'heartEmpty' }],
+        frameRate: 5,
+        repeat: 0
+      });
+    }
 
     for (let i = 0; i < this.maxHealth; i++) {
       const heart = this.add.sprite(20 + i * 40, 20, 'heartFull')
@@ -673,6 +681,12 @@ class PrototypeGame extends Phaser.Scene {
     if (this.currentHealth > 0) {
       this.currentHealth--;
       this.updateHeartDisplay();
+      if (this.currentHealth === 0) {
+        this.footstepSound.stop();
+        this.time.delayedCall(600, () => {
+          this.scene.start('GameOverScene');
+        });
+      }
     }
   }
 
@@ -682,6 +696,8 @@ class PrototypeGame extends Phaser.Scene {
       this.hearts[heartIndex].play('heart-damage');
     }
   }
+
+
 
 }
 
@@ -706,7 +722,7 @@ const config: Phaser.Types.Core.GameConfig = {
     width: '100%',
     height: '100%'
   },
-  scene: [LoadingScene, PrototypeGame],
+  scene: [LoadingScene, PrototypeGame, GameOverScene],
 };
 
 new Phaser.Game(config);
