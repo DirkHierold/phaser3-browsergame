@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { InputController } from '../../shared/InputController';
-import { GameUtils } from '../../shared/utils/GameUtils';
+import { OrientationManager } from '../../shared/OrientationManager';
+import { ResizeManager } from '../../shared/ResizeManager';
 import LoadingScene from './LoadingScene';
 
 enum PlayerState {
@@ -78,8 +79,8 @@ class PrototypeGame extends Phaser.Scene {
     this.createWorldBorder();
     this.setupCollisions();
 
-    // Setup responsive handling AFTER all objects are created
-    GameUtils.setupResponsiveHandling(this, this.handleResize.bind(this), this.handleOrientationChange.bind(this));
+    OrientationManager.getInstance().updateScene(this);
+    ResizeManager.getInstance().updateScene(this, this.handleResize.bind(this));
   }
 
   handleResize() {
@@ -131,7 +132,7 @@ class PrototypeGame extends Phaser.Scene {
 
   updateWorldBorder() {
     if (!this.worldBorder) return;
-    
+
     this.worldBorder.clear();
     this.worldBorder.lineStyle(4, 0x000000);
     this.worldBorder.strokeRect(0, 0, this.scale.width, this.scale.height);
@@ -139,29 +140,7 @@ class PrototypeGame extends Phaser.Scene {
 
 
 
-  private handleOrientationChange() {
-    const isDesktop = this.sys.game.device.os.desktop;
-    const isIncorrectOrientation = (this.scale.orientation.toString() === Phaser.Scale.PORTRAIT);
 
-    if (!isDesktop && isIncorrectOrientation) {
-      this.setTurnMessage();
-      this.scene.pause();
-    } else {
-      this.scene.resume();
-    }
-  }
-
-  private setTurnMessage() {
-    const turnMessageElement = document.getElementById('turn-message');
-    if (turnMessageElement) {
-      const isGerman = navigator.language.toLowerCase().startsWith('de');
-      if (isGerman) {
-        turnMessageElement.textContent = 'Bitte drehe dein Gerät ins Querformat!';
-      } else {
-        turnMessageElement.textContent = 'Please turn your device to landscape!';
-      }
-    }
-  }
 
 
 
@@ -591,9 +570,10 @@ class PrototypeGame extends Phaser.Scene {
 
   createSwordHitbox() {
     const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
-    const hitboxSize = this.sys.game.device.os.desktop ? 120 * baseScale : 60;
-    this.swordHitbox = this.add.zone(0, 0, hitboxSize, hitboxSize);
+    const hitboxRadius = this.sys.game.device.os.desktop ? 60 * baseScale : 30;
+    this.swordHitbox = this.add.zone(0, 0, hitboxRadius * 2, hitboxRadius * 2);
     this.physics.add.existing(this.swordHitbox);
+    (this.swordHitbox.body as Phaser.Physics.Arcade.Body).setCircle(hitboxRadius);
     (this.swordHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
   }
 
@@ -647,15 +627,14 @@ class PrototypeGame extends Phaser.Scene {
 
     const body = this.swordHitbox.body as Phaser.Physics.Arcade.Body;
     const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
-    const offset = 10 * baseScale;
 
     if (this.playerState === PlayerState.WALKING_ATTACK || this.playerState === PlayerState.ATTACKING) {
       body.enable = true;
       const positions = {
-        [Direction.DOWN]: { x: this.player.x, y: this.player.y + offset },
-        [Direction.UP]: { x: this.player.x, y: this.player.y - offset },
-        [Direction.LEFT]: { x: this.player.x - offset, y: this.player.y },
-        [Direction.RIGHT]: { x: this.player.x + offset, y: this.player.y }
+        [Direction.DOWN]: { x: this.player.x, y: this.player.y + 23 * baseScale },
+        [Direction.UP]: { x: this.player.x, y: this.player.y - 13 * baseScale },
+        [Direction.LEFT]: { x: this.player.x - 20 * baseScale, y: this.player.y },
+        [Direction.RIGHT]: { x: this.player.x + 20 * baseScale, y: this.player.y }
       };
       const pos = positions[this.facingDirection];
       this.swordHitbox.setPosition(pos.x, pos.y);
@@ -718,7 +697,7 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   physics: {
     default: 'arcade',
-    arcade: { gravity: { x: 0, y: 0 }, debug: false }
+    arcade: { gravity: { x: 0, y: 0 }, debug: true }
   },
   scale: {
     mode: Phaser.Scale.RESIZE,

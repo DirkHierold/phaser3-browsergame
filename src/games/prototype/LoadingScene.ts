@@ -1,4 +1,5 @@
-import { GameUtils } from '../../shared/utils/GameUtils';
+import { OrientationManager } from '../../shared/OrientationManager';
+import { ResizeManager } from '../../shared/ResizeManager';
 
 export default class LoadingScene extends Phaser.Scene {
   private progressBar!: Phaser.GameObjects.Graphics;
@@ -62,9 +63,7 @@ export default class LoadingScene extends Phaser.Scene {
     });
 
     this.load.on("complete", () => {
-      // this._realLoadingComplete = true;
       this.completeLoading();
-      this.sound.play('backgroundMusic', { loop: true, volume: 0.3 });
     });
 
 
@@ -88,10 +87,8 @@ export default class LoadingScene extends Phaser.Scene {
   }
 
   create() {
-    // Setup responsive handling for loading scene
-    GameUtils.setupResponsiveHandling(this, this.handleResize.bind(this), this.handleOrientationChange.bind(this));
-    
-    // Game starts only when start button is clicked
+    OrientationManager.getInstance().initialize(this);
+    ResizeManager.getInstance().initialize(this, this.handleResize.bind(this));
   }
 
   private handleResize() {
@@ -137,30 +134,7 @@ export default class LoadingScene extends Phaser.Scene {
     }
   }
 
-  private handleOrientationChange() {
-    const isDesktop = this.sys.game.device.os.desktop;
-    const isIncorrectOrientation = (this.scale.orientation.toString() === Phaser.Scale.PORTRAIT);
-    
-    if (!isDesktop && isIncorrectOrientation) {
-      // Show landscape message for mobile devices
-      this.setTurnMessage();
-      this.scene.pause();
-    } else {
-      this.scene.resume();
-    }
-  }
 
-  private setTurnMessage() {
-    const turnMessageElement = document.getElementById('turn-message');
-    if (turnMessageElement) {
-      const isGerman = navigator.language.toLowerCase().startsWith('de');
-      if (isGerman) {
-        turnMessageElement.textContent = 'Bitte drehe dein Gerät ins Querformat!';
-      } else {
-        turnMessageElement.textContent = 'Please turn your device to landscape!';
-      }
-    }
-  }
 
   private completeLoading() {
     // this._isLoadingComplete = true;
@@ -182,6 +156,7 @@ export default class LoadingScene extends Phaser.Scene {
     }).setOrigin(0.5).setInteractive();
 
     this.startButton.on('pointerdown', () => {
+      this.sound.play('backgroundMusic', { loop: true, volume: 0.3 });
       this.scene.start('PrototypeGame');
     });
   }

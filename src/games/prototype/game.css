@@ -18,21 +18,18 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.9);
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
     color: white;
     text-align: center;
     font-family: Arial, sans-serif;
     font-size: 2em;
     display: flex;
-    /* Immer Flexbox für Zentrierung verwenden */
     justify-content: center;
     align-items: center;
-    z-index: 9999;
-    /* Verstecke standardmäßig über display: none; */
+    z-index: 99999;
     display: none;
-    /* Dies ist die Ausgangsstellung */
 }
 
 @media screen and (orientation: portrait) {
