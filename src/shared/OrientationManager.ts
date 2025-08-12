@@ -20,13 +20,14 @@ export class OrientationManager {
 
   private setupOrientationListener() {
     const handleOrientationChange = () => {
-      setTimeout(() => this.checkOrientation(), 100);
+      // Small delay to let ResizeManager handle resize first
+      setTimeout(() => this.checkOrientation(), 150);
     };
     
     window.addEventListener('orientationchange', handleOrientationChange);
   }
 
-  private checkOrientation() {
+  checkOrientation() {
     if (!this.currentScene) return;
 
     const isDesktop = this.currentScene.sys.game.device.os.desktop;

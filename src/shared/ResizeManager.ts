@@ -2,6 +2,8 @@ export class ResizeManager {
   private static instance: ResizeManager;
   private currentScene: Phaser.Scene | null = null;
   private resizeCallback: (() => void) | null = null;
+  private resizeHandler: (() => void) | null = null;
+  private isListenerSetup: boolean = false;
 
   static getInstance(): ResizeManager {
     if (!ResizeManager.instance) {
@@ -22,29 +24,45 @@ export class ResizeManager {
     this.resizeCallback = callback || null;
   }
 
+
+
   private setupResizeListener() {
-    const handleResize = () => {
+    if (this.isListenerSetup) {
+      return; // Already setup
+    }
+
+    this.resizeHandler = () => {
       this.handleResize();
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', this.resizeHandler);
     window.addEventListener('orientationchange', () => {
-      setTimeout(handleResize, 100);
+      setTimeout(this.resizeHandler!, 100);
     });
+    this.isListenerSetup = true;
   }
 
   private handleResize() {
     if (!this.currentScene) return;
 
     this.currentScene.scale.refresh();
-    
+
     if (this.resizeCallback) {
       this.resizeCallback();
     }
   }
 
+  triggerResize() {
+    this.handleResize();
+  }
+
   destroy() {
+    if (this.resizeHandler && this.isListenerSetup) {
+      window.removeEventListener('resize', this.resizeHandler);
+      this.isListenerSetup = false;
+    }
     this.currentScene = null;
     this.resizeCallback = null;
+    this.resizeHandler = null;
   }
 }

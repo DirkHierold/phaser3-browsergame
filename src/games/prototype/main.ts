@@ -26,35 +26,19 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-  gameWidth: number;
-  gameHeight: number;
-  gameWidthMiddle: number;
-  gameHeightMiddle: number;
   inputController: InputController;
 
   currentDirection: string = '';
   playerSpeed: number = 2;
-  cursorDebugText: Phaser.GameObjects.Text;
-  bg: Phaser.GameObjects.Image;
   worldBorder: Phaser.GameObjects.Graphics;
-  attackButton: Phaser.GameObjects.Graphics;
   slime: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   swordHitbox: Phaser.GameObjects.Zone;
   swingSounds: Phaser.Sound.BaseSound[];
   bloodSound: Phaser.Sound.BaseSound;
   footstepSound: Phaser.Sound.BaseSound;
-  backgroundMusic: Phaser.Sound.BaseSound;
 
   playerState: PlayerState = PlayerState.IDLE;
   facingDirection: Direction = Direction.DOWN;
-  isWalkingAttack: boolean = false;
-
-  init() {
-    this.gameWidth = 800;
-    this.gameHeight = 600;
-    this.gameWidthMiddle = this.gameWidth / 2;
-    this.gameHeightMiddle = this.gameHeight / 2;
-  }
 
   preload() {
     // Assets are now loaded in LoadingScene
@@ -64,7 +48,6 @@ class PrototypeGame extends Phaser.Scene {
     this.physics.world.bounds.width = this.scale.width;
     this.physics.world.bounds.height = this.scale.height;
     this.createBackground();
-    this.cursorDebugText = this.add.text(10, 10, '');
     this.createAnimations();
     this.createSounds();
     this.createPlayer();
@@ -81,7 +64,7 @@ class PrototypeGame extends Phaser.Scene {
     this.setupCollisions();
 
     OrientationManager.getInstance().updateScene(this);
-    ResizeManager.getInstance().updateScene(this, this.handleResize.bind(this));
+    ResizeManager.getInstance().initialize(this, this.handleResize.bind(this));
   }
 
   handleResize() {
@@ -91,7 +74,6 @@ class PrototypeGame extends Phaser.Scene {
     const relativeSlimeX = this.slime ? this.slime.x / this.physics.world.bounds.width : 0.5;
     const relativeSlimeY = this.slime ? this.slime.y / this.physics.world.bounds.height : 0.5;
 
-    this.updateBackground();
     this.updateWorldBounds();
     this.updateWorldBorder();
 
@@ -111,8 +93,6 @@ class PrototypeGame extends Phaser.Scene {
       this.slime.setScale(2 * baseScale);
     }
 
-
-
     // Update sword hitbox size for desktop
     if (this.swordHitbox && this.sys.game.device.os.desktop) {
       const hitboxSize = 120 * baseScale;
@@ -120,10 +100,6 @@ class PrototypeGame extends Phaser.Scene {
     }
 
     this.inputController.updatePositions();
-  }
-
-  updateBackground() {
-    // Background update logic would go here
   }
 
   updateWorldBounds() {
@@ -433,7 +409,7 @@ class PrototypeGame extends Phaser.Scene {
     this.worldBorder.strokeRect(0, 0, this.scale.width, this.scale.height);
   }
 
-  update(_time: number, _delta: number): void {
+  update(): void {
     this.updateInputState();
     this.updatePlayerState();
     this.handleMovement();
@@ -450,17 +426,6 @@ class PrototypeGame extends Phaser.Scene {
     } else if (this.currentDirection === '' && this.footstepSound.isPlaying) {
       this.footstepSound.stop();
     }
-  }
-
-  setCursorDebugInfo() {
-    if (!this.cursorDebugText) return;
-    let text = `Direction: ${this.currentDirection}\n`;
-    text += `FPS: ${this.sys.game.loop.actualFps}\n`;
-    this.cursorDebugText.setText(text);
-  }
-
-  stopPlayerAnimations() {
-    this.player.anims.stop();
   }
 
   updatePlayerState() {
