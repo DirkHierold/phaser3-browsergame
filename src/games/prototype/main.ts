@@ -38,6 +38,7 @@ class PrototypeGame extends Phaser.Scene {
   swingSounds: Phaser.Sound.BaseSound[];
   bloodSound: Phaser.Sound.BaseSound;
   footstepSound: Phaser.Sound.BaseSound;
+  loseSound: Phaser.Sound.BaseSound;
 
   playerState: PlayerState = PlayerState.IDLE;
   facingDirection: Direction = Direction.DOWN;
@@ -668,6 +669,7 @@ class PrototypeGame extends Phaser.Scene {
     ];
     this.bloodSound = this.sound.add('blood');
     this.footstepSound = this.sound.add('footstep');
+    this.loseSound = this.sound.add('lose');
   }
 
   playRandomSwingSound() {
@@ -728,6 +730,7 @@ class PrototypeGame extends Phaser.Scene {
       if (this.currentHealth === 0) {
         this.playerState = PlayerState.DEATH;
         this.footstepSound.stop();
+        this.loseSound.play();
         this.player.anims.play(`death-${this.facingDirection}`);
         this.player.once('animationcomplete', () => {
           this.scene.start('GameOverScene');
