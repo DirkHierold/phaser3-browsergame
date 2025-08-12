@@ -11,7 +11,8 @@ enum PlayerState {
   WALKING = 'walking',
   WALKING_ATTACK = 'walking-attack',
   ATTACKING = 'attacking',
-  HURT = 'hurt'
+  HURT = 'hurt',
+  DEATH = 'death'
 }
 
 enum Direction {
@@ -414,6 +415,42 @@ class PrototypeGame extends Phaser.Scene {
       frameRate: 10,
       repeat: 0
     });
+
+    this.anims.create({
+      key: 'death-down',
+      frames: this.anims.generateFrameNames('playerDeath', {
+        frames: [0, 1, 2, 3, 4, 5, 6]
+      }),
+      frameRate: 8,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'death-left',
+      frames: this.anims.generateFrameNames('playerDeath', {
+        frames: [7, 8, 9, 10, 11, 12, 13]
+      }),
+      frameRate: 8,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'death-right',
+      frames: this.anims.generateFrameNames('playerDeath', {
+        frames: [14, 15, 16, 17, 18, 19, 20]
+      }),
+      frameRate: 8,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'death-up',
+      frames: this.anims.generateFrameNames('playerDeath', {
+        frames: [21, 22, 23, 24, 25, 26, 27]
+      }),
+      frameRate: 8,
+      repeat: 0
+    });
   }
 
   createBackground() {
@@ -446,6 +483,11 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   updatePlayerState() {
+    // Don't change state if player is dead
+    if (this.playerState === PlayerState.DEATH) {
+      return;
+    }
+
     // Don't change state if animation is playing (except for transitions)
     if (this.player.anims.isPlaying &&
       (this.playerState === PlayerState.ATTACKING ||
@@ -483,7 +525,8 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   handleMovement() {
-    if (this.playerState !== PlayerState.WALKING && this.playerState !== PlayerState.WALKING_ATTACK) return;
+    if (this.playerState === PlayerState.DEATH || 
+        (this.playerState !== PlayerState.WALKING && this.playerState !== PlayerState.WALKING_ATTACK)) return;
 
     const movements: Record<string, { x: number; y: number }> = {
       'up': { x: 0, y: -this.playerSpeed },
@@ -508,7 +551,8 @@ class PrototypeGame extends Phaser.Scene {
     if (this.player.anims.isPlaying &&
       (this.playerState === PlayerState.ATTACKING ||
         this.playerState === PlayerState.HURT ||
-        this.playerState === PlayerState.WALKING_ATTACK)) {
+        this.playerState === PlayerState.WALKING_ATTACK ||
+        this.playerState === PlayerState.DEATH)) {
       return;
     }
 
@@ -682,8 +726,10 @@ class PrototypeGame extends Phaser.Scene {
       this.currentHealth--;
       this.updateHeartDisplay();
       if (this.currentHealth === 0) {
+        this.playerState = PlayerState.DEATH;
         this.footstepSound.stop();
-        this.time.delayedCall(600, () => {
+        this.player.anims.play(`death-${this.facingDirection}`);
+        this.player.once('animationcomplete', () => {
           this.scene.start('GameOverScene');
         });
       }
