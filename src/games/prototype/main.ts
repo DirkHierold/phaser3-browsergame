@@ -1,14 +1,18 @@
 import Phaser from 'phaser';
 import { InputController } from '../../shared/InputController';
-import { GameUtils } from '../../shared/utils/GameUtils';
+import { OrientationManager } from '../../shared/OrientationManager';
+import { ResizeManager } from '../../shared/ResizeManager';
+
 import LoadingScene from './LoadingScene';
+import GameOverScene from './GameOverScene';
 
 enum PlayerState {
   IDLE = 'idle',
   WALKING = 'walking',
   WALKING_ATTACK = 'walking-attack',
   ATTACKING = 'attacking',
-  HURT = 'hurt'
+  HURT = 'hurt',
+  DEATH = 'death'
 }
 
 enum Direction {
@@ -24,49 +28,40 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-  gameWidth: number;
-  gameHeight: number;
-  gameWidthMiddle: number;
-  gameHeightMiddle: number;
   inputController: InputController;
 
   currentDirection: string = '';
   playerSpeed: number = 2;
-  cursorDebugText: Phaser.GameObjects.Text;
-  bg: Phaser.GameObjects.Image;
   worldBorder: Phaser.GameObjects.Graphics;
-  attackButton: Phaser.GameObjects.Graphics;
   slime: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   swordHitbox: Phaser.GameObjects.Zone;
   swingSounds: Phaser.Sound.BaseSound[];
   bloodSound: Phaser.Sound.BaseSound;
   footstepSound: Phaser.Sound.BaseSound;
-  backgroundMusic: Phaser.Sound.BaseSound;
+  loseSound: Phaser.Sound.BaseSound;
 
   playerState: PlayerState = PlayerState.IDLE;
   facingDirection: Direction = Direction.DOWN;
-  isWalkingAttack: boolean = false;
 
-  init() {
-    this.gameWidth = 800;
-    this.gameHeight = 600;
-    this.gameWidthMiddle = this.gameWidth / 2;
-    this.gameHeightMiddle = this.gameHeight / 2;
-  }
+  hearts: Phaser.GameObjects.Sprite[] = [];
+  maxHealth: number = 3;
+  currentHealth: number = 3;
 
   preload() {
     // Assets are now loaded in LoadingScene
   }
 
   create() {
+    this.currentHealth = this.maxHealth;
+    this.hearts = [];
     this.physics.world.bounds.width = this.scale.width;
     this.physics.world.bounds.height = this.scale.height;
     this.createBackground();
-    this.cursorDebugText = this.add.text(10, 10, '');
     this.createAnimations();
     this.createSounds();
     this.createPlayer();
     this.createSlime();
+    this.createHearts();
     this.inputController = new InputController(this);
     this.inputController.initialize((isMoving) => {
       if (isMoving) {
@@ -78,18 +73,19 @@ class PrototypeGame extends Phaser.Scene {
     this.createWorldBorder();
     this.setupCollisions();
 
-    // Setup responsive handling AFTER all objects are created
-    GameUtils.setupResponsiveHandling(this, this.handleResize.bind(this), this.handleOrientationChange.bind(this));
+    OrientationManager.getInstance().updateScene(this);
+    ResizeManager.getInstance().initialize(this, this.handleResize.bind(this));
   }
 
   handleResize() {
+    if (!this.physics?.world?.bounds) return;
+    
     // Store relative positions before resize
     const relativePlayerX = this.player ? this.player.x / this.physics.world.bounds.width : 0.5;
     const relativePlayerY = this.player ? this.player.y / this.physics.world.bounds.height : 0.5;
     const relativeSlimeX = this.slime ? this.slime.x / this.physics.world.bounds.width : 0.5;
     const relativeSlimeY = this.slime ? this.slime.y / this.physics.world.bounds.height : 0.5;
 
-    this.updateBackground();
     this.updateWorldBounds();
     this.updateWorldBorder();
 
@@ -109,8 +105,6 @@ class PrototypeGame extends Phaser.Scene {
       this.slime.setScale(2 * baseScale);
     }
 
-
-
     // Update sword hitbox size for desktop
     if (this.swordHitbox && this.sys.game.device.os.desktop) {
       const hitboxSize = 120 * baseScale;
@@ -118,10 +112,11 @@ class PrototypeGame extends Phaser.Scene {
     }
 
     this.inputController.updatePositions();
-  }
-
-  updateBackground() {
-    // Background update logic would go here
+    
+    // Update hearts position
+    this.hearts.forEach((heart, i) => {
+      heart.setPosition(20 + i * 40, 20);
+    });
   }
 
   updateWorldBounds() {
@@ -131,39 +126,11 @@ class PrototypeGame extends Phaser.Scene {
 
   updateWorldBorder() {
     if (!this.worldBorder) return;
-    
+
     this.worldBorder.clear();
     this.worldBorder.lineStyle(4, 0x000000);
     this.worldBorder.strokeRect(0, 0, this.scale.width, this.scale.height);
   }
-
-
-
-  private handleOrientationChange() {
-    const isDesktop = this.sys.game.device.os.desktop;
-    const isIncorrectOrientation = (this.scale.orientation.toString() === Phaser.Scale.PORTRAIT);
-
-    if (!isDesktop && isIncorrectOrientation) {
-      this.setTurnMessage();
-      this.scene.pause();
-    } else {
-      this.scene.resume();
-    }
-  }
-
-  private setTurnMessage() {
-    const turnMessageElement = document.getElementById('turn-message');
-    if (turnMessageElement) {
-      const isGerman = navigator.language.toLowerCase().startsWith('de');
-      if (isGerman) {
-        turnMessageElement.textContent = 'Bitte drehe dein Gerät ins Querformat!';
-      } else {
-        turnMessageElement.textContent = 'Please turn your device to landscape!';
-      }
-    }
-  }
-
-
 
   createPlayer() {
     this.player = this.physics.add.sprite(this.scale.width / 2, this.scale.height / 2, 'playerIdle', 0);
@@ -180,6 +147,8 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   createAnimations() {
+    if (this.anims.exists('idle-down')) return;
+    
     this.anims.create({
       key: 'idle-down',
       frames: this.anims.generateFrameNames('playerIdle', {
@@ -447,11 +416,43 @@ class PrototypeGame extends Phaser.Scene {
       frameRate: 10,
       repeat: 0
     });
+
+    this.anims.create({
+      key: 'death-down',
+      frames: this.anims.generateFrameNames('playerDeath', {
+        frames: [0, 1, 2, 3, 4, 5, 6]
+      }),
+      frameRate: 8,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'death-left',
+      frames: this.anims.generateFrameNames('playerDeath', {
+        frames: [7, 8, 9, 10, 11, 12, 13]
+      }),
+      frameRate: 8,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'death-right',
+      frames: this.anims.generateFrameNames('playerDeath', {
+        frames: [14, 15, 16, 17, 18, 19, 20]
+      }),
+      frameRate: 8,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'death-up',
+      frames: this.anims.generateFrameNames('playerDeath', {
+        frames: [21, 22, 23, 24, 25, 26, 27]
+      }),
+      frameRate: 8,
+      repeat: 0
+    });
   }
-
-
-
-
 
   createBackground() {
     this.cameras.main.setBackgroundColor('#228B22');
@@ -463,7 +464,7 @@ class PrototypeGame extends Phaser.Scene {
     this.worldBorder.strokeRect(0, 0, this.scale.width, this.scale.height);
   }
 
-  update(_time: number, _delta: number): void {
+  update(): void {
     this.updateInputState();
     this.updatePlayerState();
     this.handleMovement();
@@ -475,25 +476,19 @@ class PrototypeGame extends Phaser.Scene {
     const inputState = this.inputController.getInputState();
     this.currentDirection = inputState.direction;
 
-    if (this.currentDirection !== '' && !this.footstepSound.isPlaying) {
+    if (this.currentDirection !== '' && !this.footstepSound.isPlaying && this.currentHealth > 0) {
       this.footstepSound.play({ loop: true, volume: 0.2 });
-    } else if (this.currentDirection === '' && this.footstepSound.isPlaying) {
+    } else if ((this.currentDirection === '' || this.currentHealth === 0) && this.footstepSound.isPlaying) {
       this.footstepSound.stop();
     }
   }
 
-  setCursorDebugInfo() {
-    if (!this.cursorDebugText) return;
-    let text = `Direction: ${this.currentDirection}\n`;
-    text += `FPS: ${this.sys.game.loop.actualFps}\n`;
-    this.cursorDebugText.setText(text);
-  }
-
-  stopPlayerAnimations() {
-    this.player.anims.stop();
-  }
-
   updatePlayerState() {
+    // Don't change state if player is dead
+    if (this.playerState === PlayerState.DEATH) {
+      return;
+    }
+
     // Don't change state if animation is playing (except for transitions)
     if (this.player.anims.isPlaying &&
       (this.playerState === PlayerState.ATTACKING ||
@@ -531,7 +526,8 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   handleMovement() {
-    if (this.playerState !== PlayerState.WALKING && this.playerState !== PlayerState.WALKING_ATTACK) return;
+    if (this.playerState === PlayerState.DEATH || 
+        (this.playerState !== PlayerState.WALKING && this.playerState !== PlayerState.WALKING_ATTACK)) return;
 
     const movements: Record<string, { x: number; y: number }> = {
       'up': { x: 0, y: -this.playerSpeed },
@@ -556,7 +552,8 @@ class PrototypeGame extends Phaser.Scene {
     if (this.player.anims.isPlaying &&
       (this.playerState === PlayerState.ATTACKING ||
         this.playerState === PlayerState.HURT ||
-        this.playerState === PlayerState.WALKING_ATTACK)) {
+        this.playerState === PlayerState.WALKING_ATTACK ||
+        this.playerState === PlayerState.DEATH)) {
       return;
     }
 
@@ -579,24 +576,20 @@ class PrototypeGame extends Phaser.Scene {
     const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
 
     if (this.slime) {
-      this.slime.setPosition(x, y);
-      this.slime.setScale(2 * baseScale);
-      // Ensure physics body is properly set for respawned slime
-      this.slime.body.setCircle(7, 26, 26);
-      this.slime.body.enable = true;
-    } else {
-      this.slime = this.physics.add.sprite(x, y, 'slimeIdle', 0);
-      this.slime.setScale(2 * baseScale);
-      this.slime.body.setCircle(7, 26, 26);
+      this.slime.destroy();
     }
+    this.slime = this.physics.add.sprite(x, y, 'slimeIdle', 0);
+    this.slime.setScale(2 * baseScale);
+    this.slime.body.setCircle(7, 26, 26);
     this.slime.anims.play(`slime-idle-${randomDirection}`);
   }
 
   createSwordHitbox() {
     const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
-    const hitboxSize = this.sys.game.device.os.desktop ? 120 * baseScale : 60;
-    this.swordHitbox = this.add.zone(0, 0, hitboxSize, hitboxSize);
+    const hitboxRadius = this.sys.game.device.os.desktop ? 60 * baseScale : 30;
+    this.swordHitbox = this.add.zone(0, 0, hitboxRadius * 2, hitboxRadius * 2);
     this.physics.add.existing(this.swordHitbox);
+    (this.swordHitbox.body as Phaser.Physics.Arcade.Body).setCircle(hitboxRadius);
     (this.swordHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
   }
 
@@ -615,7 +608,9 @@ class PrototypeGame extends Phaser.Scene {
   hurtPlayer() {
     this.playerState = PlayerState.HURT;
     this.player.anims.play(`hurt-${this.facingDirection}`);
+    this.footstepSound.stop();
 
+    this.takeDamage();
     this.cameras.main.shake(200, 0.01);
 
     const pushDistance = 30;
@@ -650,15 +645,14 @@ class PrototypeGame extends Phaser.Scene {
 
     const body = this.swordHitbox.body as Phaser.Physics.Arcade.Body;
     const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
-    const offset = 10 * baseScale;
 
     if (this.playerState === PlayerState.WALKING_ATTACK || this.playerState === PlayerState.ATTACKING) {
       body.enable = true;
       const positions = {
-        [Direction.DOWN]: { x: this.player.x, y: this.player.y + offset },
-        [Direction.UP]: { x: this.player.x, y: this.player.y - offset },
-        [Direction.LEFT]: { x: this.player.x - offset, y: this.player.y },
-        [Direction.RIGHT]: { x: this.player.x + offset, y: this.player.y }
+        [Direction.DOWN]: { x: this.player.x, y: this.player.y + 23 * baseScale },
+        [Direction.UP]: { x: this.player.x, y: this.player.y - 13 * baseScale },
+        [Direction.LEFT]: { x: this.player.x - 20 * baseScale, y: this.player.y },
+        [Direction.RIGHT]: { x: this.player.x + 20 * baseScale, y: this.player.y }
       };
       const pos = positions[this.facingDirection];
       this.swordHitbox.setPosition(pos.x, pos.y);
@@ -675,7 +669,7 @@ class PrototypeGame extends Phaser.Scene {
     ];
     this.bloodSound = this.sound.add('blood');
     this.footstepSound = this.sound.add('footstep');
-    this.backgroundMusic = this.sound.add('backgroundMusic');
+    this.loseSound = this.sound.add('lose');
   }
 
   playRandomSwingSound() {
@@ -709,6 +703,51 @@ class PrototypeGame extends Phaser.Scene {
     });
   }
 
+  createHearts() {
+    if (!this.anims.exists('heart-damage')) {
+      this.anims.create({
+        key: 'heart-damage',
+        frames: [{ key: 'heartFull' }, { key: 'heartHalf' }, { key: 'heartEmpty' }],
+        frameRate: 5,
+        repeat: 0
+      });
+    }
+
+    for (let i = 0; i < this.maxHealth; i++) {
+      const heart = this.add.sprite(20 + i * 40, 20, 'heartFull')
+        .setOrigin(0, 0)
+        .setScale(0.5)
+        .setScrollFactor(0)
+        .setDepth(100);
+      this.hearts.push(heart);
+    }
+  }
+
+  takeDamage() {
+    if (this.currentHealth > 0) {
+      this.currentHealth--;
+      this.updateHeartDisplay();
+      if (this.currentHealth === 0) {
+        this.playerState = PlayerState.DEATH;
+        this.footstepSound.stop();
+        this.loseSound.play();
+        this.player.anims.play(`death-${this.facingDirection}`);
+        this.player.once('animationcomplete', () => {
+          this.scene.start('GameOverScene');
+        });
+      }
+    }
+  }
+
+  updateHeartDisplay() {
+    const heartIndex = this.currentHealth;
+    if (heartIndex >= 0 && heartIndex < this.maxHealth) {
+      this.hearts[heartIndex].play('heart-damage');
+    }
+  }
+
+
+
 }
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -719,6 +758,10 @@ const config: Phaser.Types.Core.GameConfig = {
   dom: {
     createContainer: true
   },
+  audio: {
+    disableWebAudio: false,
+    noAudio: false
+  },
   physics: {
     default: 'arcade',
     arcade: { gravity: { x: 0, y: 0 }, debug: false }
@@ -728,7 +771,7 @@ const config: Phaser.Types.Core.GameConfig = {
     width: '100%',
     height: '100%'
   },
-  scene: [LoadingScene, PrototypeGame],
+  scene: [LoadingScene, PrototypeGame, GameOverScene],
 };
 
 new Phaser.Game(config);
