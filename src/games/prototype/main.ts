@@ -581,6 +581,9 @@ class PrototypeGame extends Phaser.Scene {
     if (this.slime) {
       this.slime.setPosition(x, y);
       this.slime.setScale(2 * baseScale);
+      // Ensure physics body is properly set for respawned slime
+      this.slime.body.setCircle(7, 26, 26);
+      this.slime.body.enable = true;
     } else {
       this.slime = this.physics.add.sprite(x, y, 'slimeIdle', 0);
       this.slime.setScale(2 * baseScale);
