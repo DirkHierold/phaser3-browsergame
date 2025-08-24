@@ -74,6 +74,8 @@ export default class LoadingScene extends Phaser.Scene {
     this.load.spritesheet('playerHurt', '/images/Swordsman_lvl1_Hurt_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 20 });
     this.load.spritesheet('playerDeath', '/images/Swordsman_lvl1_Death_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 28 });
     this.load.spritesheet('playerWalkAttack', '/images/Swordsman_lvl1_Walk_Attack_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('playerRun', '/images/Swordsman_lvl1_Run_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 32 });
+    this.load.spritesheet('playerRunAttack', '/images/Swordsman_lvl1_Run_Attack_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 32 });
     // Slime 1 spritesheets
     this.load.spritesheet('slime1Idle', '/images/Slime1_Idle_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
     this.load.spritesheet('slime1Walk', '/images/Slime1_Walk_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });

@@ -9,7 +9,9 @@ import GameOverScene from './GameOverScene';
 enum PlayerState {
   IDLE = 'idle',
   WALKING = 'walking',
+  RUNNING = 'running',
   WALKING_ATTACK = 'walking-attack',
+  RUNNING_ATTACK = 'running-attack',
   ATTACKING = 'attacking',
   HURT = 'hurt',
   DEATH = 'death'
@@ -32,6 +34,12 @@ class PrototypeGame extends Phaser.Scene {
 
   currentDirection: string = '';
   playerSpeed: number = 2;
+  runSpeed: number = 4;
+  isRunning: boolean = false;
+  
+  // Double-tap detection for desktop
+  lastKeyPress: { [key: string]: number } = {};
+  doubleTapThreshold: number = 300; // milliseconds
   worldBorder: Phaser.GameObjects.Graphics;
   slime: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   slimeType: number = 1;
@@ -239,6 +247,42 @@ class PrototypeGame extends Phaser.Scene {
         ]
       }),
       frameRate: 12,
+      repeat: -1
+    });
+
+    this.anims.create({
+      key: 'running-left',
+      frames: this.anims.generateFrameNames('playerRun', {
+        frames: [8, 9, 10, 11, 12, 13, 14, 15]
+      }),
+      frameRate: 15,
+      repeat: -1
+    });
+
+    this.anims.create({
+      key: 'running-right',
+      frames: this.anims.generateFrameNames('playerRun', {
+        frames: [16, 17, 18, 19, 20, 21, 22, 23]
+      }),
+      frameRate: 15,
+      repeat: -1
+    });
+
+    this.anims.create({
+      key: 'running-up',
+      frames: this.anims.generateFrameNames('playerRun', {
+        frames: [24, 25, 26, 27, 28, 29, 30, 31]
+      }),
+      frameRate: 15,
+      repeat: -1
+    });
+
+    this.anims.create({
+      key: 'running-down',
+      frames: this.anims.generateFrameNames('playerRun', {
+        frames: [0, 1, 2, 3, 4, 5, 6, 7]
+      }),
+      frameRate: 15,
       repeat: -1
     });
 
@@ -894,6 +938,42 @@ class PrototypeGame extends Phaser.Scene {
     });
 
     this.anims.create({
+      key: 'running-attack-down',
+      frames: this.anims.generateFrameNames('playerRunAttack', {
+        frames: [0, 1, 2, 3, 4, 5, 6, 7]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'running-attack-left',
+      frames: this.anims.generateFrameNames('playerRunAttack', {
+        frames: [8, 9, 10, 11, 12, 13, 14, 15]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'running-attack-right',
+      frames: this.anims.generateFrameNames('playerRunAttack', {
+        frames: [16, 17, 18, 19, 20, 21, 22, 23]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
+
+    this.anims.create({
+      key: 'running-attack-up',
+      frames: this.anims.generateFrameNames('playerRunAttack', {
+        frames: [24, 25, 26, 27, 28, 29, 30, 31]
+      }),
+      frameRate: 12,
+      repeat: 0
+    });
+
+    this.anims.create({
       key: 'death-down',
       frames: this.anims.generateFrameNames('playerDeath', {
         frames: [0, 1, 2, 3, 4, 5, 6]
@@ -952,9 +1032,13 @@ class PrototypeGame extends Phaser.Scene {
   updateInputState() {
     const inputState = this.inputController.getInputState();
     this.currentDirection = inputState.direction;
+    this.isRunning = inputState.isRunning;
 
     if (this.currentDirection !== '' && !this.footstepSound.isPlaying && this.currentHealth > 0) {
-      this.footstepSound.play({ loop: true, volume: 0.2 });
+      // Adjust footstep volume and rate based on running
+      const volume = this.isRunning ? 0.3 : 0.2;
+      const rate = this.isRunning ? 1.3 : 1.0;
+      this.footstepSound.play({ loop: true, volume, rate });
     } else if ((this.currentDirection === '' || this.currentHealth === 0) && this.footstepSound.isPlaying) {
       this.footstepSound.stop();
     }
@@ -970,14 +1054,18 @@ class PrototypeGame extends Phaser.Scene {
     if (this.player.anims.isPlaying &&
       (this.playerState === PlayerState.ATTACKING ||
         this.playerState === PlayerState.HURT ||
-        this.playerState === PlayerState.WALKING_ATTACK)) {
+        this.playerState === PlayerState.WALKING_ATTACK ||
+        this.playerState === PlayerState.RUNNING_ATTACK)) {
 
-      // Allow transition from ATTACKING to WALKING_ATTACK
+      // Allow transition from ATTACKING to movement attacks
       if (this.playerState === PlayerState.ATTACKING && this.currentDirection !== '') {
-        this.playerState = PlayerState.WALKING_ATTACK;
+        const newState = this.isRunning ? PlayerState.RUNNING_ATTACK : PlayerState.WALKING_ATTACK;
+        const animKey = this.isRunning ? 'running-attack' : 'walking-attack';
+        
+        this.playerState = newState;
         this.facingDirection = this.getDirectionFromInput(this.currentDirection);
         const currentFrame = this.player.anims.currentFrame?.index || 0;
-        this.player.anims.play(`walking-attack-${this.facingDirection}`);
+        this.player.anims.play(`${animKey}-${this.facingDirection}`);
         if (this.player.anims.currentAnim?.frames) {
           this.player.anims.setCurrentFrame(this.player.anims.currentAnim.frames[Math.min(currentFrame, 5)]);
         }
@@ -987,7 +1075,11 @@ class PrototypeGame extends Phaser.Scene {
 
     // Normal state transitions when no priority animation is playing
     if (this.currentDirection !== '') {
-      this.playerState = PlayerState.WALKING;
+      if (this.isRunning) {
+        this.playerState = PlayerState.RUNNING;
+      } else {
+        this.playerState = PlayerState.WALKING;
+      }
       this.facingDirection = this.getDirectionFromInput(this.currentDirection);
     } else {
       this.playerState = PlayerState.IDLE;
@@ -1004,17 +1096,23 @@ class PrototypeGame extends Phaser.Scene {
 
   handleMovement() {
     if (this.playerState === PlayerState.DEATH || 
-        (this.playerState !== PlayerState.WALKING && this.playerState !== PlayerState.WALKING_ATTACK)) return;
+        (this.playerState !== PlayerState.WALKING && 
+         this.playerState !== PlayerState.RUNNING &&
+         this.playerState !== PlayerState.WALKING_ATTACK &&
+         this.playerState !== PlayerState.RUNNING_ATTACK)) return;
 
+    // Determine current speed based on running state
+    const currentSpeed = this.isRunning ? this.runSpeed : this.playerSpeed;
+    
     const movements: Record<string, { x: number; y: number }> = {
-      'up': { x: 0, y: -this.playerSpeed },
-      'down': { x: 0, y: this.playerSpeed },
-      'left': { x: -this.playerSpeed, y: 0 },
-      'right': { x: this.playerSpeed, y: 0 },
-      'upright': { x: this.playerSpeed, y: -this.playerSpeed },
-      'downright': { x: this.playerSpeed, y: this.playerSpeed },
-      'downleft': { x: -this.playerSpeed, y: this.playerSpeed },
-      'upleft': { x: -this.playerSpeed, y: -this.playerSpeed }
+      'up': { x: 0, y: -currentSpeed },
+      'down': { x: 0, y: currentSpeed },
+      'left': { x: -currentSpeed, y: 0 },
+      'right': { x: currentSpeed, y: 0 },
+      'upright': { x: currentSpeed, y: -currentSpeed },
+      'downright': { x: currentSpeed, y: currentSpeed },
+      'downleft': { x: -currentSpeed, y: currentSpeed },
+      'upleft': { x: -currentSpeed, y: -currentSpeed }
     };
 
     const movement = movements[this.currentDirection];
@@ -1030,6 +1128,7 @@ class PrototypeGame extends Phaser.Scene {
       (this.playerState === PlayerState.ATTACKING ||
         this.playerState === PlayerState.HURT ||
         this.playerState === PlayerState.WALKING_ATTACK ||
+        this.playerState === PlayerState.RUNNING_ATTACK ||
         this.playerState === PlayerState.DEATH)) {
       return;
     }
@@ -1145,7 +1244,9 @@ class PrototypeGame extends Phaser.Scene {
     const body = this.swordHitbox.body as Phaser.Physics.Arcade.Body;
     const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
 
-    if (this.playerState === PlayerState.WALKING_ATTACK || this.playerState === PlayerState.ATTACKING) {
+    if (this.playerState === PlayerState.WALKING_ATTACK || 
+        this.playerState === PlayerState.RUNNING_ATTACK || 
+        this.playerState === PlayerState.ATTACKING) {
       body.enable = true;
       const positions = {
         [Direction.DOWN]: { x: this.player.x, y: this.player.y + 23 * baseScale },
@@ -1179,14 +1280,26 @@ class PrototypeGame extends Phaser.Scene {
   performWalkingAttack() {
     if (this.playerState === PlayerState.ATTACKING || this.playerState === PlayerState.HURT) return;
 
-    this.playerState = PlayerState.WALKING_ATTACK;
-    const attackAnim = `walking-attack-${this.facingDirection}`;
-    this.player.anims.play(attackAnim);
-    this.playRandomSwingSound();
+    // Choose attack type based on running state
+    if (this.isRunning) {
+      this.playerState = PlayerState.RUNNING_ATTACK;
+      const attackAnim = `running-attack-${this.facingDirection}`;
+      this.player.anims.play(attackAnim);
+      this.playRandomSwingSound();
 
-    this.player.once('animationcomplete', () => {
-      this.playerState = PlayerState.WALKING;
-    });
+      this.player.once('animationcomplete', () => {
+        this.playerState = PlayerState.RUNNING;
+      });
+    } else {
+      this.playerState = PlayerState.WALKING_ATTACK;
+      const attackAnim = `walking-attack-${this.facingDirection}`;
+      this.player.anims.play(attackAnim);
+      this.playRandomSwingSound();
+
+      this.player.once('animationcomplete', () => {
+        this.playerState = PlayerState.WALKING;
+      });
+    }
   }
 
   performAttack() {
