@@ -409,6 +409,96 @@ export default {
 
 This comprehensive guide ensures consistent development practices, optimal performance, and maintainable code architecture across the entire game collection while leveraging the sophisticated shared systems already in place.
 
+## Systematic Development Workflows
+
+### Bug Fix Methodology
+
+When fixing bugs in the game codebase, follow this systematic approach:
+
+**Step 1: Reproduce the Issue**
+- Identify affected game (prototype, dash, evade, etc.)
+- Test on both desktop (keyboard/mouse) and mobile (touch)
+- Document browser, screen size, and reproduction steps
+- Use browser developer tools and check console for errors
+
+**Step 2: Root Cause Analysis Categories**
+- **Physics Issues**: Collision detection, body sizes, velocity, world bounds
+- **Animation Problems**: State transitions, frame issues, spritesheet loading
+- **Input Handling**: Touch responsiveness, keyboard conflicts, InputController states
+- **Responsive Design**: UI scaling, orientation changes, GameUtils integration
+- **Audio Issues**: Playback problems, volume controls, browser audio policies
+- **Memory Leaks**: Event listeners, scene transitions, physics body disposal
+
+**Step 3: Fix Implementation Best Practices**
+- Make minimal changes focused on the specific problem
+- Use existing patterns and shared utilities when possible
+- Test fix on all affected platforms before considering complete
+- Document complex fixes with inline comments
+
+**Step 4: Verification Checklist**
+- [ ] Bug fixed on reported platform
+- [ ] No regression on other platforms  
+- [ ] Performance impact acceptable
+- [ ] Cross-platform testing completed (Chrome/Firefox/Safari, iOS/Android)
+- [ ] Different screen sizes and orientations tested
+
+### Feature Implementation Process
+
+**Step 1: Planning and Analysis**
+- Define feature scope and affected games
+- Identify required assets (sprites, audio, data files)
+- Plan Phaser 3 systems needed (physics, animations, input)
+- Determine shared utilities to leverage
+- Consider performance implications
+
+**Step 2: Architecture Design**
+```typescript
+// Always design interfaces first
+interface NewFeatureConfig {
+  behavior: FeatureBehavior;
+  assets: RequiredAssets;
+  input: InputRequirements;
+  responsive: ResponsiveNeeds;
+}
+```
+
+**Step 3: Implementation Strategy**
+- Use existing shared systems (GameUtils, InputController, constants)
+- Follow responsive design patterns from project start
+- Implement proper state management with enums
+- Use established animation naming conventions: `${action}-${direction}`
+
+**Step 4: Testing Integration**
+- [ ] Feature works on desktop and mobile
+- [ ] Responsive behavior across screen sizes
+- [ ] Audio plays correctly across browsers
+- [ ] Performance monitoring (no frame drops)
+- [ ] Memory usage doesn't increase significantly
+- [ ] Integration with existing systems verified
+
+### Code Analysis Guidelines
+
+**Performance Analysis Focus Areas**
+- Check for expensive operations in `update()` loops
+- Identify object creation in hot paths  
+- Review asset loading and disposal patterns
+- Examine physics calculations efficiency
+- Assess particle effect performance
+
+**Quality Metrics Validation**
+- TypeScript strict mode compliance
+- Proper typing usage (avoid `any`)
+- Consistent naming conventions
+- JSDoc documentation coverage
+- Centralized constants usage
+
+**Red Flags to Watch For**
+- Direct DOM manipulation instead of Phaser APIs
+- Missing memory cleanup in scene shutdown
+- Hardcoded values instead of constants
+- Missing responsive design implementation
+- Inefficient collision detection patterns
+
 ## Phaser 3 Engine Documentation
 
 For comprehensive Phaser 3 engine documentation, API references, and best practices, refer to the documentation files in the `doc/` folder:
