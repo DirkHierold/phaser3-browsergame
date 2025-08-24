@@ -74,8 +74,26 @@ export default class LoadingScene extends Phaser.Scene {
     this.load.spritesheet('playerHurt', '/images/Swordsman_lvl1_Hurt_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 20 });
     this.load.spritesheet('playerDeath', '/images/Swordsman_lvl1_Death_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 28 });
     this.load.spritesheet('playerWalkAttack', '/images/Swordsman_lvl1_Walk_Attack_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
-    this.load.spritesheet('slimeIdle', '/images/Slime1_Idle_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
-    this.load.spritesheet('slimeDeath', '/images/Slime1_Death_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
+    // Slime 1 spritesheets
+    this.load.spritesheet('slime1Idle', '/images/Slime1_Idle_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime1Walk', '/images/Slime1_Walk_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime1Attack', '/images/Slime1_Attack_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime1Hurt', '/images/Slime1_Hurt_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime1Death', '/images/Slime1_Death_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
+    
+    // Slime 2 spritesheets
+    this.load.spritesheet('slime2Idle', '/images/Slime2_Idle_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime2Walk', '/images/Slime2_Walk_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime2Attack', '/images/Slime2_Attack_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime2Hurt', '/images/Slime2_Hurt_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime2Death', '/images/Slime2_Death_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
+    
+    // Slime 3 spritesheets
+    this.load.spritesheet('slime3Idle', '/images/Slime3_Idle_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime3Walk', '/images/Slime3_Walk_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime3Attack', '/images/Slime3_Attack_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime3Hurt', '/images/Slime3_Hurt_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime3Death', '/images/Slime3_Death_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
     this.load.audio('swing1', '/audios/swing.wav');
     this.load.audio('swing2', '/audios/swing2.wav');
     this.load.audio('swing3', '/audios/swing3.wav');
