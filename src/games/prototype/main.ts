@@ -582,6 +582,9 @@ class PrototypeGame extends Phaser.Scene {
     this.slime.setScale(2 * baseScale);
     this.slime.body.setCircle(7, 26, 26);
     this.slime.anims.play(`slime-idle-${randomDirection}`);
+    
+    // Re-establish collision detection for the new slime
+    this.setupSlimeCollisions();
   }
 
   createSwordHitbox() {
@@ -594,6 +597,17 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   setupCollisions() {
+    this.setupSlimeCollisions();
+  }
+
+  setupSlimeCollisions() {
+    if (!this.slime) return;
+    
+    // Clear any existing collisions for this slime to prevent duplicates
+    this.physics.world.removeCollider(this.swordHitbox, this.slime);
+    this.physics.world.removeCollider(this.player, this.slime);
+    
+    // Set up fresh collision detection for the current slime
     this.physics.add.overlap(this.swordHitbox, this.slime, () => {
       this.killSlime();
     });
