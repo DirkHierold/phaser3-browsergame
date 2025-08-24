@@ -117,6 +117,9 @@ class PrototypeGame extends Phaser.Scene {
     this.hearts.forEach((heart, i) => {
       heart.setPosition(20 + i * 40, 20);
     });
+
+    // Update depth sorting after position changes
+    this.updateDepthSorting();
   }
 
   updateWorldBounds() {
@@ -470,6 +473,7 @@ class PrototypeGame extends Phaser.Scene {
     this.handleMovement();
     this.updateAnimation();
     this.updateSwordHitbox();
+    this.updateDepthSorting();
   }
 
   updateInputState() {
@@ -582,6 +586,8 @@ class PrototypeGame extends Phaser.Scene {
     this.slime.setScale(2 * baseScale);
     this.slime.body.setCircle(7, 26, 26);
     this.slime.anims.play(`slime-idle-${randomDirection}`);
+    const slimeBottomY = this.slime.y + (this.slime.displayHeight / 2);
+    this.slime.setDepth(slimeBottomY);
     
     // Re-establish collision detection for the new slime
     this.setupSlimeCollisions();
@@ -760,7 +766,19 @@ class PrototypeGame extends Phaser.Scene {
     }
   }
 
-
+  private updateDepthSorting(): void {
+    // Use bottom edge Y position for proper 2D pseudo-3D layering
+    // Bottom edge represents where character's "feet" touch the ground
+    // Higher bottom Y = further south = higher depth = renders in front
+    if (this.player?.active) {
+      const playerBottomY = this.player.y + (this.player.displayHeight / 2);
+      this.player.setDepth(playerBottomY);
+    }
+    if (this.slime?.active) {
+      const slimeBottomY = this.slime.y + (this.slime.displayHeight / 2);
+      this.slime.setDepth(slimeBottomY);
+    }
+  }
 
 }
 
