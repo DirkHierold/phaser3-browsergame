@@ -16,7 +16,7 @@ export class InputController {
   private attackKeys?: { space: Phaser.Input.Keyboard.Key; enter: Phaser.Input.Keyboard.Key; };
   private attackButton?: Phaser.GameObjects.Graphics;
   private isDesktop: boolean;
-  private onAttackCallback?: (isMoving: boolean) => void;
+  private onAttackCallback?: (isMoving: boolean, isRunning: boolean) => void;
   
   // Running state tracking
   private lastKeyPress: { [key: string]: number } = {};
@@ -28,7 +28,7 @@ export class InputController {
     this.isDesktop = scene.sys.game.device.os.desktop;
   }
 
-  initialize(onAttackCallback?: (isMoving: boolean) => void): void {
+  initialize(onAttackCallback?: (isMoving: boolean, isRunning: boolean) => void): void {
     this.onAttackCallback = onAttackCallback;
     
     if (this.isDesktop) {
@@ -115,7 +115,7 @@ export class InputController {
   private handleAttackInput(): void {
     if (this.onAttackCallback) {
       const inputState = this.getInputState();
-      this.onAttackCallback(inputState.isMoving);
+      this.onAttackCallback(inputState.isMoving, inputState.isRunning);
     }
   }
 

@@ -72,10 +72,18 @@ class PrototypeGame extends Phaser.Scene {
     this.createSlime();
     this.createHearts();
     this.inputController = new InputController(this);
-    this.inputController.initialize((isMoving) => {
-      if (isMoving) {
+    this.inputController.initialize((isMoving, isRunning) => {
+      // Update running state immediately for mobile attack detection
+      this.isRunning = isRunning;
+      
+      if (isRunning) {
+        // Player is running - perform running attack
+        this.performRunningAttack();
+      } else if (isMoving) {
+        // Player is walking - perform walking attack  
         this.performWalkingAttack();
       } else {
+        // Player is standing still - perform standing attack
         this.performAttack();
       }
     });
@@ -1277,28 +1285,39 @@ class PrototypeGame extends Phaser.Scene {
     randomSound.play();
   }
 
+  performRunningAttack() {
+    if (this.playerState === PlayerState.ATTACKING || this.playerState === PlayerState.HURT) return;
+
+    this.playerState = PlayerState.RUNNING_ATTACK;
+    const attackAnim = `running-attack-${this.facingDirection}`;
+    this.player.anims.play(attackAnim);
+    this.playRandomSwingSound();
+
+    this.player.once('animationcomplete', () => {
+      this.playerState = PlayerState.RUNNING;
+    });
+
+    // Enable sword hitbox
+    if (this.swordHitbox?.body) {
+      (this.swordHitbox.body as Phaser.Physics.Arcade.Body).enable = true;
+    }
+  }
+
   performWalkingAttack() {
     if (this.playerState === PlayerState.ATTACKING || this.playerState === PlayerState.HURT) return;
 
-    // Choose attack type based on running state
-    if (this.isRunning) {
-      this.playerState = PlayerState.RUNNING_ATTACK;
-      const attackAnim = `running-attack-${this.facingDirection}`;
-      this.player.anims.play(attackAnim);
-      this.playRandomSwingSound();
+    this.playerState = PlayerState.WALKING_ATTACK;
+    const attackAnim = `walking-attack-${this.facingDirection}`;
+    this.player.anims.play(attackAnim);
+    this.playRandomSwingSound();
 
-      this.player.once('animationcomplete', () => {
-        this.playerState = PlayerState.RUNNING;
-      });
-    } else {
-      this.playerState = PlayerState.WALKING_ATTACK;
-      const attackAnim = `walking-attack-${this.facingDirection}`;
-      this.player.anims.play(attackAnim);
-      this.playRandomSwingSound();
+    this.player.once('animationcomplete', () => {
+      this.playerState = PlayerState.WALKING;
+    });
 
-      this.player.once('animationcomplete', () => {
-        this.playerState = PlayerState.WALKING;
-      });
+    // Enable sword hitbox
+    if (this.swordHitbox?.body) {
+      (this.swordHitbox.body as Phaser.Physics.Arcade.Body).enable = true;
     }
   }
 
