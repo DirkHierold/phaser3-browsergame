@@ -76,14 +76,20 @@ class PrototypeGame extends Phaser.Scene {
       // Update running state immediately for mobile attack detection
       this.isRunning = isRunning;
       
+      // Debug logging for attack detection
+      console.log(`Attack triggered - isMoving: ${isMoving}, isRunning: ${isRunning}`);
+      
       if (isRunning) {
         // Player is running - perform running attack
+        console.log('Performing running attack');
         this.performRunningAttack();
       } else if (isMoving) {
         // Player is walking - perform walking attack  
+        console.log('Performing walking attack');
         this.performWalkingAttack();
       } else {
         // Player is standing still - perform standing attack
+        console.log('Performing standing attack');
         this.performAttack();
       }
     });

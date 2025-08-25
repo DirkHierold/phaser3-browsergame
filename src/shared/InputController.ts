@@ -47,8 +47,12 @@ export class InputController {
       base: this.scene.add.image(0, 0, 'base').setDisplaySize(110, 110),
       thumb: this.scene.add.image(0, 0, 'thumb').setDisplaySize(48, 48),
       forceMin: 0,
+      forceMax: 1,
       enable: true,
-      dir: '8dir'
+      dir: '8dir',
+      // Disable snapping to ensure smooth movement
+      noReturn: false,
+      noFollowPointer: false
     });
     this.cursorKeys = this.joyStick.createCursorKeys();
   }
@@ -165,17 +169,34 @@ export class InputController {
       
       // Use desktop running state from double-tap detection
       isRunning = this.isRunning;
-    } else if (this.cursorKeys && this.joyStick) {
-      for (let key of Object.keys(this.cursorKeys) as Array<keyof typeof this.cursorKeys>) {
-        if (this.cursorKeys[key].isDown) {
-          direction += key;
+    } else if (this.joyStick) {
+      // Use joystick force directly instead of cursorKeys for better control
+      const force = this.joyStick.force;
+      const angle = this.joyStick.angle;
+      
+      // Only register movement if there's actual force applied
+      if (force > 0.1) {
+        // Convert angle to direction - use simple 4-directional for now
+        const deg = Phaser.Math.RadToDeg(angle);
+        
+        // Normalize angle to 0-360
+        const normalizedDeg = deg < 0 ? deg + 360 : deg;
+        
+        // Determine primary direction (4-directional)
+        if (normalizedDeg >= 315 || normalizedDeg < 45) direction = 'right';
+        else if (normalizedDeg >= 45 && normalizedDeg < 135) direction = 'down';
+        else if (normalizedDeg >= 135 && normalizedDeg < 225) direction = 'left';
+        else if (normalizedDeg >= 225 && normalizedDeg < 315) direction = 'up';
+        
+        // Determine running based on force threshold
+        const threshold = 0.7; // Run if joystick is pushed > 70% to edge
+        isRunning = force > threshold;
+        
+        // Debug logging (remove in production)
+        if (Math.random() < 0.1) { // Only log occasionally to avoid spam
+          console.log(`Joystick force: ${force.toFixed(2)}, angle: ${deg.toFixed(1)}°, direction: ${direction}, isRunning: ${isRunning}`);
         }
       }
-      
-      // Mobile: Check joystick distance to determine running
-      const force = this.joyStick.force;
-      const threshold = 0.8; // Run if joystick is pushed > 80% to edge
-      isRunning = force > threshold;
     }
 
     return {
