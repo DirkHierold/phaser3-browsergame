@@ -34,7 +34,7 @@ class PrototypeGame extends Phaser.Scene {
 
   currentDirection: string = '';
   playerSpeed: number = 2;
-  runSpeed: number = 4;
+  runSpeed: number = 3;
   isRunning: boolean = false;
   
   // Double-tap detection for desktop
@@ -116,7 +116,7 @@ class PrototypeGame extends Phaser.Scene {
 
     // Update sword hitbox size for both desktop and mobile
     if (this.swordHitbox) {
-      const hitboxRadius = this.sys.game.device.os.desktop ? 60 * baseScale : 30 * baseScale;
+      const hitboxRadius = this.sys.game.device.os.desktop ? 60 * baseScale : 50 * baseScale;
       this.swordHitbox.setSize(hitboxRadius * 2, hitboxRadius * 2);
       (this.swordHitbox.body as Phaser.Physics.Arcade.Body).setCircle(hitboxRadius);
     }
@@ -470,7 +470,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime1-hurt-down',
       frames: this.anims.generateFrameNames('slime1Hurt', {
-        frames: [0, 1, 2, 3, 4, 5]
+        frames: [0, 1, 2, 3, 4]
       }),
       frameRate: 12,
       repeat: 0
@@ -479,7 +479,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime1-hurt-up',
       frames: this.anims.generateFrameNames('slime1Hurt', {
-        frames: [6, 7, 8, 9, 10, 11]
+        frames: [5, 6, 7, 8, 9]
       }),
       frameRate: 12,
       repeat: 0
@@ -488,7 +488,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime1-hurt-left',
       frames: this.anims.generateFrameNames('slime1Hurt', {
-        frames: [12, 13, 14, 15, 16, 17]
+        frames: [10, 11, 12, 13, 14]
       }),
       frameRate: 12,
       repeat: 0
@@ -497,7 +497,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime1-hurt-right',
       frames: this.anims.generateFrameNames('slime1Hurt', {
-        frames: [18, 19, 20, 21, 22, 23]
+        frames: [15, 16, 17, 18, 19]
       }),
       frameRate: 12,
       repeat: 0
@@ -651,7 +651,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime2-hurt-down',
       frames: this.anims.generateFrameNames('slime2Hurt', {
-        frames: [0, 1, 2, 3, 4, 5]
+        frames: [0, 1, 2, 3, 4]
       }),
       frameRate: 12,
       repeat: 0
@@ -660,7 +660,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime2-hurt-up',
       frames: this.anims.generateFrameNames('slime2Hurt', {
-        frames: [6, 7, 8, 9, 10, 11]
+        frames: [5, 6, 7, 8, 9]
       }),
       frameRate: 12,
       repeat: 0
@@ -669,7 +669,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime2-hurt-left',
       frames: this.anims.generateFrameNames('slime2Hurt', {
-        frames: [12, 13, 14, 15, 16, 17]
+        frames: [10, 11, 12, 13, 14]
       }),
       frameRate: 12,
       repeat: 0
@@ -678,7 +678,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime2-hurt-right',
       frames: this.anims.generateFrameNames('slime2Hurt', {
-        frames: [18, 19, 20, 21, 22, 23]
+        frames: [15, 16, 17, 18, 19]
       }),
       frameRate: 12,
       repeat: 0
@@ -832,7 +832,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime3-hurt-down',
       frames: this.anims.generateFrameNames('slime3Hurt', {
-        frames: [0, 1, 2, 3, 4, 5]
+        frames: [0, 1, 2, 3, 4]
       }),
       frameRate: 12,
       repeat: 0
@@ -841,7 +841,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime3-hurt-up',
       frames: this.anims.generateFrameNames('slime3Hurt', {
-        frames: [6, 7, 8, 9, 10, 11]
+        frames: [5, 6, 7, 8, 9]
       }),
       frameRate: 12,
       repeat: 0
@@ -850,7 +850,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime3-hurt-left',
       frames: this.anims.generateFrameNames('slime3Hurt', {
-        frames: [12, 13, 14, 15, 16, 17]
+        frames: [10, 11, 12, 13, 14]
       }),
       frameRate: 12,
       repeat: 0
@@ -859,7 +859,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime3-hurt-right',
       frames: this.anims.generateFrameNames('slime3Hurt', {
-        frames: [18, 19, 20, 21, 22, 23]
+        frames: [15, 16, 17, 18, 19]
       }),
       frameRate: 12,
       repeat: 0
@@ -1173,7 +1173,7 @@ class PrototypeGame extends Phaser.Scene {
 
   createSwordHitbox() {
     const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
-    const hitboxRadius = this.sys.game.device.os.desktop ? 60 * baseScale : 30;
+    const hitboxRadius = this.sys.game.device.os.desktop ? 60 * baseScale : 50;
     this.swordHitbox = this.add.zone(0, 0, hitboxRadius * 2, hitboxRadius * 2);
     this.physics.add.existing(this.swordHitbox);
     (this.swordHitbox.body as Phaser.Physics.Arcade.Body).setCircle(hitboxRadius);

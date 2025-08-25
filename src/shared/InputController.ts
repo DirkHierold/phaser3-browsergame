@@ -46,6 +46,9 @@ export class InputController {
       radius: 60,
       base: this.scene.add.image(0, 0, 'base').setDisplaySize(110, 110),
       thumb: this.scene.add.image(0, 0, 'thumb').setDisplaySize(48, 48),
+      forceMin: 0,
+      enable: true,
+      dir: '8dir'
     });
     this.cursorKeys = this.joyStick.createCursorKeys();
   }
@@ -171,7 +174,7 @@ export class InputController {
       
       // Mobile: Check joystick distance to determine running
       const force = this.joyStick.force;
-      const threshold = 0.7; // Run if joystick is pushed > 70% to edge
+      const threshold = 0.8; // Run if joystick is pushed > 80% to edge
       isRunning = force > threshold;
     }
 
