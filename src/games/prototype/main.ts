@@ -49,6 +49,9 @@ class PrototypeGame extends Phaser.Scene {
   footstepSound: Phaser.Sound.BaseSound;
   loseSound: Phaser.Sound.BaseSound;
 
+  // Debug dashboard
+  debugText: Phaser.GameObjects.Text;
+
   playerState: PlayerState = PlayerState.IDLE;
   facingDirection: Direction = Direction.DOWN;
 
@@ -76,20 +79,14 @@ class PrototypeGame extends Phaser.Scene {
       // Update running state immediately for mobile attack detection
       this.isRunning = isRunning;
       
-      // Debug logging for attack detection
-      console.log(`Attack triggered - isMoving: ${isMoving}, isRunning: ${isRunning}`);
-      
       if (isRunning) {
         // Player is running - perform running attack
-        console.log('Performing running attack');
         this.performRunningAttack();
       } else if (isMoving) {
         // Player is walking - perform walking attack  
-        console.log('Performing walking attack');
         this.performWalkingAttack();
       } else {
         // Player is standing still - perform standing attack
-        console.log('Performing standing attack');
         this.performAttack();
       }
     });
@@ -98,6 +95,8 @@ class PrototypeGame extends Phaser.Scene {
 
     OrientationManager.getInstance().updateScene(this);
     ResizeManager.getInstance().initialize(this, this.handleResize.bind(this));
+    
+    this.createDebugDashboard();
   }
 
   handleResize() {
@@ -1034,6 +1033,69 @@ class PrototypeGame extends Phaser.Scene {
     this.worldBorder.strokeRect(0, 0, this.scale.width, this.scale.height);
   }
 
+  createDebugDashboard() {
+    // Create debug text overlay for joystick testing
+    this.debugText = this.add.text(10, 10, '', {
+      fontSize: '16px',
+      fontFamily: 'monospace',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      color: '#00ff00',
+      padding: { x: 10, y: 10 }
+    });
+    this.debugText.setScrollFactor(0); // Keep fixed on screen
+    this.debugText.setDepth(1000); // Always on top
+  }
+
+  updateDebugDashboard() {
+    if (!this.debugText || !this.inputController) return;
+
+    const inputState = this.inputController.getInputState();
+    
+    // Get joystick data if available
+    let joystickData = 'N/A (Desktop)';
+    if (this.inputController['joyStick']) {
+      const joyStick = this.inputController['joyStick'];
+      
+      // Use force data instead of position data (more reliable)
+      const force = joyStick.force || 0;
+      const angle = joyStick.angle || 0;
+      const normalizedForce = Math.min(force / 60, 1);
+      const percentage = (normalizedForce * 100).toFixed(1);
+      
+      joystickData = `
+🕹️ JOYSTICK DATA:
+  Force: ${force.toFixed(1)} (${percentage}% normalized)
+  Angle: ${(angle * 180 / Math.PI).toFixed(1)}°
+  Dead Zone: 15% | Run Threshold: 70%`;
+    }
+
+    // Device detection
+    const deviceInfo = this.sys.game.device.os.desktop ? 'Desktop' : 'Mobile';
+    const inputMethod = this.sys.game.device.os.desktop ? 'Keyboard' : 'Touch';
+
+    this.debugText.setText(`
+🔍 DEBUG DASHBOARD - ${deviceInfo} (${inputMethod})
+
+${joystickData}
+
+📍 INPUT STATE:
+  Direction: "${inputState.direction}"
+  isMoving: ${inputState.isMoving}
+  isRunning: ${inputState.isRunning}
+
+⚔️ PLAYER STATE:
+  State: ${this.playerState}
+  Facing: ${this.facingDirection}
+  Speed: ${this.isRunning ? this.runSpeed : this.playerSpeed}
+  
+🎮 CONTROLS (Mobile):
+  Center (0-10px): Standing still
+  Middle (10-45px): Walking  
+  Edge (45-60px): Running
+  Tap attack button: Attack based on movement
+    `);
+  }
+
   update(): void {
     this.updateInputState();
     this.updatePlayerState();
@@ -1041,6 +1103,7 @@ class PrototypeGame extends Phaser.Scene {
     this.updateAnimation();
     this.updateSwordHitbox();
     this.updateDepthSorting();
+    this.updateDebugDashboard();
   }
 
   updateInputState() {
@@ -1202,8 +1265,19 @@ class PrototypeGame extends Phaser.Scene {
     if (!this.slime) return;
     
     // Clear any existing collisions for this slime to prevent duplicates
-    this.physics.world.removeCollider(this.swordHitbox, this.slime);
-    this.physics.world.removeCollider(this.player, this.slime);
+    if (this.swordHitbox && this.slime) {
+      const existingColliders = this.physics.world.colliders.getActive();
+      existingColliders.forEach((collider: any) => {
+        if ((collider.object1 === this.swordHitbox || collider.object2 === this.swordHitbox) &&
+            (collider.object1 === this.slime || collider.object2 === this.slime)) {
+          this.physics.world.removeCollider(collider);
+        }
+        if ((collider.object1 === this.player || collider.object2 === this.player) &&
+            (collider.object1 === this.slime || collider.object2 === this.slime)) {
+          this.physics.world.removeCollider(collider);
+        }
+      });
+    }
     
     // Set up fresh collision detection for the current slime
     this.physics.add.overlap(this.swordHitbox, this.slime, () => {
