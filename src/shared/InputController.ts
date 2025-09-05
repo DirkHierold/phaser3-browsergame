@@ -15,6 +15,7 @@ export class InputController {
   private wasdKeys?: { up: Phaser.Input.Keyboard.Key; down: Phaser.Input.Keyboard.Key; left: Phaser.Input.Keyboard.Key; right: Phaser.Input.Keyboard.Key; };
   private attackKeys?: { space: Phaser.Input.Keyboard.Key; enter: Phaser.Input.Keyboard.Key; };
   private attackButton?: Phaser.GameObjects.Graphics;
+  private attackButtonZone?: Phaser.GameObjects.Zone;
   private isDesktop: boolean;
   private onAttackCallback?: () => void;
   
@@ -106,18 +107,30 @@ export class InputController {
   }
 
   private createAttackButton(): void {
+    const buttonX = this.scene.scale.width - 100;
+    const buttonY = this.scene.scale.height - 100;
+    
+    // Create visual graphics for the button
     this.attackButton = this.scene.add.graphics();
-    this.attackButton.lineStyle(3, 0xff0000); // Make it thicker and more visible
+    this.attackButton.lineStyle(3, 0xff0000);
     this.attackButton.strokeCircle(0, 0, 55);
-    this.attackButton.fillStyle(0xff0000, 0.2); // Add a semi-transparent fill
+    this.attackButton.fillStyle(0xff0000, 0.2);
     this.attackButton.fillCircle(0, 0, 55);
-    this.attackButton.setPosition(this.scene.scale.width - 100, this.scene.scale.height - 100);
-    this.attackButton.setDepth(1000); // Ensure attack button appears above other game objects
-    this.attackButton.setInteractive(new Phaser.Geom.Circle(0, 0, 55), Phaser.Geom.Circle.Contains);
+    this.attackButton.setPosition(buttonX, buttonY);
+    this.attackButton.setDepth(1000);
+
+    // Create separate interactive zone for better mobile touch detection
+    this.attackButtonZone = this.scene.add.zone(buttonX, buttonY, 110, 110);
+    this.attackButtonZone.setDepth(1001); // Above graphics
+    this.attackButtonZone.setInteractive({
+      hitArea: new Phaser.Geom.Circle(0, 0, 55),
+      hitAreaCallback: Phaser.Geom.Circle.Contains,
+      useHandCursor: false
+    });
 
     // Debug: Visual feedback when tapped
-    this.attackButton.on('pointerdown', () => {
-      // Flash the button
+    this.attackButtonZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      // Flash the visual button
       this.attackButton.setTint(0xffffff);
       this.scene.time.delayedCall(100, () => {
         this.attackButton.clearTint();
@@ -218,12 +231,16 @@ export class InputController {
   updatePositions(): void {
     if (!this.isDesktop) {
       this.joyStick?.setPosition(100, this.scene.scale.height - 100);
-      this.attackButton?.setPosition(this.scene.scale.width - 100, this.scene.scale.height - 100);
+      const buttonX = this.scene.scale.width - 100;
+      const buttonY = this.scene.scale.height - 100;
+      this.attackButton?.setPosition(buttonX, buttonY);
+      this.attackButtonZone?.setPosition(buttonX, buttonY);
     }
   }
 
   destroy(): void {
     this.joyStick?.destroy();
     this.attackButton?.destroy();
+    this.attackButtonZone?.destroy();
   }
 }
