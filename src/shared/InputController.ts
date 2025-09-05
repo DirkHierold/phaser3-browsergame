@@ -127,6 +127,26 @@ export class InputController {
   private handleAttackInput(): void {
     if (this.onAttackCallback) {
       const inputState = this.getInputState();
+      
+      // DEBUG: Mobile input debugging
+      if (!this.isDesktop) {
+        console.log('🎮 MOBILE ATTACK DEBUG:', {
+          timestamp: Date.now(),
+          inputState,
+          joystickData: this.joyStick ? {
+            force: this.joyStick.force,
+            angle: this.joyStick.angle,
+            normalizedForce: Math.min(this.joyStick.force / 60, 1)
+          } : 'No joystick',
+          cursorKeys: this.cursorKeys ? {
+            up: this.cursorKeys.up.isDown,
+            down: this.cursorKeys.down.isDown,
+            left: this.cursorKeys.left.isDown,
+            right: this.cursorKeys.right.isDown
+          } : 'No cursor keys'
+        });
+      }
+      
       let actuallyMoving = inputState.isMoving;
       let actuallyRunning = inputState.isRunning;
       
@@ -137,9 +157,11 @@ export class InputController {
         if (now - this.lastMovementTime < this.movementStateTimeout) {
           actuallyMoving = this.lastMovementState.isMoving;
           actuallyRunning = this.lastMovementState.isRunning;
+          console.log('🔄 Using cached movement state:', this.lastMovementState);
         }
       }
       
+      console.log('⚔️ Attack with state:', { actuallyMoving, actuallyRunning });
       this.onAttackCallback(actuallyMoving, actuallyRunning);
     }
   }
@@ -227,6 +249,7 @@ export class InputController {
         direction: inputState.direction
       };
       this.lastMovementTime = Date.now();
+      console.log('📍 Cached movement state:', this.lastMovementState);
     }
 
     return inputState;
