@@ -107,17 +107,33 @@ export class InputController {
 
   private createAttackButton(): void {
     this.attackButton = this.scene.add.graphics();
-    this.attackButton.lineStyle(1, 0xff0000);
+    this.attackButton.lineStyle(3, 0xff0000); // Make it thicker and more visible
     this.attackButton.strokeCircle(0, 0, 55);
+    this.attackButton.fillStyle(0xff0000, 0.2); // Add a semi-transparent fill
+    this.attackButton.fillCircle(0, 0, 55);
     this.attackButton.setPosition(this.scene.scale.width - 100, this.scene.scale.height - 100);
     this.attackButton.setDepth(1000); // Ensure attack button appears above other game objects
     this.attackButton.setInteractive(new Phaser.Geom.Circle(0, 0, 55), Phaser.Geom.Circle.Contains);
 
-    this.attackButton.on('pointerdown', () => this.handleAttackInput());
+    // Debug: Visual feedback when tapped
+    this.attackButton.on('pointerdown', () => {
+      // Flash the button
+      this.attackButton.setTint(0xffffff);
+      this.scene.time.delayedCall(100, () => {
+        this.attackButton.clearTint();
+      });
+      
+      this.handleAttackInput();
+    });
   }
 
   private handleAttackInput(): void {
     if (this.onAttackCallback) {
+      // Debug: Show that attack button was tapped
+      if (!this.isDesktop && (this.scene as any).movementStateText) {
+        (this.scene as any).movementStateText.setText('MOBILE: ATTACK BUTTON TAPPED!');
+      }
+      
       // Simply trigger attack - main game will use its continuously tracked movement state
       this.onAttackCallback();
     }
