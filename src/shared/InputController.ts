@@ -126,42 +126,29 @@ export class InputController {
 
   private handleAttackInput(): void {
     if (this.onAttackCallback) {
-      const inputState = this.getInputState();
+      let actuallyMoving = false;
+      let actuallyRunning = false;
       
-      // DEBUG: Mobile input debugging
-      if (!this.isDesktop) {
-        console.log('🎮 MOBILE ATTACK DEBUG:', {
-          timestamp: Date.now(),
-          inputState,
-          joystickData: this.joyStick ? {
-            force: this.joyStick.force,
-            angle: this.joyStick.angle,
-            normalizedForce: Math.min(this.joyStick.force / 60, 1)
-          } : 'No joystick',
-          cursorKeys: this.cursorKeys ? {
-            up: this.cursorKeys.up.isDown,
-            down: this.cursorKeys.down.isDown,
-            left: this.cursorKeys.left.isDown,
-            right: this.cursorKeys.right.isDown
-          } : 'No cursor keys'
-        });
-      }
-      
-      let actuallyMoving = inputState.isMoving;
-      let actuallyRunning = inputState.isRunning;
-      
-      // For mobile, use cached movement state if current state shows no movement
-      // but we recently had movement (handles joystick release during attack tap)
-      if (!this.isDesktop && !inputState.isMoving) {
-        const now = Date.now();
-        if (now - this.lastMovementTime < this.movementStateTimeout) {
-          actuallyMoving = this.lastMovementState.isMoving;
-          actuallyRunning = this.lastMovementState.isRunning;
-          console.log('🔄 Using cached movement state:', this.lastMovementState);
+      if (this.isDesktop) {
+        // Desktop: use normal input state
+        const inputState = this.getInputState();
+        actuallyMoving = inputState.isMoving;
+        actuallyRunning = inputState.isRunning;
+      } else {
+        // Mobile: directly check joystick force to avoid cursor key timing issues
+        if (this.joyStick) {
+          const force = this.joyStick.force || 0;
+          const normalizedForce = Math.min(force / 60, 1);
+          const forceDeadZone = 0.15;
+          const runThreshold = 0.7;
+          
+          if (normalizedForce > forceDeadZone) {
+            actuallyMoving = true;
+            actuallyRunning = normalizedForce > runThreshold;
+          }
         }
       }
       
-      console.log('⚔️ Attack with state:', { actuallyMoving, actuallyRunning });
       this.onAttackCallback(actuallyMoving, actuallyRunning);
     }
   }
@@ -249,7 +236,6 @@ export class InputController {
         direction: inputState.direction
       };
       this.lastMovementTime = Date.now();
-      console.log('📍 Cached movement state:', this.lastMovementState);
     }
 
     return inputState;
