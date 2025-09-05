@@ -80,9 +80,32 @@ class PrototypeGame extends Phaser.Scene {
     this.createHearts();
     this.inputController = new InputController(this);
     this.inputController.initialize(() => {
-      // Use continuously tracked movement state for reliable mobile attacks
-      const isMoving = this.currentMovementState.isMoving;
-      const isRunning = this.currentMovementState.isRunning;
+      // Use continuously tracked movement state, but fallback to current input if not yet updated
+      let isMoving = this.currentMovementState.isMoving;
+      let isRunning = this.currentMovementState.isRunning;
+      
+      // Fallback: get current input state if tracked state seems stale
+      if (!isMoving && !isRunning) {
+        const currentInput = this.inputController.getInputState();
+        isMoving = currentInput.isMoving;
+        isRunning = currentInput.isRunning;
+      }
+      
+      // Debug: Update visual indicator with attack state
+      if (this.movementStateText) {
+        const deviceType = this.sys.game.device.os.desktop ? 'DESKTOP' : 'MOBILE';
+        let stateText = 'IDLE';
+        if (isRunning) stateText = 'RUNNING';
+        else if (isMoving) stateText = 'WALKING';
+        this.movementStateText.setText(`${deviceType}: ATTACKING ${stateText}`);
+        
+        // Reset text after a short delay
+        this.time.delayedCall(500, () => {
+          if (this.movementStateText) {
+            this.movementStateText.setText('');
+          }
+        });
+      }
       
       if (isRunning) {
         // Player is running - perform running attack
