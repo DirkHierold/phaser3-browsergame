@@ -40,6 +40,9 @@ class PrototypeGame extends Phaser.Scene {
   // Continuously tracked movement state for reliable mobile attacks
   currentMovementState: { isMoving: boolean; isRunning: boolean } = { isMoving: false, isRunning: false };
   
+  // Visual debugging indicator for mobile
+  movementStateText: Phaser.GameObjects.Text;
+  
   // Double-tap detection for desktop
   lastKeyPress: { [key: string]: number } = {};
   doubleTapThreshold: number = 300; // milliseconds
@@ -97,6 +100,8 @@ class PrototypeGame extends Phaser.Scene {
 
     OrientationManager.getInstance().updateScene(this);
     ResizeManager.getInstance().initialize(this, this.handleResize.bind(this));
+    
+    this.createMovementStateIndicator();
     
   }
 
@@ -157,6 +162,19 @@ class PrototypeGame extends Phaser.Scene {
     this.worldBorder.clear();
     this.worldBorder.lineStyle(4, 0x000000);
     this.worldBorder.strokeRect(0, 0, this.scale.width, this.scale.height);
+  }
+
+  createMovementStateIndicator() {
+    this.movementStateText = this.add.text(this.scale.width / 2, 50, '', {
+      fontSize: '24px',
+      fontFamily: 'Arial',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      color: '#ffffff',
+      padding: { x: 10, y: 5 }
+    });
+    this.movementStateText.setOrigin(0.5, 0.5);
+    this.movementStateText.setScrollFactor(0);
+    this.movementStateText.setDepth(1000);
   }
 
   createPlayer() {
@@ -1055,6 +1073,16 @@ class PrototypeGame extends Phaser.Scene {
       isMoving: inputState.isMoving,
       isRunning: inputState.isRunning
     };
+    
+    // Update visual debugging indicator
+    if (this.movementStateText) {
+      const deviceType = this.sys.game.device.os.desktop ? 'DESKTOP' : 'MOBILE';
+      let stateText = 'IDLE';
+      if (inputState.isRunning) stateText = 'RUNNING';
+      else if (inputState.isMoving) stateText = 'WALKING';
+      
+      this.movementStateText.setText(`${deviceType}: ${stateText}`);
+    }
 
     if (this.currentDirection !== '' && !this.footstepSound.isPlaying && this.currentHealth > 0) {
       // Adjust footstep volume and rate based on running
