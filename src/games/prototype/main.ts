@@ -37,6 +37,9 @@ class PrototypeGame extends Phaser.Scene {
   runSpeed: number = 3;
   isRunning: boolean = false;
   
+  // Continuously tracked movement state for reliable mobile attacks
+  currentMovementState: { isMoving: boolean; isRunning: boolean } = { isMoving: false, isRunning: false };
+  
   // Double-tap detection for desktop
   lastKeyPress: { [key: string]: number } = {};
   doubleTapThreshold: number = 300; // milliseconds
@@ -73,9 +76,10 @@ class PrototypeGame extends Phaser.Scene {
     this.createSlime();
     this.createHearts();
     this.inputController = new InputController(this);
-    this.inputController.initialize((isMoving, isRunning) => {
-      // InputController now handles mobile state detection correctly
-      this.isRunning = isRunning;
+    this.inputController.initialize(() => {
+      // Use continuously tracked movement state for reliable mobile attacks
+      const isMoving = this.currentMovementState.isMoving;
+      const isRunning = this.currentMovementState.isRunning;
       
       if (isRunning) {
         // Player is running - perform running attack
@@ -1045,6 +1049,12 @@ class PrototypeGame extends Phaser.Scene {
     const inputState = this.inputController.getInputState();
     this.currentDirection = inputState.direction;
     this.isRunning = inputState.isRunning;
+    
+    // Continuously track movement state for reliable mobile attacks
+    this.currentMovementState = {
+      isMoving: inputState.isMoving,
+      isRunning: inputState.isRunning
+    };
 
     if (this.currentDirection !== '' && !this.footstepSound.isPlaying && this.currentHealth > 0) {
       // Adjust footstep volume and rate based on running

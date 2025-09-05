@@ -16,28 +16,20 @@ export class InputController {
   private attackKeys?: { space: Phaser.Input.Keyboard.Key; enter: Phaser.Input.Keyboard.Key; };
   private attackButton?: Phaser.GameObjects.Graphics;
   private isDesktop: boolean;
-  private onAttackCallback?: (isMoving: boolean, isRunning: boolean) => void;
+  private onAttackCallback?: () => void;
   
   // Running state tracking
   private lastKeyPress: { [key: string]: number } = {};
   private doubleTapThreshold: number = 300; // milliseconds
   private isRunning: boolean = false;
   
-  // Mobile movement state tracking for attacks
-  private lastMovementState: { isMoving: boolean; isRunning: boolean; direction: string } = {
-    isMoving: false,
-    isRunning: false,
-    direction: ''
-  };
-  private lastMovementTime: number = 0;
-  private movementStateTimeout: number = 200; // milliseconds
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.isDesktop = scene.sys.game.device.os.desktop;
   }
 
-  initialize(onAttackCallback?: (isMoving: boolean, isRunning: boolean) => void): void {
+  initialize(onAttackCallback?: () => void): void {
     this.onAttackCallback = onAttackCallback;
     
     if (this.isDesktop) {
@@ -53,8 +45,8 @@ export class InputController {
       x: 100,
       y: this.scene.scale.height - 100,
       radius: 60,
-      base: this.scene.add.circle(0, 0, 55, 0x888888, 0.8).setDepth(1000),
-      thumb: this.scene.add.circle(0, 0, 24, 0xcccccc, 0.9).setDepth(1001),
+      base: this.scene.add.image(0, 0, 'base').setDisplaySize(110, 110).setDepth(1000),
+      thumb: this.scene.add.image(0, 0, 'thumb').setDisplaySize(50, 50).setDepth(1001),
       forceMin: 0,
       enable: true,
       dir: '8dir',
@@ -126,30 +118,8 @@ export class InputController {
 
   private handleAttackInput(): void {
     if (this.onAttackCallback) {
-      let actuallyMoving = false;
-      let actuallyRunning = false;
-      
-      if (this.isDesktop) {
-        // Desktop: use normal input state
-        const inputState = this.getInputState();
-        actuallyMoving = inputState.isMoving;
-        actuallyRunning = inputState.isRunning;
-      } else {
-        // Mobile: directly check joystick force to avoid cursor key timing issues
-        if (this.joyStick) {
-          const force = this.joyStick.force || 0;
-          const normalizedForce = Math.min(force / 60, 1);
-          const forceDeadZone = 0.15;
-          const runThreshold = 0.7;
-          
-          if (normalizedForce > forceDeadZone) {
-            actuallyMoving = true;
-            actuallyRunning = normalizedForce > runThreshold;
-          }
-        }
-      }
-      
-      this.onAttackCallback(actuallyMoving, actuallyRunning);
+      // Simply trigger attack - main game will use its continuously tracked movement state
+      this.onAttackCallback();
     }
   }
 
@@ -221,24 +191,12 @@ export class InputController {
       }
     }
 
-    const inputState = {
+    return {
       direction,
       isMoving: direction !== '',
       isRunning,
       isAttacking: false
     };
-
-    // Cache movement state for mobile attack detection
-    if (!this.isDesktop && inputState.isMoving) {
-      this.lastMovementState = {
-        isMoving: inputState.isMoving,
-        isRunning: inputState.isRunning,
-        direction: inputState.direction
-      };
-      this.lastMovementTime = Date.now();
-    }
-
-    return inputState;
   }
 
   updatePositions(): void {
