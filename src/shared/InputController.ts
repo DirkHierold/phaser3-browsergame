@@ -22,6 +22,15 @@ export class InputController {
   private lastKeyPress: { [key: string]: number } = {};
   private doubleTapThreshold: number = 300; // milliseconds
   private isRunning: boolean = false;
+  
+  // Mobile movement state tracking for attacks
+  private lastMovementState: { isMoving: boolean; isRunning: boolean; direction: string } = {
+    isMoving: false,
+    isRunning: false,
+    direction: ''
+  };
+  private lastMovementTime: number = 0;
+  private movementStateTimeout: number = 200; // milliseconds
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -118,7 +127,20 @@ export class InputController {
   private handleAttackInput(): void {
     if (this.onAttackCallback) {
       const inputState = this.getInputState();
-      this.onAttackCallback(inputState.isMoving, inputState.isRunning);
+      let actuallyMoving = inputState.isMoving;
+      let actuallyRunning = inputState.isRunning;
+      
+      // For mobile, use cached movement state if current state shows no movement
+      // but we recently had movement (handles joystick release during attack tap)
+      if (!this.isDesktop && !inputState.isMoving) {
+        const now = Date.now();
+        if (now - this.lastMovementTime < this.movementStateTimeout) {
+          actuallyMoving = this.lastMovementState.isMoving;
+          actuallyRunning = this.lastMovementState.isRunning;
+        }
+      }
+      
+      this.onAttackCallback(actuallyMoving, actuallyRunning);
     }
   }
 
@@ -190,12 +212,24 @@ export class InputController {
       }
     }
 
-    return {
+    const inputState = {
       direction,
       isMoving: direction !== '',
       isRunning,
       isAttacking: false
     };
+
+    // Cache movement state for mobile attack detection
+    if (!this.isDesktop && inputState.isMoving) {
+      this.lastMovementState = {
+        isMoving: inputState.isMoving,
+        isRunning: inputState.isRunning,
+        direction: inputState.direction
+      };
+      this.lastMovementTime = Date.now();
+    }
+
+    return inputState;
   }
 
   updatePositions(): void {

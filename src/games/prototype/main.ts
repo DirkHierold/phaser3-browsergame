@@ -74,18 +74,13 @@ class PrototypeGame extends Phaser.Scene {
     this.createHearts();
     this.inputController = new InputController(this);
     this.inputController.initialize((isMoving, isRunning) => {
-      // Get current input state to ensure accurate mobile detection
-      const currentInputState = this.inputController.getInputState();
-      const actuallyMoving = currentInputState.isMoving;
-      const actuallyRunning = currentInputState.isRunning;
+      // InputController now handles mobile state detection correctly
+      this.isRunning = isRunning;
       
-      // Update running state immediately for mobile attack detection
-      this.isRunning = actuallyRunning;
-      
-      if (actuallyRunning) {
+      if (isRunning) {
         // Player is running - perform running attack
         this.performRunningAttack();
-      } else if (actuallyMoving) {
+      } else if (isMoving) {
         // Player is walking - perform walking attack  
         this.performWalkingAttack();
       } else {
