@@ -49,8 +49,6 @@ class PrototypeGame extends Phaser.Scene {
   footstepSound: Phaser.Sound.BaseSound;
   loseSound: Phaser.Sound.BaseSound;
 
-  // Debug dashboard
-  debugText: Phaser.GameObjects.Text;
 
   playerState: PlayerState = PlayerState.IDLE;
   facingDirection: Direction = Direction.DOWN;
@@ -76,13 +74,18 @@ class PrototypeGame extends Phaser.Scene {
     this.createHearts();
     this.inputController = new InputController(this);
     this.inputController.initialize((isMoving, isRunning) => {
-      // Update running state immediately for mobile attack detection
-      this.isRunning = isRunning;
+      // Get current input state to ensure accurate mobile detection
+      const currentInputState = this.inputController.getInputState();
+      const actuallyMoving = currentInputState.isMoving;
+      const actuallyRunning = currentInputState.isRunning;
       
-      if (isRunning) {
+      // Update running state immediately for mobile attack detection
+      this.isRunning = actuallyRunning;
+      
+      if (actuallyRunning) {
         // Player is running - perform running attack
         this.performRunningAttack();
-      } else if (isMoving) {
+      } else if (actuallyMoving) {
         // Player is walking - perform walking attack  
         this.performWalkingAttack();
       } else {
@@ -96,7 +99,6 @@ class PrototypeGame extends Phaser.Scene {
     OrientationManager.getInstance().updateScene(this);
     ResizeManager.getInstance().initialize(this, this.handleResize.bind(this));
     
-    this.createDebugDashboard();
   }
 
   handleResize() {
@@ -1033,68 +1035,7 @@ class PrototypeGame extends Phaser.Scene {
     this.worldBorder.strokeRect(0, 0, this.scale.width, this.scale.height);
   }
 
-  createDebugDashboard() {
-    // Create debug text overlay for joystick testing
-    this.debugText = this.add.text(10, 10, '', {
-      fontSize: '16px',
-      fontFamily: 'monospace',
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      color: '#00ff00',
-      padding: { x: 10, y: 10 }
-    });
-    this.debugText.setScrollFactor(0); // Keep fixed on screen
-    this.debugText.setDepth(1000); // Always on top
-  }
 
-  updateDebugDashboard() {
-    if (!this.debugText || !this.inputController) return;
-
-    const inputState = this.inputController.getInputState();
-    
-    // Get joystick data if available
-    let joystickData = 'N/A (Desktop)';
-    if (this.inputController['joyStick']) {
-      const joyStick = this.inputController['joyStick'];
-      
-      // Use force data instead of position data (more reliable)
-      const force = joyStick.force || 0;
-      const angle = joyStick.angle || 0;
-      const normalizedForce = Math.min(force / 60, 1);
-      const percentage = (normalizedForce * 100).toFixed(1);
-      
-      joystickData = `
-🕹️ JOYSTICK DATA:
-  Force: ${force.toFixed(1)} (${percentage}% normalized)
-  Angle: ${(angle * 180 / Math.PI).toFixed(1)}°
-  Dead Zone: 15% | Run Threshold: 70%`;
-    }
-
-    // Device detection
-    const deviceInfo = this.sys.game.device.os.desktop ? 'Desktop' : 'Mobile';
-    const inputMethod = this.sys.game.device.os.desktop ? 'Keyboard' : 'Touch';
-
-    this.debugText.setText(`
-🔍 DEBUG DASHBOARD - ${deviceInfo} (${inputMethod})
-
-${joystickData}
-
-📍 INPUT STATE:
-  Direction: "${inputState.direction}"
-  isMoving: ${inputState.isMoving}
-  isRunning: ${inputState.isRunning}
-
-⚔️ PLAYER STATE:
-  State: ${this.playerState}
-  Facing: ${this.facingDirection}
-  Speed: ${this.isRunning ? this.runSpeed : this.playerSpeed}
-  
-🎮 CONTROLS (Mobile):
-  Center (0-10px): Standing still
-  Middle (10-45px): Walking  
-  Edge (45-60px): Running
-  Tap attack button: Attack based on movement
-    `);
-  }
 
   update(): void {
     this.updateInputState();
@@ -1103,7 +1044,6 @@ ${joystickData}
     this.updateAnimation();
     this.updateSwordHitbox();
     this.updateDepthSorting();
-    this.updateDebugDashboard();
   }
 
   updateInputState() {
@@ -1487,7 +1427,7 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   physics: {
     default: 'arcade',
-    arcade: { gravity: { x: 0, y: 0 }, debug: true }
+    arcade: { gravity: { x: 0, y: 0 }, debug: false }
   },
   scale: {
     mode: Phaser.Scale.RESIZE,
