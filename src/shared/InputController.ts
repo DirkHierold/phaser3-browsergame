@@ -119,25 +119,51 @@ export class InputController {
     this.attackButton.setPosition(buttonX, buttonY);
     this.attackButton.setDepth(1000);
 
-    // Create separate interactive zone for better mobile touch detection
-    this.attackButtonZone = this.scene.add.zone(buttonX, buttonY, 110, 110);
-    this.attackButtonZone.setDepth(1001); // Above graphics
-    this.attackButtonZone.setInteractive({
-      hitArea: new Phaser.Geom.Circle(0, 0, 55),
-      hitAreaCallback: Phaser.Geom.Circle.Contains,
-      useHandCursor: false
-    });
+    // Try a simple rectangular zone with broader touch area
+    this.attackButtonZone = this.scene.add.zone(buttonX, buttonY, 120, 120);
+    this.attackButtonZone.setDepth(1001);
+    this.attackButtonZone.setInteractive();
 
-    // Debug: Visual feedback when tapped
-    this.attackButtonZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      // Flash the visual button
-      this.attackButton.setTint(0xffffff);
-      this.scene.time.delayedCall(100, () => {
-        this.attackButton.clearTint();
-      });
-      
-      this.handleAttackInput();
+    // Add multiple event listeners to catch any touch event
+    this.attackButtonZone.on('pointerdown', () => {
+      this.debugAttackTap('pointerdown');
     });
+    
+    this.attackButtonZone.on('pointerup', () => {
+      this.debugAttackTap('pointerup');
+    });
+    
+    // Also try global pointer events as backup
+    this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      const distance = Phaser.Geom.Point.Distance(
+        { x: pointer.x, y: pointer.y },
+        { x: buttonX, y: buttonY }
+      );
+      
+      if (distance <= 60) {
+        this.debugAttackTap('global-pointerdown');
+      }
+    });
+  }
+  
+  private debugAttackTap(eventType: string): void {
+    // Flash the visual button
+    this.attackButton?.setTint(0xffffff);
+    this.scene.time.delayedCall(100, () => {
+      this.attackButton?.clearTint();
+    });
+    
+    // Show debug message
+    if (!this.isDesktop && (this.scene as any).movementStateText) {
+      (this.scene as any).movementStateText.setText(`MOBILE: ${eventType.toUpperCase()} DETECTED!`);
+      this.scene.time.delayedCall(1000, () => {
+        if ((this.scene as any).movementStateText) {
+          (this.scene as any).movementStateText.setText('');
+        }
+      });
+    }
+    
+    this.handleAttackInput();
   }
 
   private handleAttackInput(): void {
