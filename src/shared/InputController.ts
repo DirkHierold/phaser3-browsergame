@@ -51,7 +51,9 @@ export class InputController {
       forceMin: 0,
       enable: true,
       dir: '8dir',
-      fixed: true
+      fixed: true,
+      // CRITICAL: Allow other input events to work
+      stopPropagation: false
     });
     
     this.cursorKeys = this.joyStick.createCursorKeys();
@@ -147,8 +149,48 @@ export class InputController {
         this.debugAttackTap('global-near-button');
       }
     });
+    
+    // FALLBACK: If VirtualJoystick still blocks, create attack zone after joystick
+    this.scene.time.delayedCall(100, () => {
+      this.createBackupAttackDetection(buttonX, buttonY);
+    });
   }
   
+  private createBackupAttackDetection(buttonX: number, buttonY: number): void {
+    // Manual touch detection using DOM events as ultimate fallback
+    const canvas = this.scene.sys.canvas;
+    if (canvas) {
+      canvas.addEventListener('touchstart', (event: TouchEvent) => {
+        event.preventDefault();
+        
+        const rect = canvas.getBoundingClientRect();
+        const touch = event.touches[0];
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        
+        // Scale coordinates to game coordinates
+        const scaleX = this.scene.scale.width / rect.width;
+        const scaleY = this.scene.scale.height / rect.height;
+        const gameX = x * scaleX;
+        const gameY = y * scaleY;
+        
+        // Check if touch is near button
+        const distance = Math.sqrt(
+          Math.pow(gameX - buttonX, 2) + Math.pow(gameY - buttonY, 2)
+        );
+        
+        if (distance <= 100) {
+          this.debugAttackTap('dom-touchstart');
+        }
+        
+        // Show any touch for debugging
+        if ((this.scene as any).movementStateText) {
+          (this.scene as any).movementStateText.setText(`DOM TOUCH: ${gameX.toFixed(0)}, ${gameY.toFixed(0)}`);
+        }
+      });
+    }
+  }
+
   private debugAttackTap(eventType: string): void {
     // Flash the visual button
     this.attackButton?.setTint(0xffffff);
