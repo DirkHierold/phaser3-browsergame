@@ -36,7 +36,8 @@ export class InputController {
     if (this.isDesktop) {
       this.createKeyboardControls();
     } else {
-      this.createVirtualJoystick();
+      // TEMPORARILY DISABLE JOYSTICK TO TEST ATTACK BUTTON
+      // this.createVirtualJoystick();
       this.createAttackButton();
     }
   }
