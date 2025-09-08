@@ -125,6 +125,7 @@ class PrototypeGame extends Phaser.Scene {
     ResizeManager.getInstance().initialize(this, this.handleResize.bind(this));
     
     this.createMovementStateIndicator();
+    this.createSimpleInputTest();
     
   }
 
@@ -198,6 +199,28 @@ class PrototypeGame extends Phaser.Scene {
     this.movementStateText.setOrigin(0.5, 0.5);
     this.movementStateText.setScrollFactor(0);
     this.movementStateText.setDepth(1000);
+  }
+
+  createSimpleInputTest() {
+    // Enable input for the entire scene
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      console.log('SCENE POINTER DOWN:', pointer.x, pointer.y);
+      if (this.movementStateText) {
+        this.movementStateText.setText(`SCENE TOUCH: ${pointer.x.toFixed(0)}, ${pointer.y.toFixed(0)}`);
+      }
+    });
+
+    // Also test with a very simple clickable rectangle
+    const testRect = this.add.rectangle(this.scale.width / 2, 200, 200, 100, 0x00ff00, 0.8);
+    testRect.setInteractive();
+    testRect.setDepth(3000);
+    
+    testRect.on('pointerdown', () => {
+      if (this.movementStateText) {
+        this.movementStateText.setText('GREEN RECT CLICKED!');
+      }
+      console.log('GREEN RECT CLICKED!');
+    });
   }
 
   createPlayer() {
@@ -1480,6 +1503,11 @@ const config: Phaser.Types.Core.GameConfig = {
   audio: {
     disableWebAudio: false,
     noAudio: false
+  },
+  input: {
+    touch: true,
+    mouse: true,
+    activePointers: 3 // Allow multiple simultaneous touches
   },
   physics: {
     default: 'arcade',
