@@ -76,20 +76,16 @@ class PrototypeGame extends Phaser.Scene {
     this.createSlime();
     this.createHearts();
     this.inputController = new InputController(this);
-    this.inputController.initialize(() => {
-      // For now, mobile attacks are disabled - only desktop attacks work
-      if (this.sys.game.device.os.desktop) {
-        const currentInput = this.inputController.getInputState();
-        const isMoving = currentInput.isMoving;
-        const isRunning = currentInput.isRunning;
-        
-        if (isRunning) {
-          this.performRunningAttack();
-        } else if (isMoving) {
-          this.performWalkingAttack();
-        } else {
-          this.performAttack();
-        }
+    this.inputController.initialize((isMoving, isRunning) => {
+      if (isRunning) {
+        // Player is running - perform running attack
+        this.performRunningAttack();
+      } else if (isMoving) {
+        // Player is walking - perform walking attack  
+        this.performWalkingAttack();
+      } else {
+        // Player is standing still - perform standing attack
+        this.performAttack();
       }
     });
     this.createWorldBorder();

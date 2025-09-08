@@ -17,7 +17,7 @@ export class InputController {
   private attackButton?: Phaser.GameObjects.Graphics;
   private attackButtonZone?: Phaser.GameObjects.Zone;
   private isDesktop: boolean;
-  private onAttackCallback?: () => void;
+  private onAttackCallback?: (isMoving: boolean, isRunning: boolean) => void;
   
   // Running state tracking
   private lastKeyPress: { [key: string]: number } = {};
@@ -30,14 +30,14 @@ export class InputController {
     this.isDesktop = scene.sys.game.device.os.desktop;
   }
 
-  initialize(onAttackCallback?: () => void): void {
+  initialize(onAttackCallback?: (isMoving: boolean, isRunning: boolean) => void): void {
     this.onAttackCallback = onAttackCallback;
     
     if (this.isDesktop) {
       this.createKeyboardControls();
     } else {
       this.createVirtualJoystick();
-      this.createMobileAttackButton();
+      this.createAttackButton();
     }
   }
 
@@ -46,14 +46,12 @@ export class InputController {
       x: 100,
       y: this.scene.scale.height - 100,
       radius: 60,
-      base: this.scene.add.image(0, 0, 'base').setDisplaySize(110, 110).setDepth(1000),
-      thumb: this.scene.add.image(0, 0, 'thumb').setDisplaySize(50, 50).setDepth(1001),
+      base: this.scene.add.circle(0, 0, 55, 0x888888, 0.8).setDepth(1000),
+      thumb: this.scene.add.circle(0, 0, 24, 0xcccccc, 0.9).setDepth(1001),
       forceMin: 0,
       enable: true,
       dir: '8dir',
-      fixed: true,
-      // CRITICAL: Allow other input events to work
-      stopPropagation: false
+      fixed: true
     });
     
     this.cursorKeys = this.joyStick.createCursorKeys();
@@ -108,33 +106,21 @@ export class InputController {
     this.attackKeys.enter.on('down', () => this.handleAttackInput());
   }
 
-  private createMobileAttackButton(): void {
-    // Simple attack button - back to basics
-    const buttonX = this.scene.scale.width - 100;
-    const buttonY = this.scene.scale.height - 100;
-    
-    // Visual button
+  private createAttackButton(): void {
     this.attackButton = this.scene.add.graphics();
-    this.attackButton.lineStyle(2, 0xff0000);
-    this.attackButton.strokeCircle(0, 0, 50);
-    this.attackButton.fillStyle(0xff0000, 0.3);
-    this.attackButton.fillCircle(0, 0, 50);
-    this.attackButton.setPosition(buttonX, buttonY);
-    this.attackButton.setDepth(1000);
+    this.attackButton.lineStyle(1, 0xff0000);
+    this.attackButton.strokeCircle(0, 0, 55);
+    this.attackButton.setPosition(this.scene.scale.width - 100, this.scene.scale.height - 100);
+    this.attackButton.setDepth(1000); // Ensure attack button appears above other game objects
+    this.attackButton.setInteractive(new Phaser.Geom.Circle(0, 0, 55), Phaser.Geom.Circle.Contains);
 
-    // For now, let's use a simple approach - no attack functionality on mobile
-    // We'll focus on getting the basic game working first
+    this.attackButton.on('pointerdown', () => this.handleAttackInput());
   }
 
   private handleAttackInput(): void {
     if (this.onAttackCallback) {
-      // Debug: Show that attack button was tapped
-      if (!this.isDesktop && (this.scene as any).movementStateText) {
-        (this.scene as any).movementStateText.setText('MOBILE: ATTACK BUTTON TAPPED!');
-      }
-      
-      // Simply trigger attack - main game will use its continuously tracked movement state
-      this.onAttackCallback();
+      const inputState = this.getInputState();
+      this.onAttackCallback(inputState.isMoving, inputState.isRunning);
     }
   }
 
