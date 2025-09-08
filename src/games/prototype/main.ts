@@ -56,7 +56,6 @@ class PrototypeGame extends Phaser.Scene {
 
   playerState: PlayerState = PlayerState.IDLE;
   facingDirection: Direction = Direction.DOWN;
-  isDead: boolean = false;
 
   hearts: Phaser.GameObjects.Sprite[] = [];
   maxHealth: number = 3;
@@ -69,7 +68,6 @@ class PrototypeGame extends Phaser.Scene {
   create() {
     this.currentHealth = this.maxHealth;
     this.hearts = [];
-    this.isDead = false;
     this.physics.world.bounds.width = this.scale.width;
     this.physics.world.bounds.height = this.scale.height;
     this.createBackground();
@@ -1068,8 +1066,8 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   updatePlayerState() {
-    // Don't change state if player is dead or playing death animation
-    if (this.isDead || this.playerState === PlayerState.DEATH) {
+    // Don't change state if player is dead
+    if (this.playerState === PlayerState.DEATH) {
       return;
     }
 
@@ -1118,7 +1116,7 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   handleMovement() {
-    if (this.isDead || this.playerState === PlayerState.DEATH || 
+    if (this.playerState === PlayerState.DEATH || 
         (this.playerState !== PlayerState.WALKING && 
          this.playerState !== PlayerState.RUNNING &&
          this.playerState !== PlayerState.WALKING_ATTACK &&
@@ -1146,11 +1144,6 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   updateAnimation() {
-    // Never update animation if player is dead (even after animation completes)
-    if (this.isDead) {
-      return;
-    }
-
     // Only update animation if no priority animation is playing
     if (this.player.anims.isPlaying &&
       (this.playerState === PlayerState.ATTACKING ||
@@ -1390,14 +1383,19 @@ class PrototypeGame extends Phaser.Scene {
       this.currentHealth--;
       this.updateHeartDisplay();
       if (this.currentHealth === 0) {
+        // Remove any existing animation complete listeners to prevent conflicts
+        this.player.off('animationcomplete');
+        
         this.playerState = PlayerState.DEATH;
         this.footstepSound.stop();
         SoundManager.getInstance().pauseBackgroundMusic();
         this.loseSound.play();
+        
+        // Force play death animation, interrupting any current animation
+        this.player.anims.stop();
         this.player.anims.play(`death-${this.facingDirection}`);
+        
         this.player.once('animationcomplete', () => {
-          // Set dead flag AFTER animation completes
-          this.isDead = true;
           // Keep player on the last frame of death animation
           const deathAnim = this.player.anims.currentAnim;
           if (deathAnim && deathAnim.frames.length > 0) {
