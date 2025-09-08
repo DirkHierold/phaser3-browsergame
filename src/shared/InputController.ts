@@ -107,41 +107,44 @@ export class InputController {
   }
 
   private createAttackButton(): void {
-    const buttonX = this.scene.scale.width - 100;
-    const buttonY = this.scene.scale.height - 100;
+    // Position button at center top - far from joystick to test interference
+    const buttonX = this.scene.scale.width / 2;
+    const buttonY = 100;
     
-    // Create visual graphics for the button
+    // Create HUGE visual button to make it obvious
     this.attackButton = this.scene.add.graphics();
-    this.attackButton.lineStyle(3, 0xff0000);
-    this.attackButton.strokeCircle(0, 0, 55);
-    this.attackButton.fillStyle(0xff0000, 0.2);
-    this.attackButton.fillCircle(0, 0, 55);
+    this.attackButton.lineStyle(5, 0xff0000);
+    this.attackButton.strokeCircle(0, 0, 80);
+    this.attackButton.fillStyle(0xff0000, 0.5);
+    this.attackButton.fillCircle(0, 0, 80);
     this.attackButton.setPosition(buttonX, buttonY);
-    this.attackButton.setDepth(1000);
+    this.attackButton.setDepth(2000); // Very high depth
 
-    // Try a simple rectangular zone with broader touch area
-    this.attackButtonZone = this.scene.add.zone(buttonX, buttonY, 120, 120);
-    this.attackButtonZone.setDepth(1001);
+    // Create HUGE interactive zone
+    this.attackButtonZone = this.scene.add.zone(buttonX, buttonY, 200, 200);
+    this.attackButtonZone.setDepth(2001);
     this.attackButtonZone.setInteractive();
 
-    // Add multiple event listeners to catch any touch event
+    // Test if zone events work at all
     this.attackButtonZone.on('pointerdown', () => {
-      this.debugAttackTap('pointerdown');
+      this.debugAttackTap('zone-pointerdown');
     });
     
-    this.attackButtonZone.on('pointerup', () => {
-      this.debugAttackTap('pointerup');
-    });
-    
-    // Also try global pointer events as backup
+    // TEST: Global touch detector to see if ANY touches work
     this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      // Show global touch location for any touch
+      if ((this.scene as any).movementStateText) {
+        (this.scene as any).movementStateText.setText(`GLOBAL TOUCH: ${pointer.x.toFixed(0)}, ${pointer.y.toFixed(0)}`);
+      }
+      
+      // Check if it's near our button
       const distance = Phaser.Geom.Point.Distance(
         { x: pointer.x, y: pointer.y },
         { x: buttonX, y: buttonY }
       );
       
-      if (distance <= 60) {
-        this.debugAttackTap('global-pointerdown');
+      if (distance <= 100) {
+        this.debugAttackTap('global-near-button');
       }
     });
   }
@@ -257,8 +260,9 @@ export class InputController {
   updatePositions(): void {
     if (!this.isDesktop) {
       this.joyStick?.setPosition(100, this.scene.scale.height - 100);
-      const buttonX = this.scene.scale.width - 100;
-      const buttonY = this.scene.scale.height - 100;
+      // Position large test button at center top
+      const buttonX = this.scene.scale.width / 2;
+      const buttonY = 100;
       this.attackButton?.setPosition(buttonX, buttonY);
       this.attackButtonZone?.setPosition(buttonX, buttonY);
     }
