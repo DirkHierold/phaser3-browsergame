@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { InputController } from '../../shared/InputController';
 import { OrientationManager } from '../../shared/OrientationManager';
 import { ResizeManager } from '../../shared/ResizeManager';
+import { SoundManager } from '../../shared/SoundManager';
 
 import LoadingScene from './LoadingScene';
 import GameOverScene from './GameOverScene';
@@ -55,6 +56,7 @@ class PrototypeGame extends Phaser.Scene {
 
   playerState: PlayerState = PlayerState.IDLE;
   facingDirection: Direction = Direction.DOWN;
+  isDead: boolean = false;
 
   hearts: Phaser.GameObjects.Sprite[] = [];
   maxHealth: number = 3;
@@ -67,6 +69,7 @@ class PrototypeGame extends Phaser.Scene {
   create() {
     this.currentHealth = this.maxHealth;
     this.hearts = [];
+    this.isDead = false;
     this.physics.world.bounds.width = this.scale.width;
     this.physics.world.bounds.height = this.scale.height;
     this.createBackground();
@@ -1065,8 +1068,8 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   updatePlayerState() {
-    // Don't change state if player is dead
-    if (this.playerState === PlayerState.DEATH) {
+    // Don't change state if player is dead or playing death animation
+    if (this.isDead || this.playerState === PlayerState.DEATH) {
       return;
     }
 
@@ -1115,7 +1118,7 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   handleMovement() {
-    if (this.playerState === PlayerState.DEATH || 
+    if (this.isDead || this.playerState === PlayerState.DEATH || 
         (this.playerState !== PlayerState.WALKING && 
          this.playerState !== PlayerState.RUNNING &&
          this.playerState !== PlayerState.WALKING_ATTACK &&
@@ -1143,6 +1146,11 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   updateAnimation() {
+    // Never update animation if player is dead (even after animation completes)
+    if (this.isDead) {
+      return;
+    }
+
     // Only update animation if no priority animation is playing
     if (this.player.anims.isPlaying &&
       (this.playerState === PlayerState.ATTACKING ||
@@ -1384,10 +1392,20 @@ class PrototypeGame extends Phaser.Scene {
       if (this.currentHealth === 0) {
         this.playerState = PlayerState.DEATH;
         this.footstepSound.stop();
+        SoundManager.getInstance().pauseBackgroundMusic();
         this.loseSound.play();
         this.player.anims.play(`death-${this.facingDirection}`);
         this.player.once('animationcomplete', () => {
-          this.scene.start('GameOverScene');
+          // Set dead flag AFTER animation completes
+          this.isDead = true;
+          // Keep player on the last frame of death animation
+          const deathAnim = this.player.anims.currentAnim;
+          if (deathAnim && deathAnim.frames.length > 0) {
+            const lastFrame = deathAnim.frames[deathAnim.frames.length - 1];
+            this.player.setFrame(lastFrame.frame);
+          }
+          this.scene.launch('GameOverScene');
+          this.scene.pause();
         });
       }
     }

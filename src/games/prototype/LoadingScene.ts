@@ -1,6 +1,7 @@
 import { OrientationManager } from '../../shared/OrientationManager';
 import { ResizeManager } from '../../shared/ResizeManager';
 import { SoundManager } from '../../shared/SoundManager';
+import { UIStyles } from '../../shared/UIStyles';
 
 export default class LoadingScene extends Phaser.Scene {
   private progressBar!: Phaser.GameObjects.Graphics;
@@ -27,21 +28,23 @@ export default class LoadingScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
 
     this.add.text(width / 2, height * 0.3, "Prototype Adventure", {
-      fontSize: "48px",
-      color: "#ffffff"
+      ...UIStyles.text.title
     }).setOrigin(0.5);
 
     this.progressBar = this.add.graphics();
-    this.add.graphics().fillStyle(0x222222, 0.8).fillRect(width / 2 - 160, height / 2 - 25, 320, 50);
+    this.add.graphics().fillStyle(UIStyles.colors.background, 0.8).fillRect(width / 2 - 160, height / 2 - 25, 320, 50);
 
     this.loadingText = this.add.text(width / 2, height * 0.6, this.funnyTexts[0], {
-      fontSize: "24px",
-      color: "#ffffff"
+      ...UIStyles.text.loading
     }).setOrigin(0.5);
 
     this.percentText = this.add.text(width / 2, height / 2, "0%", {
       fontSize: "32px",
-      color: "#ffffff"
+      fontFamily: 'serif',
+      fontWeight: 'bold',
+      color: '#DAA520',
+      stroke: '#000000',
+      strokeThickness: 2
     }).setOrigin(0.5);
 
     // Real progress tracking
@@ -50,7 +53,7 @@ export default class LoadingScene extends Phaser.Scene {
       const percentage = Math.round(progress * 100);
       
       this.percentText.setText(`${percentage}%`);
-      this.progressBar.clear().fillStyle(0x00ff00, 1).fillRect(width / 2 - 150, height / 2 - 15, 300 * progress, 30);
+      this.progressBar.clear().fillStyle(UIStyles.colors.accent, 1).fillRect(width / 2 - 150, height / 2 - 15, 300 * progress, 30);
       
       // Change text every ~14% progress (7 texts total)
       const textChangeThreshold = 0.14;
@@ -130,7 +133,7 @@ export default class LoadingScene extends Phaser.Scene {
       child instanceof Phaser.GameObjects.Graphics && child !== this.progressBar
     ) as Phaser.GameObjects.Graphics;
     if (progressBg) {
-      progressBg.clear().fillStyle(0x222222, 0.8).fillRect(width / 2 - 160, height / 2 - 25, 320, 50);
+      progressBg.clear().fillStyle(UIStyles.colors.background, 0.8).fillRect(width / 2 - 160, height / 2 - 25, 320, 50);
     }
     
     // Update loading text position
@@ -147,7 +150,7 @@ export default class LoadingScene extends Phaser.Scene {
     if (this.progressBar) {
       // Get current progress from the text
       const currentProgress = parseInt(this.percentText.text.replace('%', '')) / 100;
-      this.progressBar.clear().fillStyle(0x00ff00, 1).fillRect(width / 2 - 150, height / 2 - 15, 300 * currentProgress, 30);
+      this.progressBar.clear().fillStyle(UIStyles.colors.accent, 1).fillRect(width / 2 - 150, height / 2 - 15, 300 * currentProgress, 30);
     }
     
     // Update start button position if visible
@@ -170,11 +173,17 @@ export default class LoadingScene extends Phaser.Scene {
     this.loadingText.setText("Ready to play!");
 
     this.startButton = this.add.text(width / 2, height / 2, "Start Game", {
-      fontSize: "32px",
-      color: "#00ff00",
-      backgroundColor: "#222222",
-      padding: { x: 20, y: 10 }
+      ...UIStyles.button.primary
     }).setOrigin(0.5).setInteractive();
+
+    // Hover effects
+    this.startButton.on('pointerover', () => {
+      this.startButton.setStyle({ backgroundColor: '#A0522D' });
+    });
+    
+    this.startButton.on('pointerout', () => {
+      this.startButton.setStyle({ backgroundColor: '#8B4513' });
+    });
 
     this.startButton.on('pointerdown', () => {
       // Load audio assets after user interaction
