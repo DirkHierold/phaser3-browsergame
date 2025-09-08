@@ -40,9 +40,6 @@ class PrototypeGame extends Phaser.Scene {
   // Continuously tracked movement state for reliable mobile attacks
   currentMovementState: { isMoving: boolean; isRunning: boolean } = { isMoving: false, isRunning: false };
   
-  // Visual debugging indicator for mobile
-  movementStateText: Phaser.GameObjects.Text;
-  
   // Double-tap detection for desktop
   lastKeyPress: { [key: string]: number } = {};
   doubleTapThreshold: number = 300; // milliseconds
@@ -80,42 +77,19 @@ class PrototypeGame extends Phaser.Scene {
     this.createHearts();
     this.inputController = new InputController(this);
     this.inputController.initialize(() => {
-      // Use continuously tracked movement state, but fallback to current input if not yet updated
-      let isMoving = this.currentMovementState.isMoving;
-      let isRunning = this.currentMovementState.isRunning;
-      
-      // Fallback: get current input state if tracked state seems stale
-      if (!isMoving && !isRunning) {
+      // For now, mobile attacks are disabled - only desktop attacks work
+      if (this.sys.game.device.os.desktop) {
         const currentInput = this.inputController.getInputState();
-        isMoving = currentInput.isMoving;
-        isRunning = currentInput.isRunning;
-      }
-      
-      // Debug: Update visual indicator with attack state
-      if (this.movementStateText) {
-        const deviceType = this.sys.game.device.os.desktop ? 'DESKTOP' : 'MOBILE';
-        let stateText = 'IDLE';
-        if (isRunning) stateText = 'RUNNING';
-        else if (isMoving) stateText = 'WALKING';
-        this.movementStateText.setText(`${deviceType}: ATTACKING ${stateText}`);
+        const isMoving = currentInput.isMoving;
+        const isRunning = currentInput.isRunning;
         
-        // Reset text after a short delay
-        this.time.delayedCall(500, () => {
-          if (this.movementStateText) {
-            this.movementStateText.setText('');
-          }
-        });
-      }
-      
-      if (isRunning) {
-        // Player is running - perform running attack
-        this.performRunningAttack();
-      } else if (isMoving) {
-        // Player is walking - perform walking attack  
-        this.performWalkingAttack();
-      } else {
-        // Player is standing still - perform standing attack
-        this.performAttack();
+        if (isRunning) {
+          this.performRunningAttack();
+        } else if (isMoving) {
+          this.performWalkingAttack();
+        } else {
+          this.performAttack();
+        }
       }
     });
     this.createWorldBorder();
@@ -124,8 +98,6 @@ class PrototypeGame extends Phaser.Scene {
     OrientationManager.getInstance().updateScene(this);
     ResizeManager.getInstance().initialize(this, this.handleResize.bind(this));
     
-    this.createMovementStateIndicator();
-    this.createSimpleInputTest();
     
   }
 
@@ -188,79 +160,6 @@ class PrototypeGame extends Phaser.Scene {
     this.worldBorder.strokeRect(0, 0, this.scale.width, this.scale.height);
   }
 
-  createMovementStateIndicator() {
-    this.movementStateText = this.add.text(this.scale.width / 2, 50, '', {
-      fontSize: '24px',
-      fontFamily: 'Arial',
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      color: '#ffffff',
-      padding: { x: 10, y: 5 }
-    });
-    this.movementStateText.setOrigin(0.5, 0.5);
-    this.movementStateText.setScrollFactor(0);
-    this.movementStateText.setDepth(1000);
-  }
-
-  createSimpleInputTest() {
-    // Enable input for the entire scene
-    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      console.log('SCENE POINTER DOWN:', pointer.x, pointer.y);
-      if (this.movementStateText) {
-        this.movementStateText.setText(`SCENE TOUCH: ${pointer.x.toFixed(0)}, ${pointer.y.toFixed(0)}`);
-      }
-    });
-
-    // Also test with a very simple clickable rectangle
-    const testRect = this.add.rectangle(this.scale.width / 2, 200, 200, 100, 0x00ff00, 0.8);
-    testRect.setInteractive();
-    testRect.setDepth(3000);
-    
-    testRect.on('pointerdown', () => {
-      if (this.movementStateText) {
-        this.movementStateText.setText('GREEN RECT CLICKED!');
-      }
-      console.log('GREEN RECT CLICKED!');
-    });
-
-    // ULTIMATE TEST: Pure DOM touch events that bypass Phaser entirely
-    this.setupDOMTouchTest();
-  }
-
-  setupDOMTouchTest() {
-    const canvas = this.sys.canvas;
-    if (!canvas) return;
-
-    // Remove any existing event listeners first
-    canvas.removeEventListener('touchstart', this.handleDOMTouch);
-    canvas.removeEventListener('touchend', this.handleDOMTouch);
-    canvas.removeEventListener('click', this.handleDOMTouch);
-
-    // Add DOM touch listeners
-    canvas.addEventListener('touchstart', this.handleDOMTouch.bind(this), { passive: false });
-    canvas.addEventListener('touchend', this.handleDOMTouch.bind(this), { passive: false });
-    canvas.addEventListener('click', this.handleDOMTouch.bind(this)); // Desktop fallback
-
-    console.log('DOM touch listeners added to canvas');
-  }
-
-  handleDOMTouch(event: TouchEvent | MouseEvent) {
-    console.log('DOM TOUCH EVENT:', event.type);
-    
-    if (this.movementStateText) {
-      this.movementStateText.setText(`DOM ${event.type.toUpperCase()} DETECTED!`);
-      
-      // Auto-clear after 2 seconds
-      this.time.delayedCall(2000, () => {
-        if (this.movementStateText) {
-          this.movementStateText.setText('Tap anywhere to test...');
-        }
-      });
-    }
-
-    // Prevent default to avoid any interference
-    event.preventDefault();
-    event.stopPropagation();
-  }
 
   createPlayer() {
     this.player = this.physics.add.sprite(this.scale.width / 2, this.scale.height / 2, 'playerIdle', 0);
@@ -1158,16 +1057,6 @@ class PrototypeGame extends Phaser.Scene {
       isMoving: inputState.isMoving,
       isRunning: inputState.isRunning
     };
-    
-    // Update visual debugging indicator
-    if (this.movementStateText) {
-      const deviceType = this.sys.game.device.os.desktop ? 'DESKTOP' : 'MOBILE';
-      let stateText = 'IDLE';
-      if (inputState.isRunning) stateText = 'RUNNING';
-      else if (inputState.isMoving) stateText = 'WALKING';
-      
-      this.movementStateText.setText(`${deviceType}: ${stateText}`);
-    }
 
     if (this.currentDirection !== '' && !this.footstepSound.isPlaying && this.currentHealth > 0) {
       // Adjust footstep volume and rate based on running

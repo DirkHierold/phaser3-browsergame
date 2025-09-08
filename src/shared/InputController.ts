@@ -36,9 +36,8 @@ export class InputController {
     if (this.isDesktop) {
       this.createKeyboardControls();
     } else {
-      // TEMPORARILY DISABLE JOYSTICK TO TEST ATTACK BUTTON
-      // this.createVirtualJoystick();
-      this.createAttackButton();
+      this.createVirtualJoystick();
+      this.createMobileAttackButton();
     }
   }
 
@@ -109,107 +108,22 @@ export class InputController {
     this.attackKeys.enter.on('down', () => this.handleAttackInput());
   }
 
-  private createAttackButton(): void {
-    // Position button at center top - far from joystick to test interference
-    const buttonX = this.scene.scale.width / 2;
-    const buttonY = 100;
+  private createMobileAttackButton(): void {
+    // Simple attack button - back to basics
+    const buttonX = this.scene.scale.width - 100;
+    const buttonY = this.scene.scale.height - 100;
     
-    // Create HUGE visual button to make it obvious
+    // Visual button
     this.attackButton = this.scene.add.graphics();
-    this.attackButton.lineStyle(5, 0xff0000);
-    this.attackButton.strokeCircle(0, 0, 80);
-    this.attackButton.fillStyle(0xff0000, 0.5);
-    this.attackButton.fillCircle(0, 0, 80);
+    this.attackButton.lineStyle(2, 0xff0000);
+    this.attackButton.strokeCircle(0, 0, 50);
+    this.attackButton.fillStyle(0xff0000, 0.3);
+    this.attackButton.fillCircle(0, 0, 50);
     this.attackButton.setPosition(buttonX, buttonY);
-    this.attackButton.setDepth(2000); // Very high depth
+    this.attackButton.setDepth(1000);
 
-    // Create HUGE interactive zone
-    this.attackButtonZone = this.scene.add.zone(buttonX, buttonY, 200, 200);
-    this.attackButtonZone.setDepth(2001);
-    this.attackButtonZone.setInteractive();
-
-    // Test if zone events work at all
-    this.attackButtonZone.on('pointerdown', () => {
-      this.debugAttackTap('zone-pointerdown');
-    });
-    
-    // TEST: Global touch detector to see if ANY touches work
-    this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      // Show global touch location for any touch
-      if ((this.scene as any).movementStateText) {
-        (this.scene as any).movementStateText.setText(`GLOBAL TOUCH: ${pointer.x.toFixed(0)}, ${pointer.y.toFixed(0)}`);
-      }
-      
-      // Check if it's near our button
-      const distance = Phaser.Geom.Point.Distance(
-        { x: pointer.x, y: pointer.y },
-        { x: buttonX, y: buttonY }
-      );
-      
-      if (distance <= 100) {
-        this.debugAttackTap('global-near-button');
-      }
-    });
-    
-    // FALLBACK: If VirtualJoystick still blocks, create attack zone after joystick
-    this.scene.time.delayedCall(100, () => {
-      this.createBackupAttackDetection(buttonX, buttonY);
-    });
-  }
-  
-  private createBackupAttackDetection(buttonX: number, buttonY: number): void {
-    // Manual touch detection using DOM events as ultimate fallback
-    const canvas = this.scene.sys.canvas;
-    if (canvas) {
-      canvas.addEventListener('touchstart', (event: TouchEvent) => {
-        event.preventDefault();
-        
-        const rect = canvas.getBoundingClientRect();
-        const touch = event.touches[0];
-        const x = touch.clientX - rect.left;
-        const y = touch.clientY - rect.top;
-        
-        // Scale coordinates to game coordinates
-        const scaleX = this.scene.scale.width / rect.width;
-        const scaleY = this.scene.scale.height / rect.height;
-        const gameX = x * scaleX;
-        const gameY = y * scaleY;
-        
-        // Check if touch is near button
-        const distance = Math.sqrt(
-          Math.pow(gameX - buttonX, 2) + Math.pow(gameY - buttonY, 2)
-        );
-        
-        if (distance <= 100) {
-          this.debugAttackTap('dom-touchstart');
-        }
-        
-        // Show any touch for debugging
-        if ((this.scene as any).movementStateText) {
-          (this.scene as any).movementStateText.setText(`DOM TOUCH: ${gameX.toFixed(0)}, ${gameY.toFixed(0)}`);
-        }
-      });
-    }
-  }
-
-  private debugAttackTap(eventType: string): void {
-    // Flash the visual button
-    this.attackButton?.setTint(0xffffff);
-    this.scene.time.delayedCall(100, () => {
-      this.attackButton?.clearTint();
-    });
-    
-    // Show debug message
-    if (!this.isDesktop && (this.scene as any).movementStateText) {
-      (this.scene as any).movementStateText.setText(`MOBILE: ${eventType.toUpperCase()} DETECTED!`);
-      this.scene.time.delayedCall(1000, () => {
-        if ((this.scene as any).movementStateText) {
-          (this.scene as any).movementStateText.setText('');
-        }
-      });
-    }
-    
-    this.handleAttackInput();
+    // For now, let's use a simple approach - no attack functionality on mobile
+    // We'll focus on getting the basic game working first
   }
 
   private handleAttackInput(): void {
@@ -303,9 +217,8 @@ export class InputController {
   updatePositions(): void {
     if (!this.isDesktop) {
       this.joyStick?.setPosition(100, this.scene.scale.height - 100);
-      // Position large test button at center top
-      const buttonX = this.scene.scale.width / 2;
-      const buttonY = 100;
+      const buttonX = this.scene.scale.width - 100;
+      const buttonY = this.scene.scale.height - 100;
       this.attackButton?.setPosition(buttonX, buttonY);
       this.attackButtonZone?.setPosition(buttonX, buttonY);
     }
