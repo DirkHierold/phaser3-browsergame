@@ -221,6 +221,45 @@ class PrototypeGame extends Phaser.Scene {
       }
       console.log('GREEN RECT CLICKED!');
     });
+
+    // ULTIMATE TEST: Pure DOM touch events that bypass Phaser entirely
+    this.setupDOMTouchTest();
+  }
+
+  setupDOMTouchTest() {
+    const canvas = this.sys.canvas;
+    if (!canvas) return;
+
+    // Remove any existing event listeners first
+    canvas.removeEventListener('touchstart', this.handleDOMTouch);
+    canvas.removeEventListener('touchend', this.handleDOMTouch);
+    canvas.removeEventListener('click', this.handleDOMTouch);
+
+    // Add DOM touch listeners
+    canvas.addEventListener('touchstart', this.handleDOMTouch.bind(this), { passive: false });
+    canvas.addEventListener('touchend', this.handleDOMTouch.bind(this), { passive: false });
+    canvas.addEventListener('click', this.handleDOMTouch.bind(this)); // Desktop fallback
+
+    console.log('DOM touch listeners added to canvas');
+  }
+
+  handleDOMTouch(event: TouchEvent | MouseEvent) {
+    console.log('DOM TOUCH EVENT:', event.type);
+    
+    if (this.movementStateText) {
+      this.movementStateText.setText(`DOM ${event.type.toUpperCase()} DETECTED!`);
+      
+      // Auto-clear after 2 seconds
+      this.time.delayedCall(2000, () => {
+        if (this.movementStateText) {
+          this.movementStateText.setText('Tap anywhere to test...');
+        }
+      });
+    }
+
+    // Prevent default to avoid any interference
+    event.preventDefault();
+    event.stopPropagation();
   }
 
   createPlayer() {
