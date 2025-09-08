@@ -56,6 +56,7 @@ class PrototypeGame extends Phaser.Scene {
 
   playerState: PlayerState = PlayerState.IDLE;
   facingDirection: Direction = Direction.DOWN;
+  isDeadAndFrozen: boolean = false;
 
   hearts: Phaser.GameObjects.Sprite[] = [];
   maxHealth: number = 3;
@@ -68,6 +69,7 @@ class PrototypeGame extends Phaser.Scene {
   create() {
     this.currentHealth = this.maxHealth;
     this.hearts = [];
+    this.isDeadAndFrozen = false;
     this.physics.world.bounds.width = this.scale.width;
     this.physics.world.bounds.height = this.scale.height;
     this.createBackground();
@@ -1144,6 +1146,11 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   updateAnimation() {
+    // Never update animation if player is dead and frozen
+    if (this.isDeadAndFrozen) {
+      return;
+    }
+    
     // Only update animation if no priority animation is playing
     if (this.player.anims.isPlaying &&
       (this.playerState === PlayerState.ATTACKING ||
@@ -1391,15 +1398,28 @@ class PrototypeGame extends Phaser.Scene {
         SoundManager.getInstance().pauseBackgroundMusic();
         this.loseSound.play();
         
-        // Force play death animation, interrupting any current animation
+        // Force stop current animation and play death animation after brief delay
         this.player.anims.stop();
-        this.player.anims.play(`death-${this.facingDirection}`);
+        const deathAnimKey = `death-${this.facingDirection}`;
         
-        this.player.once('animationcomplete', () => {
-          // Keep player on the last frame of death animation
-          const deathAnim = this.player.anims.currentAnim;
+        // Add small delay to ensure hurt animation is fully stopped
+        this.time.delayedCall(50, () => {
+          this.player.anims.play(deathAnimKey);
+        });
+        
+        // Calculate total duration: 7 frames at 8fps = 875ms + 50ms delay
+        const animationDuration = (7 / 8) * 1000 + 50;
+        
+        // Wait for animation to complete then freeze on last frame
+        this.time.delayedCall(animationDuration, () => {
+          // Set frozen flag to prevent any further animation updates
+          this.isDeadAndFrozen = true;
+          
+          // Get death animation and set to last frame
+          const deathAnim = this.anims.get(deathAnimKey);
           if (deathAnim && deathAnim.frames.length > 0) {
             const lastFrame = deathAnim.frames[deathAnim.frames.length - 1];
+            this.player.anims.stop();
             this.player.setFrame(lastFrame.frame);
           }
           this.scene.launch('GameOverScene');
