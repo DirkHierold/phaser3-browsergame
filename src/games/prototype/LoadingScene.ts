@@ -82,21 +82,21 @@ export default class LoadingScene extends Phaser.Scene {
     // Slime 1 spritesheets
     this.load.spritesheet('slime1Idle', '/images/Slime1_Idle_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
     this.load.spritesheet('slime1Walk', '/images/Slime1_Walk_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
-    this.load.spritesheet('slime1Attack', '/images/Slime1_Attack_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime1Attack', '/images/slime1Attack.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
     this.load.spritesheet('slime1Hurt', '/images/Slime1_Hurt_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 19 });
     this.load.spritesheet('slime1Death', '/images/Slime1_Death_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
     
     // Slime 2 spritesheets
     this.load.spritesheet('slime2Idle', '/images/Slime2_Idle_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
     this.load.spritesheet('slime2Walk', '/images/Slime2_Walk_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
-    this.load.spritesheet('slime2Attack', '/images/Slime2_Attack_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime2Attack', '/images/slime2Attack.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 44 });
     this.load.spritesheet('slime2Hurt', '/images/Slime2_Hurt_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 19 });
     this.load.spritesheet('slime2Death', '/images/Slime2_Death_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
     
     // Slime 3 spritesheets
     this.load.spritesheet('slime3Idle', '/images/Slime3_Idle_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
     this.load.spritesheet('slime3Walk', '/images/Slime3_Walk_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
-    this.load.spritesheet('slime3Attack', '/images/Slime3_Attack_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime3Attack', '/images/slime3Attack.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 36 });
     this.load.spritesheet('slime3Hurt', '/images/Slime3_Hurt_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 19 });
     this.load.spritesheet('slime3Death', '/images/Slime3_Death_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
     this.load.audio('swing1', '/audios/swing.wav');

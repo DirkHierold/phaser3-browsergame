@@ -25,6 +25,11 @@ enum Direction {
   RIGHT = 'right'
 }
 
+enum SlimeState {
+  IDLE = 'idle',
+  ATTACKING = 'attacking'
+}
+
 class PrototypeGame extends Phaser.Scene {
   constructor() {
     super({ key: 'PrototypeGame' });
@@ -47,6 +52,10 @@ class PrototypeGame extends Phaser.Scene {
   worldBorder: Phaser.GameObjects.Graphics;
   slime: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   slimeType: number = 1;
+  slimeState: SlimeState = SlimeState.IDLE;
+  slimeFacingDirection: Direction = Direction.DOWN;
+  slimeAttackTimer: number = 0;
+  slimeAttackInterval: number = 3000; // Attack every 3 seconds
   swordHitbox: Phaser.GameObjects.Zone;
   swingSounds: Phaser.Sound.BaseSound[];
   bloodSound: Phaser.Sound.BaseSound;
@@ -449,7 +458,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime1-attack-down',
       frames: this.anims.generateFrameNames('slime1Attack', {
-        frames: [0, 1, 2, 3, 4, 5]
+        frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
       }),
       frameRate: 12,
       repeat: 0
@@ -458,7 +467,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime1-attack-up',
       frames: this.anims.generateFrameNames('slime1Attack', {
-        frames: [6, 7, 8, 9, 10, 11]
+        frames: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
       }),
       frameRate: 12,
       repeat: 0
@@ -467,7 +476,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime1-attack-left',
       frames: this.anims.generateFrameNames('slime1Attack', {
-        frames: [12, 13, 14, 15, 16, 17]
+        frames: [20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
       }),
       frameRate: 12,
       repeat: 0
@@ -476,7 +485,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime1-attack-right',
       frames: this.anims.generateFrameNames('slime1Attack', {
-        frames: [18, 19, 20, 21, 22, 23]
+        frames: [30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
       }),
       frameRate: 12,
       repeat: 0
@@ -630,7 +639,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime2-attack-down',
       frames: this.anims.generateFrameNames('slime2Attack', {
-        frames: [0, 1, 2, 3, 4, 5]
+        frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
       }),
       frameRate: 12,
       repeat: 0
@@ -639,7 +648,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime2-attack-up',
       frames: this.anims.generateFrameNames('slime2Attack', {
-        frames: [6, 7, 8, 9, 10, 11]
+        frames: [ 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
       }),
       frameRate: 12,
       repeat: 0
@@ -648,7 +657,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime2-attack-left',
       frames: this.anims.generateFrameNames('slime2Attack', {
-        frames: [12, 13, 14, 15, 16, 17]
+        frames: [ 22, 23, 24, 25, 26, 27, 28, 29,30, 31, 32]
       }),
       frameRate: 12,
       repeat: 0
@@ -657,7 +666,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime2-attack-right',
       frames: this.anims.generateFrameNames('slime2Attack', {
-        frames: [18, 19, 20, 21, 22, 23]
+        frames: [ 33, 34, 35, 36, 37, 38, 39,40, 41, 42, 43]
       }),
       frameRate: 12,
       repeat: 0
@@ -811,7 +820,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime3-attack-down',
       frames: this.anims.generateFrameNames('slime3Attack', {
-        frames: [0, 1, 2, 3, 4, 5]
+        frames: [0, 1, 2, 3, 4, 5, 6, 7, 8]
       }),
       frameRate: 12,
       repeat: 0
@@ -820,7 +829,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime3-attack-up',
       frames: this.anims.generateFrameNames('slime3Attack', {
-        frames: [6, 7, 8, 9, 10, 11]
+        frames: [9, 10, 11, 12, 13, 14, 15, 16, 17]
       }),
       frameRate: 12,
       repeat: 0
@@ -829,7 +838,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime3-attack-left',
       frames: this.anims.generateFrameNames('slime3Attack', {
-        frames: [12, 13, 14, 15, 16, 17]
+        frames: [18, 19, 20, 21, 22, 23, 24, 25, 26]
       }),
       frameRate: 12,
       repeat: 0
@@ -838,7 +847,7 @@ class PrototypeGame extends Phaser.Scene {
     this.anims.create({
       key: 'slime3-attack-right',
       frames: this.anims.generateFrameNames('slime3Attack', {
-        frames: [18, 19, 20, 21, 22, 23]
+        frames: [27, 28, 29, 30, 31, 32, 33, 34, 35]
       }),
       frameRate: 12,
       repeat: 0
@@ -1037,12 +1046,13 @@ class PrototypeGame extends Phaser.Scene {
 
 
 
-  update(): void {
+  update(time: number, delta: number): void {
     this.updateInputState();
     this.updatePlayerState();
     this.handleMovement();
     this.updateAnimation();
     this.updateSwordHitbox();
+    this.updateSlimeBehavior(time, delta);
     this.updateDepthSorting();
   }
 
@@ -1117,6 +1127,14 @@ class PrototypeGame extends Phaser.Scene {
     return this.facingDirection;
   }
 
+  getDirectionFromString(directionStr: string): Direction {
+    if (directionStr === 'up') return Direction.UP;
+    if (directionStr === 'down') return Direction.DOWN;
+    if (directionStr === 'left') return Direction.LEFT;
+    if (directionStr === 'right') return Direction.RIGHT;
+    return Direction.DOWN;
+  }
+
   handleMovement() {
     if (this.playerState === PlayerState.DEATH || 
         (this.playerState !== PlayerState.WALKING && 
@@ -1185,6 +1203,11 @@ class PrototypeGame extends Phaser.Scene {
     if (this.slime) {
       this.slime.destroy();
     }
+    
+    // Reset slime state
+    this.slimeState = SlimeState.IDLE;
+    this.slimeFacingDirection = this.getDirectionFromString(randomDirection);
+    this.slimeAttackTimer = 0;
     
     // Use appropriate spritesheet based on slime type
     const spriteKey = `slime${this.slimeType}Idle`;
@@ -1434,6 +1457,47 @@ class PrototypeGame extends Phaser.Scene {
     if (heartIndex >= 0 && heartIndex < this.maxHealth) {
       this.hearts[heartIndex].play('heart-damage');
     }
+  }
+
+  updateSlimeBehavior(time: number, delta: number): void {
+    if (!this.slime || !this.slime.active || this.currentHealth === 0) return;
+
+    // Update attack timer
+    this.slimeAttackTimer += delta;
+
+    // Check if slime should attack
+    if (this.slimeState === SlimeState.IDLE && this.slimeAttackTimer >= this.slimeAttackInterval) {
+      this.performSlimeAttack();
+      this.slimeAttackTimer = 0;
+    }
+  }
+
+  performSlimeAttack(): void {
+    if (this.slimeState === SlimeState.ATTACKING) return;
+    
+    this.slimeState = SlimeState.ATTACKING;
+    
+    // Calculate direction to face player
+    const dx = this.player.x - this.slime.x;
+    const dy = this.player.y - this.slime.y;
+    
+    if (Math.abs(dx) > Math.abs(dy)) {
+      this.slimeFacingDirection = dx > 0 ? Direction.RIGHT : Direction.LEFT;
+    } else {
+      this.slimeFacingDirection = dy > 0 ? Direction.DOWN : Direction.UP;
+    }
+    
+    const directionStr = this.slimeFacingDirection.toLowerCase();
+    const attackAnim = `slime${this.slimeType}-attack-${directionStr}`;
+    
+    this.slime.anims.play(attackAnim);
+    
+    // Return to idle after attack animation completes
+    this.slime.once('animationcomplete', () => {
+      this.slimeState = SlimeState.IDLE;
+      const idleAnim = `slime${this.slimeType}-idle-${directionStr}`;
+      this.slime.anims.play(idleAnim);
+    });
   }
 
   private updateDepthSorting(): void {
