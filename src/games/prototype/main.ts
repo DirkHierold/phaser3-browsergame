@@ -57,6 +57,9 @@ class PrototypeGame extends Phaser.Scene {
   slimeAttackTimer: number = 0;
   slimeAttackInterval: number = 3000; // Attack every 3 seconds
   swordHitbox: Phaser.GameObjects.Zone;
+  slime1AttackHitbox: Phaser.GameObjects.Zone; // Upper half-circle
+  slime2AttackHitbox: Phaser.GameObjects.Zone; // Forward dash circular
+  slime3AttackHitbox: Phaser.GameObjects.Zone; // Area burn circular
   swingSounds: Phaser.Sound.BaseSound[];
   bloodSound: Phaser.Sound.BaseSound;
   footstepSound: Phaser.Sound.BaseSound;
@@ -86,6 +89,7 @@ class PrototypeGame extends Phaser.Scene {
     this.createSounds();
     this.createPlayer();
     this.createSlime();
+    this.createSlimeAttackHitboxes();
     this.createHearts();
     this.inputController = new InputController(this);
     this.inputController.initialize((isMoving, isRunning) => {
@@ -142,6 +146,23 @@ class PrototypeGame extends Phaser.Scene {
       const hitboxRadius = this.sys.game.device.os.desktop ? 60 * baseScale : 50 * baseScale;
       this.swordHitbox.setSize(hitboxRadius * 2, hitboxRadius * 2);
       (this.swordHitbox.body as Phaser.Physics.Arcade.Body).setCircle(hitboxRadius);
+    }
+    
+    // Update slime attack hitbox sizes to match creation values
+    if (this.slime1AttackHitbox) {
+      const slime1Radius = 60 * baseScale;
+      this.slime1AttackHitbox.setSize(slime1Radius * 2, slime1Radius);
+      (this.slime1AttackHitbox.body as Phaser.Physics.Arcade.Body).setSize(slime1Radius * 2, slime1Radius);
+    }
+    if (this.slime2AttackHitbox) {
+      const slime2Radius = 35 * baseScale;
+      this.slime2AttackHitbox.setSize(slime2Radius * 2, slime2Radius * 2);
+      (this.slime2AttackHitbox.body as Phaser.Physics.Arcade.Body).setCircle(slime2Radius);
+    }
+    if (this.slime3AttackHitbox) {
+      const slime3Radius = 50 * baseScale;
+      this.slime3AttackHitbox.setSize(slime3Radius * 2, slime3Radius * 2);
+      (this.slime3AttackHitbox.body as Phaser.Physics.Arcade.Body).setCircle(slime3Radius);
     }
 
     this.inputController.updatePositions();
@@ -1052,6 +1073,7 @@ class PrototypeGame extends Phaser.Scene {
     this.handleMovement();
     this.updateAnimation();
     this.updateSwordHitbox();
+    this.updateSlimeAttackHitboxes();
     this.updateSlimeBehavior(time, delta);
     this.updateDepthSorting();
   }
@@ -1231,36 +1253,96 @@ class PrototypeGame extends Phaser.Scene {
     (this.swordHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
   }
 
+  createSlimeAttackHitboxes() {
+    const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
+    
+    // Slime1: Upper half-circle attack (projectile spray upward)
+    const slime1Radius = 60 * baseScale;
+    this.slime1AttackHitbox = this.add.zone(0, 0, slime1Radius * 2, slime1Radius);
+    this.physics.add.existing(this.slime1AttackHitbox);
+    (this.slime1AttackHitbox.body as Phaser.Physics.Arcade.Body).setSize(slime1Radius * 2, slime1Radius);
+    (this.slime1AttackHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
+    
+    // Slime2: Forward dash circular attack (bigger than slime body)
+    const slime2Radius = 35 * baseScale; // Bigger than slime body (7px radius)
+    this.slime2AttackHitbox = this.add.zone(0, 0, slime2Radius * 2, slime2Radius * 2);
+    this.physics.add.existing(this.slime2AttackHitbox);
+    (this.slime2AttackHitbox.body as Phaser.Physics.Arcade.Body).setCircle(slime2Radius);
+    (this.slime2AttackHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
+    
+    // Slime3: Area burn circular attack (larger area)
+    const slime3Radius = 50 * baseScale;
+    this.slime3AttackHitbox = this.add.zone(0, 0, slime3Radius * 2, slime3Radius * 2);
+    this.physics.add.existing(this.slime3AttackHitbox);
+    (this.slime3AttackHitbox.body as Phaser.Physics.Arcade.Body).setCircle(slime3Radius);
+    (this.slime3AttackHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
+  }
+
   setupCollisions() {
     this.setupSlimeCollisions();
   }
 
   setupSlimeCollisions() {
-    if (!this.slime) return;
+    if (!this.slime || !this.slime1AttackHitbox || !this.slime2AttackHitbox || !this.slime3AttackHitbox) return;
     
     // Clear any existing collisions for this slime to prevent duplicates
-    if (this.swordHitbox && this.slime) {
-      const existingColliders = this.physics.world.colliders.getActive();
-      existingColliders.forEach((collider: any) => {
-        if ((collider.object1 === this.swordHitbox || collider.object2 === this.swordHitbox) &&
-            (collider.object1 === this.slime || collider.object2 === this.slime)) {
-          this.physics.world.removeCollider(collider);
-        }
+    const existingColliders = this.physics.world.colliders.getActive();
+    existingColliders.forEach((collider: any) => {
+      // Clear sword vs slime collisions
+      if ((collider.object1 === this.swordHitbox || collider.object2 === this.swordHitbox) &&
+          (collider.object1 === this.slime || collider.object2 === this.slime)) {
+        this.physics.world.removeCollider(collider);
+      }
+      // Clear player vs slime body collisions
+      if ((collider.object1 === this.player || collider.object2 === this.player) &&
+          (collider.object1 === this.slime || collider.object2 === this.slime)) {
+        this.physics.world.removeCollider(collider);
+      }
+      // Clear player vs all attack hitbox collisions
+      const attackHitboxes = [this.slime1AttackHitbox, this.slime2AttackHitbox, this.slime3AttackHitbox];
+      attackHitboxes.forEach(hitbox => {
         if ((collider.object1 === this.player || collider.object2 === this.player) &&
-            (collider.object1 === this.slime || collider.object2 === this.slime)) {
+            (collider.object1 === hitbox || collider.object2 === hitbox)) {
           this.physics.world.removeCollider(collider);
         }
       });
-    }
+    });
     
     // Set up fresh collision detection for the current slime
+    // Player sword can only hit slime body (not attack hitboxes)
     this.physics.add.overlap(this.swordHitbox, this.slime, () => {
       this.killSlime();
     });
 
+    // Player body collision with slime body (passive collision)
     this.physics.add.overlap(this.player, this.slime, () => {
       if (this.playerState !== PlayerState.ATTACKING && this.playerState !== PlayerState.HURT) {
         this.hurtPlayer();
+      }
+    });
+    
+    // Set up collision detection for each slime type's attack hitbox
+    this.physics.add.overlap(this.player, this.slime1AttackHitbox, () => {
+      if (this.slimeType === 1 && this.slimeState === SlimeState.ATTACKING && 
+          this.playerState !== PlayerState.ATTACKING && 
+          this.playerState !== PlayerState.HURT) {
+        this.hurtPlayerFromSlimeAttack();
+      }
+    });
+    
+    this.physics.add.overlap(this.player, this.slime2AttackHitbox, () => {
+      if (this.slimeType === 2 && this.slimeState === SlimeState.ATTACKING && 
+          this.playerState !== PlayerState.ATTACKING && 
+          this.playerState !== PlayerState.HURT) {
+        this.hurtPlayerFromSlimeAttack();
+      }
+    });
+    
+    this.physics.add.overlap(this.player, this.slime3AttackHitbox, () => {
+      if (this.slimeType === 3 && this.slimeState === SlimeState.ATTACKING && 
+          this.playerState !== PlayerState.ATTACKING && 
+          this.playerState !== PlayerState.HURT) {
+        this.hurtPlayerFromSlimeAttack();
       }
     });
   }
@@ -1274,6 +1356,30 @@ class PrototypeGame extends Phaser.Scene {
     this.cameras.main.shake(200, 0.01);
 
     const pushDistance = 30;
+    const dx = this.player.x - this.slime.x;
+    const dy = this.player.y - this.slime.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance > 0) {
+      this.player.x += (dx / distance) * pushDistance;
+      this.player.y += (dy / distance) * pushDistance;
+    }
+
+    this.player.once('animationcomplete', () => {
+      this.playerState = PlayerState.IDLE;
+    });
+  }
+
+  hurtPlayerFromSlimeAttack() {
+    this.playerState = PlayerState.HURT;
+    this.player.anims.play(`hurt-${this.facingDirection}`);
+    this.footstepSound.stop();
+
+    this.takeDamage();
+    this.cameras.main.shake(300, 0.015); // Stronger shake for attack damage
+
+    // Push player away from slime attack
+    const pushDistance = 50; // Stronger push for attack
     const dx = this.player.x - this.slime.x;
     const dy = this.player.y - this.slime.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -1320,6 +1426,58 @@ class PrototypeGame extends Phaser.Scene {
       this.swordHitbox.setPosition(pos.x, pos.y);
     } else {
       body.enable = false;
+    }
+  }
+
+  enableSlimeAttackHitbox() {
+    if (this.slimeType === 1 && this.slime1AttackHitbox?.body) {
+      (this.slime1AttackHitbox.body as Phaser.Physics.Arcade.Body).enable = true;
+    } else if (this.slimeType === 2 && this.slime2AttackHitbox?.body) {
+      (this.slime2AttackHitbox.body as Phaser.Physics.Arcade.Body).enable = true;
+    } else if (this.slimeType === 3 && this.slime3AttackHitbox?.body) {
+      (this.slime3AttackHitbox.body as Phaser.Physics.Arcade.Body).enable = true;
+    }
+  }
+  
+  disableAllSlimeAttackHitboxes() {
+    if (this.slime1AttackHitbox?.body) {
+      (this.slime1AttackHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
+    }
+    if (this.slime2AttackHitbox?.body) {
+      (this.slime2AttackHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
+    }
+    if (this.slime3AttackHitbox?.body) {
+      (this.slime3AttackHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
+    }
+  }
+
+  updateSlimeAttackHitboxes() {
+    if (!this.slime?.active || this.slimeState !== SlimeState.ATTACKING) return;
+
+    const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
+    
+    if (this.slimeType === 1 && this.slime1AttackHitbox) {
+      // Slime1: Upper half-circle rectangle with bottom edge at slime body bottom
+      const slime1HitboxHeight = 60 * baseScale; // Height of the rectangle hitbox
+      // Get the actual bottom of the slime body (not sprite)
+      const slimeBodyBottomY = this.slime.y + (this.slime.body as Phaser.Physics.Arcade.Body).height / 2;
+      // Position hitbox so its bottom edge is at slime body bottom
+      // Move the hitbox center up by half its height from the slime body bottom
+      this.slime1AttackHitbox.setPosition(this.slime.x, slimeBodyBottomY - (slime1HitboxHeight / 2));
+    } else if (this.slimeType === 2 && this.slime2AttackHitbox) {
+      // Slime2: Forward dash - position hitbox closer to slime based on facing direction
+      const dashDistance = 20 * baseScale; // Much closer to slime
+      const positions = {
+        [Direction.DOWN]: { x: this.slime.x, y: this.slime.y + dashDistance },
+        [Direction.UP]: { x: this.slime.x, y: this.slime.y - dashDistance },
+        [Direction.LEFT]: { x: this.slime.x - dashDistance, y: this.slime.y },
+        [Direction.RIGHT]: { x: this.slime.x + dashDistance, y: this.slime.y }
+      };
+      const pos = positions[this.slimeFacingDirection] || { x: this.slime.x, y: this.slime.y };
+      this.slime2AttackHitbox.setPosition(pos.x, pos.y);
+    } else if (this.slimeType === 3 && this.slime3AttackHitbox) {
+      // Slime3: Area burn centered on slime (smaller radius already set in creation)
+      this.slime3AttackHitbox.setPosition(this.slime.x, this.slime.y);
     }
   }
 
@@ -1492,11 +1650,17 @@ class PrototypeGame extends Phaser.Scene {
     
     this.slime.anims.play(attackAnim);
     
+    // Enable the appropriate attack hitbox based on slime type
+    this.enableSlimeAttackHitbox();
+    
     // Return to idle after attack animation completes
     this.slime.once('animationcomplete', () => {
       this.slimeState = SlimeState.IDLE;
       const idleAnim = `slime${this.slimeType}-idle-${directionStr}`;
       this.slime.anims.play(idleAnim);
+      
+      // Disable all attack hitboxes when attack is done
+      this.disableAllSlimeAttackHitboxes();
     });
   }
 
