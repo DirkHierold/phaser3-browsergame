@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import GameScene from "./scenes/GameScene";
+import { registerServiceWorker } from '../../shared/utils/registerServiceWorker';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.CANVAS,
@@ -23,5 +24,8 @@ const config: Phaser.Types.Core.GameConfig = {
     },
     scene: [GameScene],
 };
+
+// Register service worker for offline support
+registerServiceWorker();
 
 new Phaser.Game(config);

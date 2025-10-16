@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import path from 'path';
+import { VitePWA } from 'vite-plugin-pwa';
 
 const phasermsg = () => {
     return {
@@ -52,6 +53,69 @@ export default defineConfig({
         port: 8080
     },
     plugins: [
-        phasermsg()
+        phasermsg(),
+        VitePWA({
+            registerType: 'autoUpdate',
+            includeAssets: ['**/*.png', '**/*.jpg', '**/*.svg', '**/*.mp3', '**/*.ogg', '**/*.json'],
+            manifest: {
+                name: 'Phaser 3 Game Collection',
+                short_name: 'Games',
+                description: 'Collection of Phaser 3 mini-games by Dirk Hierold',
+                theme_color: '#ffffff',
+                background_color: '#ffffff',
+                display: 'fullscreen',
+                icons: [
+                    {
+                        src: '/images/hero.png',
+                        sizes: '192x192',
+                        type: 'image/png'
+                    },
+                    {
+                        src: '/images/hero.png',
+                        sizes: '256x256',
+                        type: 'image/png'
+                    },
+                    {
+                        src: '/images/hero.png',
+                        sizes: '512x512',
+                        type: 'image/png'
+                    }
+                ]
+            },
+            workbox: {
+                globPatterns: ['**/*.{js,css,html,png,jpg,svg,mp3,ogg,json}'],
+                maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB - allow larger audio files
+                runtimeCaching: [
+                    {
+                        urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'google-fonts-cache',
+                            expiration: {
+                                maxEntries: 10,
+                                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
+                    },
+                    {
+                        urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'gstatic-fonts-cache',
+                            expiration: {
+                                maxEntries: 10,
+                                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
+                    }
+                ]
+            }
+        })
     ]
 });

@@ -4,6 +4,7 @@ import { Button } from "../../shared/utils/Button";
 import Player from '../../shared/Player';
 import Obstacles from '../../shared/Obstacles';
 import AudioKeys from "../../shared/utils/consts/AudioKeys";
+import { registerServiceWorker } from '../../shared/utils/registerServiceWorker';
 
 export default class GameScene extends Phaser.Scene {
     private player!: Player;
@@ -323,5 +324,8 @@ const config: Phaser.Types.Core.GameConfig = {
     },
     scene: GameScene,
 };
+
+// Register service worker for offline support
+registerServiceWorker();
 
 new Phaser.Game(config);

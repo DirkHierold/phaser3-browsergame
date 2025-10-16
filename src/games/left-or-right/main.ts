@@ -3,6 +3,7 @@ import Player from '../../shared/Player';
 import Obstacles from '../../shared/Obstacles';
 import Targets from '../../shared/Targets';
 import { Button } from '../../shared/utils/Button';
+import { registerServiceWorker } from '../../shared/utils/registerServiceWorker';
 
 
 
@@ -243,5 +244,8 @@ const config: Phaser.Types.Core.GameConfig = {
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   scene: LeftOrRightGame,
 };
+
+// Register service worker for offline support
+registerServiceWorker();
 
 new Phaser.Game(config);

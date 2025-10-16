@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import MainMenuScene from "./scenes/MainMenuScene";
 import Preloader from "./scenes/PreloaderScene";
 import GameScene from "./scenes/GameScene";
+import { registerServiceWorker } from '../../shared/utils/registerServiceWorker';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.CANVAS,
@@ -25,6 +26,9 @@ const config: Phaser.Types.Core.GameConfig = {
 
   scene: [Preloader, GameScene, MainMenuScene],
 };
+
+// Register service worker for offline support
+registerServiceWorker();
 
 let game = new Phaser.Game(config);
 

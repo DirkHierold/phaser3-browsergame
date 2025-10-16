@@ -3,6 +3,7 @@ import { InputController } from '../../shared/InputController';
 import { OrientationManager } from '../../shared/OrientationManager';
 import { ResizeManager } from '../../shared/ResizeManager';
 import { SoundManager } from '../../shared/SoundManager';
+import { registerServiceWorker } from '../../shared/utils/registerServiceWorker';
 
 import LoadingScene from './LoadingScene';
 import GameOverScene from './GameOverScene';
@@ -1708,5 +1709,8 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   scene: [LoadingScene, PrototypeGame, GameOverScene],
 };
+
+// Register service worker for offline support
+registerServiceWorker();
 
 new Phaser.Game(config);
