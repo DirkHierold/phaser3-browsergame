@@ -4,16 +4,15 @@ import { OrientationManager } from '../../shared/OrientationManager';
 import { ResizeManager } from '../../shared/ResizeManager';
 import { SoundManager } from '../../shared/SoundManager';
 import { registerServiceWorker } from '../../shared/utils/registerServiceWorker';
-
-import LoadingScene from './LoadingScene';
-import GameOverScene from './GameOverScene';
+import {
+  TapIndicator,
+  SpeedLines
+} from './VisualEffects';
 
 enum PlayerState {
   IDLE = 'idle',
   WALKING = 'walking',
   RUNNING = 'running',
-  WALKING_ATTACK = 'walking-attack',
-  RUNNING_ATTACK = 'running-attack',
   ATTACKING = 'attacking',
   HURT = 'hurt',
   DEATH = 'death'
@@ -39,17 +38,13 @@ class PrototypeGame extends Phaser.Scene {
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   inputController: InputController;
 
-  currentDirection: string = '';
+  // Tap-to-Move properties
+  movementTarget?: { x: number; y: number };
+  arrivalThreshold: number = 10; // pixels
   playerSpeed: number = 2;
   runSpeed: number = 3;
   isRunning: boolean = false;
-  
-  // Continuously tracked movement state for reliable mobile attacks
-  currentMovementState: { isMoving: boolean; isRunning: boolean } = { isMoving: false, isRunning: false };
-  
-  // Double-tap detection for desktop
-  lastKeyPress: { [key: string]: number } = {};
-  doubleTapThreshold: number = 300; // milliseconds
+
   worldBorder: Phaser.GameObjects.Graphics;
   slime: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   slimeType: number = 1;
@@ -75,8 +70,61 @@ class PrototypeGame extends Phaser.Scene {
   maxHealth: number = 3;
   currentHealth: number = 3;
 
+  // Visual Effects
+  speedLines?: SpeedLines;
+
+  // Overlay text elements
+  titleText?: Phaser.GameObjects.Text;
+  gameOverText?: Phaser.GameObjects.Text;
+
   preload() {
-    // Assets are now loaded in LoadingScene
+    // Load all assets directly in PrototypeGame
+    this.load.image('background', '/images/background-template-2776x1440.png');
+    this.load.image('base', '/images/base.png');
+    this.load.image('thumb', '/images/thumb.png');
+    this.load.spritesheet('playerIdle', '/images/Swordsman_lvl1_Idle_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
+    this.load.spritesheet('playerWalk', '/images/Swordsman_lvl1_Walk_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('playerAttack', '/images/Swordsman_lvl1_attack_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 32 });
+    this.load.spritesheet('playerHurt', '/images/Swordsman_lvl1_Hurt_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 20 });
+    this.load.spritesheet('playerDeath', '/images/Swordsman_lvl1_Death_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 28 });
+    this.load.spritesheet('playerWalkAttack', '/images/Swordsman_lvl1_Walk_Attack_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('playerRun', '/images/Swordsman_lvl1_Run_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 32 });
+    this.load.spritesheet('playerRunAttack', '/images/Swordsman_lvl1_Run_Attack_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 32 });
+
+    // Slime 1 spritesheets
+    this.load.spritesheet('slime1Idle', '/images/Slime1_Idle_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime1Walk', '/images/Slime1_Walk_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime1Attack', '/images/slime1Attack.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
+    this.load.spritesheet('slime1Hurt', '/images/Slime1_Hurt_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 19 });
+    this.load.spritesheet('slime1Death', '/images/Slime1_Death_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
+
+    // Slime 2 spritesheets
+    this.load.spritesheet('slime2Idle', '/images/Slime2_Idle_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime2Walk', '/images/Slime2_Walk_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime2Attack', '/images/slime2Attack.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 44 });
+    this.load.spritesheet('slime2Hurt', '/images/Slime2_Hurt_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 19 });
+    this.load.spritesheet('slime2Death', '/images/Slime2_Death_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
+
+    // Slime 3 spritesheets
+    this.load.spritesheet('slime3Idle', '/images/Slime3_Idle_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime3Walk', '/images/Slime3_Walk_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 24 });
+    this.load.spritesheet('slime3Attack', '/images/slime3Attack.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 36 });
+    this.load.spritesheet('slime3Hurt', '/images/Slime3_Hurt_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 19 });
+    this.load.spritesheet('slime3Death', '/images/Slime3_Death_full.png', { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 40 });
+
+    // Audio
+    this.load.audio('swing1', '/audios/swing.wav');
+    this.load.audio('swing2', '/audios/swing2.wav');
+    this.load.audio('swing3', '/audios/swing3.wav');
+    this.load.audio('blood', '/audios/blood.wav');
+    this.load.audio('footstep', '/audios/footstep.ogg');
+    this.load.audio('backgroundMusic', '/audios/Magic Elderwood Forest - Overworld.mp3');
+    this.load.audio('lose', '/audios/Lose vol. 1.wav');
+
+    // UI
+    this.load.image('heartFull', '/images/hud_heartFull.png');
+    this.load.image('heartHalf', '/images/hud_heartHalf.png');
+    this.load.image('heartEmpty', '/images/hud_heartEmpty.png');
   }
 
   create() {
@@ -93,25 +141,97 @@ class PrototypeGame extends Phaser.Scene {
     this.createSlimeAttackHitboxes();
     this.createHearts();
     this.inputController = new InputController(this);
-    this.inputController.initialize((isMoving, isRunning) => {
-      if (isRunning) {
-        // Player is running - perform running attack
-        this.performRunningAttack();
-      } else if (isMoving) {
-        // Player is walking - perform walking attack  
-        this.performWalkingAttack();
-      } else {
-        // Player is standing still - perform standing attack
+    this.inputController.initialize(
+      (isMoving, isRunning) => {
+        // Normal attack callback
         this.performAttack();
       }
-    });
+    );
     this.createWorldBorder();
     this.setupCollisions();
+    this.setupVisualEffects();
+    this.showTitleOverlay();
+
+    // Initialize background music
+    const music = this.sound.add('backgroundMusic');
+    SoundManager.getInstance().setBackgroundMusic(music);
 
     OrientationManager.getInstance().updateScene(this);
     ResizeManager.getInstance().initialize(this, this.handleResize.bind(this));
-    
-    
+  }
+
+  showTitleOverlay(): void {
+    // Create title text overlay
+    this.titleText = this.add.text(
+      this.scale.width / 2,
+      this.scale.height / 2,
+      'Prototype Adventure',
+      {
+        fontSize: '64px',
+        fontFamily: 'serif',
+        fontWeight: 'bold',
+        color: '#FFD700',
+        stroke: '#000000',
+        strokeThickness: 6
+      }
+    );
+    this.titleText.setOrigin(0.5);
+    this.titleText.setDepth(10000);
+    this.titleText.setScrollFactor(0);
+
+    // Fade out after 2 seconds
+    this.tweens.add({
+      targets: this.titleText,
+      alpha: 0,
+      duration: 1000,
+      delay: 2000,
+      onComplete: () => {
+        this.titleText?.destroy();
+      }
+    });
+  }
+
+  showGameOverOverlay(): void {
+    // Create game over text overlay
+    this.gameOverText = this.add.text(
+      this.scale.width / 2,
+      this.scale.height / 2,
+      'Game Over',
+      {
+        fontSize: '72px',
+        fontFamily: 'serif',
+        fontWeight: 'bold',
+        color: '#FF0000',
+        stroke: '#000000',
+        strokeThickness: 8
+      }
+    );
+    this.gameOverText.setOrigin(0.5);
+    this.gameOverText.setDepth(10000);
+    this.gameOverText.setScrollFactor(0);
+    this.gameOverText.setAlpha(0);
+
+    // Fade in effect
+    this.tweens.add({
+      targets: this.gameOverText,
+      alpha: 1,
+      duration: 500,
+      ease: 'Power2'
+    });
+  }
+
+  setupVisualEffects(): void {
+    // Create speed lines
+    this.speedLines = new SpeedLines(this, this.player);
+
+    // Event listeners for visual effects
+    this.events.on('tap-ground', (position: { x: number; y: number }, movementType: string) => {
+      new TapIndicator(this, position.x, position.y, movementType as 'walk' | 'run');
+    });
+
+    this.events.on('tap-slime', (slime: Phaser.GameObjects.Sprite) => {
+      new TapIndicator(this, slime.x, slime.y, 'attack');
+    });
   }
 
   handleResize() {
@@ -1077,25 +1197,34 @@ class PrototypeGame extends Phaser.Scene {
     this.updateSlimeAttackHitboxes();
     this.updateSlimeBehavior(time, delta);
     this.updateDepthSorting();
+    this.updateVisualEffects(delta);
+  }
+
+  updateVisualEffects(delta: number): void {
+    // Handle speed lines
+    if (this.playerState === PlayerState.RUNNING) {
+      this.speedLines?.start();
+    } else {
+      this.speedLines?.stop();
+    }
   }
 
   updateInputState() {
-    const inputState = this.inputController.getInputState();
-    this.currentDirection = inputState.direction;
-    this.isRunning = inputState.isRunning;
-    
-    // Continuously track movement state for reliable mobile attacks
-    this.currentMovementState = {
-      isMoving: inputState.isMoving,
-      isRunning: inputState.isRunning
-    };
+    // Check for movement command from tap-to-move
+    const movementCommand = this.inputController.getMovementCommand();
 
-    if (this.currentDirection !== '' && !this.footstepSound.isPlaying && this.currentHealth > 0) {
-      // Adjust footstep volume and rate based on running
+    if (movementCommand) {
+      this.movementTarget = movementCommand.targetPosition;
+      this.isRunning = movementCommand.movementType === 'run';
+    }
+
+    // Footstep sounds
+    const isMoving = this.playerState === PlayerState.WALKING || this.playerState === PlayerState.RUNNING;
+    if (isMoving && !this.footstepSound.isPlaying && this.currentHealth > 0) {
       const volume = this.isRunning ? 0.3 : 0.2;
       const rate = this.isRunning ? 1.3 : 1.0;
       this.footstepSound.play({ loop: true, volume, rate });
-    } else if ((this.currentDirection === '' || this.currentHealth === 0) && this.footstepSound.isPlaying) {
+    } else if (!isMoving && this.footstepSound.isPlaying) {
       this.footstepSound.stop();
     }
   }
@@ -1106,37 +1235,20 @@ class PrototypeGame extends Phaser.Scene {
       return;
     }
 
-    // Don't change state if animation is playing (except for transitions)
+    // Don't change state if animation is playing (priority states)
     if (this.player.anims.isPlaying &&
       (this.playerState === PlayerState.ATTACKING ||
-        this.playerState === PlayerState.HURT ||
-        this.playerState === PlayerState.WALKING_ATTACK ||
-        this.playerState === PlayerState.RUNNING_ATTACK)) {
-
-      // Allow transition from ATTACKING to movement attacks
-      if (this.playerState === PlayerState.ATTACKING && this.currentDirection !== '') {
-        const newState = this.isRunning ? PlayerState.RUNNING_ATTACK : PlayerState.WALKING_ATTACK;
-        const animKey = this.isRunning ? 'running-attack' : 'walking-attack';
-        
-        this.playerState = newState;
-        this.facingDirection = this.getDirectionFromInput(this.currentDirection);
-        const currentFrame = this.player.anims.currentFrame?.index || 0;
-        this.player.anims.play(`${animKey}-${this.facingDirection}`);
-        if (this.player.anims.currentAnim?.frames) {
-          this.player.anims.setCurrentFrame(this.player.anims.currentAnim.frames[Math.min(currentFrame, 5)]);
-        }
-      }
+        this.playerState === PlayerState.HURT)) {
       return;
     }
 
-    // Normal state transitions when no priority animation is playing
-    if (this.currentDirection !== '') {
+    // Normal state transitions based on movement target
+    if (this.movementTarget) {
       if (this.isRunning) {
         this.playerState = PlayerState.RUNNING;
       } else {
         this.playerState = PlayerState.WALKING;
       }
-      this.facingDirection = this.getDirectionFromInput(this.currentDirection);
     } else {
       this.playerState = PlayerState.IDLE;
     }
@@ -1159,30 +1271,53 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   handleMovement() {
-    if (this.playerState === PlayerState.DEATH || 
-        (this.playerState !== PlayerState.WALKING && 
-         this.playerState !== PlayerState.RUNNING &&
-         this.playerState !== PlayerState.WALKING_ATTACK &&
-         this.playerState !== PlayerState.RUNNING_ATTACK)) return;
+    if (this.playerState === PlayerState.DEATH) return;
 
-    // Determine current speed based on running state
-    const currentSpeed = this.isRunning ? this.runSpeed : this.playerSpeed;
-    
-    const movements: Record<string, { x: number; y: number }> = {
-      'up': { x: 0, y: -currentSpeed },
-      'down': { x: 0, y: currentSpeed },
-      'left': { x: -currentSpeed, y: 0 },
-      'right': { x: currentSpeed, y: 0 },
-      'upright': { x: currentSpeed, y: -currentSpeed },
-      'downright': { x: currentSpeed, y: currentSpeed },
-      'downleft': { x: -currentSpeed, y: currentSpeed },
-      'upleft': { x: -currentSpeed, y: -currentSpeed }
-    };
+    // Check if we have a movement target
+    if (!this.movementTarget) return;
 
-    const movement = movements[this.currentDirection];
-    if (movement) {
-      this.player.x += movement.x;
-      this.player.y += movement.y;
+    const dx = this.movementTarget.x - this.player.x;
+    const dy = this.movementTarget.y - this.player.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Check if arrived at target
+    if (distance <= this.arrivalThreshold) {
+      this.player.x = this.movementTarget.x;
+      this.player.y = this.movementTarget.y;
+
+      // Get arrival callback if exists
+      const movementCommand = this.inputController.getMovementCommand();
+      const arrivalCallback = movementCommand?.onArrival;
+
+      // Clear movement
+      this.movementTarget = undefined;
+      this.inputController.clearMovementCommand();
+
+      // Execute arrival callback (e.g., auto-attack)
+      if (arrivalCallback) {
+        arrivalCallback();
+      }
+
+      return;
+    }
+
+    // Move towards target
+    const speed = this.isRunning ? this.runSpeed : this.playerSpeed;
+    const moveX = (dx / distance) * speed;
+    const moveY = (dy / distance) * speed;
+
+    this.player.x += moveX;
+    this.player.y += moveY;
+
+    // Update facing direction based on movement
+    this.updateFacingDirectionFromMovement(dx, dy);
+  }
+
+  private updateFacingDirectionFromMovement(dx: number, dy: number): void {
+    if (Math.abs(dx) > Math.abs(dy)) {
+      this.facingDirection = dx > 0 ? Direction.RIGHT : Direction.LEFT;
+    } else {
+      this.facingDirection = dy > 0 ? Direction.DOWN : Direction.UP;
     }
   }
 
@@ -1191,13 +1326,11 @@ class PrototypeGame extends Phaser.Scene {
     if (this.isDeadAndFrozen) {
       return;
     }
-    
+
     // Only update animation if no priority animation is playing
     if (this.player.anims.isPlaying &&
       (this.playerState === PlayerState.ATTACKING ||
         this.playerState === PlayerState.HURT ||
-        this.playerState === PlayerState.WALKING_ATTACK ||
-        this.playerState === PlayerState.RUNNING_ATTACK ||
         this.playerState === PlayerState.DEATH)) {
       return;
     }
@@ -1317,7 +1450,8 @@ class PrototypeGame extends Phaser.Scene {
 
     // Player body collision with slime body (passive collision)
     this.physics.add.overlap(this.player, this.slime, () => {
-      if (this.playerState !== PlayerState.ATTACKING && this.playerState !== PlayerState.HURT) {
+      if (this.playerState !== PlayerState.ATTACKING &&
+          this.playerState !== PlayerState.HURT) {
         this.hurtPlayer();
       }
     });
@@ -1413,9 +1547,7 @@ class PrototypeGame extends Phaser.Scene {
     const body = this.swordHitbox.body as Phaser.Physics.Arcade.Body;
     const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
 
-    if (this.playerState === PlayerState.WALKING_ATTACK || 
-        this.playerState === PlayerState.RUNNING_ATTACK || 
-        this.playerState === PlayerState.ATTACKING) {
+    if (this.playerState === PlayerState.ATTACKING) {
       body.enable = true;
       const positions = {
         [Direction.DOWN]: { x: this.player.x, y: this.player.y + 23 * baseScale },
@@ -1498,44 +1630,16 @@ class PrototypeGame extends Phaser.Scene {
     randomSound.play();
   }
 
-  performRunningAttack() {
-    if (this.playerState === PlayerState.ATTACKING || this.playerState === PlayerState.HURT) return;
-
-    this.playerState = PlayerState.RUNNING_ATTACK;
-    const attackAnim = `running-attack-${this.facingDirection}`;
-    this.player.anims.play(attackAnim);
-    this.playRandomSwingSound();
-
-    this.player.once('animationcomplete', () => {
-      this.playerState = PlayerState.RUNNING;
-    });
-
-    // Enable sword hitbox
-    if (this.swordHitbox?.body) {
-      (this.swordHitbox.body as Phaser.Physics.Arcade.Body).enable = true;
-    }
-  }
-
-  performWalkingAttack() {
-    if (this.playerState === PlayerState.ATTACKING || this.playerState === PlayerState.HURT) return;
-
-    this.playerState = PlayerState.WALKING_ATTACK;
-    const attackAnim = `walking-attack-${this.facingDirection}`;
-    this.player.anims.play(attackAnim);
-    this.playRandomSwingSound();
-
-    this.player.once('animationcomplete', () => {
-      this.playerState = PlayerState.WALKING;
-    });
-
-    // Enable sword hitbox
-    if (this.swordHitbox?.body) {
-      (this.swordHitbox.body as Phaser.Physics.Arcade.Body).enable = true;
-    }
-  }
-
   performAttack() {
     if (this.playerState === PlayerState.ATTACKING || this.playerState === PlayerState.HURT) return;
+
+    // Turn to face locked slime if exists
+    const lockedSlime = this.inputController.getLockedSlime();
+    if (lockedSlime) {
+      const dx = lockedSlime.x - this.player.x;
+      const dy = lockedSlime.y - this.player.y;
+      this.updateFacingDirectionFromMovement(dx, dy);
+    }
 
     this.playerState = PlayerState.ATTACKING;
     const attackAnim = `attack-${this.facingDirection}`;
@@ -1596,7 +1700,7 @@ class PrototypeGame extends Phaser.Scene {
         this.time.delayedCall(animationDuration, () => {
           // Set frozen flag to prevent any further animation updates
           this.isDeadAndFrozen = true;
-          
+
           // Get death animation and set to last frame
           const deathAnim = this.anims.get(deathAnimKey);
           if (deathAnim && deathAnim.frames.length > 0) {
@@ -1604,8 +1708,14 @@ class PrototypeGame extends Phaser.Scene {
             this.player.anims.stop();
             this.player.setFrame(lastFrame.frame);
           }
-          this.scene.launch('GameOverScene');
-          this.scene.pause();
+
+          // Show "Game Over" text overlay
+          this.showGameOverOverlay();
+
+          // Auto-restart after 3 seconds
+          this.time.delayedCall(3000, () => {
+            this.scene.restart();
+          });
         });
       }
     }
@@ -1707,7 +1817,7 @@ const config: Phaser.Types.Core.GameConfig = {
     width: '100%',
     height: '100%'
   },
-  scene: [LoadingScene, PrototypeGame, GameOverScene],
+  scene: [PrototypeGame],
 };
 
 // Register service worker for offline support
