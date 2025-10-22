@@ -40,9 +40,9 @@ class PrototypeGame extends Phaser.Scene {
 
   // Tap-to-Move properties
   movementTarget?: { x: number; y: number };
-  arrivalThreshold: number = 10; // pixels
+  arrivalThreshold: number = 10; // Will be calculated relative to screen size
   playerSpeed: number = 2;
-  runSpeed: number = 3;
+  runSpeed: number = 8; // Drastically increased for snappy, dynamic movement
   isRunning: boolean = false;
 
   worldBorder: Phaser.GameObjects.Graphics;
@@ -133,6 +133,11 @@ class PrototypeGame extends Phaser.Scene {
     this.isDeadAndFrozen = false;
     this.physics.world.bounds.width = this.scale.width;
     this.physics.world.bounds.height = this.scale.height;
+
+    // Calculate arrival threshold relative to screen size
+    const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
+    this.arrivalThreshold = 10 * baseScale;
+
     this.createBackground();
     this.createAnimations();
     this.createSounds();
@@ -156,7 +161,7 @@ class PrototypeGame extends Phaser.Scene {
     const music = this.sound.add('backgroundMusic');
     SoundManager.getInstance().setBackgroundMusic(music);
 
-    OrientationManager.getInstance().updateScene(this);
+    // Don't use OrientationManager - no landscape warnings
     ResizeManager.getInstance().initialize(this, this.handleResize.bind(this));
   }
 
@@ -1350,16 +1355,18 @@ class PrototypeGame extends Phaser.Scene {
     const y = Phaser.Math.Between(100, this.scale.height - 100);
     const directions = ['down', 'up', 'left', 'right'];
     const randomDirection = Phaser.Utils.Array.GetRandom(directions);
-    
+
     // Randomly choose slime type (1, 2, or 3)
     this.slimeType = Phaser.Math.Between(1, 3);
 
     const baseScale = Math.min(this.scale.width / 800, this.scale.height / 600);
 
     if (this.slime) {
+      // CRITICAL: Disable all attack hitboxes before destroying old slime
+      this.disableAllSlimeAttackHitboxes();
       this.slime.destroy();
     }
-    
+
     // Reset slime state
     this.slimeState = SlimeState.IDLE;
     this.slimeFacingDirection = this.getDirectionFromString(randomDirection);

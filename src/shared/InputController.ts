@@ -192,16 +192,16 @@ export class InputController {
         this.onAttackCallback(false, false);
       }
     } else {
-      // Out of range - calculate position just outside attack range
-      // Move towards slime but stop at attack range distance
+      // Out of range - calculate position at safe distance from slime
       const dx = target.slime.x - player.x;
       const dy = target.slime.y - player.y;
       const angle = Math.atan2(dy, dx);
 
-      // Calculate target position: attack range minus larger buffer to prevent accidental collision
-      const stopDistance = attackRange - 15; // Increased from 5px to 15px for safer distance
-      const targetX = player.x + Math.cos(angle) * (distance - stopDistance);
-      const targetY = player.y + Math.sin(angle) * (distance - stopDistance);
+      // Calculate target position: stand at 70% of attack range from slime center
+      // This ensures we're safely in range but not too close
+      const safeDistance = attackRange * 0.7;
+      const targetX = target.slime.x - Math.cos(angle) * safeDistance;
+      const targetY = target.slime.y - Math.sin(angle) * safeDistance;
 
       // Always run
       const movementType = 'run';
