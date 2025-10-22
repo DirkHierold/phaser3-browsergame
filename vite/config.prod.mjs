@@ -54,37 +54,50 @@ export default defineConfig({
     },
     plugins: [
         phasermsg(),
-        VitePWA({
+VitePWA({
             registerType: 'autoUpdate',
             includeAssets: ['**/*.png', '**/*.jpg', '**/*.svg', '**/*.mp3', '**/*.ogg', '**/*.json'],
+            devOptions: {
+                enabled: false
+            },
             manifest: {
-                name: 'Phaser 3 Game Collection',
+                name: 'Games',
                 short_name: 'Games',
-                description: 'Collection of Phaser 3 mini-games by Dirk Hierold',
+                description: 'Adfree Phaser3 PWA Free-To-Play Browsergames',
                 theme_color: '#ffffff',
                 background_color: '#ffffff',
-                display: 'fullscreen',
+                display: 'standalone',
+                scope: '/',
+                start_url: '/',
+                orientation: 'any',
                 icons: [
                     {
                         src: '/images/hero.png',
                         sizes: '192x192',
-                        type: 'image/png'
+                        type: 'image/png',
+                        purpose: 'any maskable'
                     },
                     {
                         src: '/images/hero.png',
                         sizes: '256x256',
-                        type: 'image/png'
+                        type: 'image/png',
+                        purpose: 'any maskable'
                     },
                     {
                         src: '/images/hero.png',
                         sizes: '512x512',
-                        type: 'image/png'
+                        type: 'image/png',
+                        purpose: 'any maskable'
                     }
                 ]
             },
             workbox: {
-                globPatterns: ['**/*.{js,css,html,png,jpg,svg,mp3,ogg,json}'],
-                maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB - allow larger audio files
+                globPatterns: ['**/*.{js,css,html,png,jpg,jpeg,svg,gif,mp3,ogg,wav,json,woff,woff2,ttf}'],
+                globIgnores: ['**/node_modules/**/*'],
+                maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+                cleanupOutdatedCaches: true,
+                clientsClaim: true,
+                skipWaiting: true,
                 runtimeCaching: [
                     {
                         urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -93,7 +106,7 @@ export default defineConfig({
                             cacheName: 'google-fonts-cache',
                             expiration: {
                                 maxEntries: 10,
-                                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+                                maxAgeSeconds: 60 * 60 * 24 * 365
                             },
                             cacheableResponse: {
                                 statuses: [0, 200]
@@ -107,10 +120,32 @@ export default defineConfig({
                             cacheName: 'gstatic-fonts-cache',
                             expiration: {
                                 maxEntries: 10,
-                                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+                                maxAgeSeconds: 60 * 60 * 24 * 365
                             },
                             cacheableResponse: {
                                 statuses: [0, 200]
+                            }
+                        }
+                    },
+                    {
+                        urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'images-cache',
+                            expiration: {
+                                maxEntries: 100,
+                                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                            }
+                        }
+                    },
+                    {
+                        urlPattern: /\.(?:mp3|ogg|wav)$/,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'audio-cache',
+                            expiration: {
+                                maxEntries: 50,
+                                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
                             }
                         }
                     }

@@ -1,16 +1,31 @@
 {
-  "name": "Dirk Hierold",
-  "short_name": "Dirk Hierold",
-  "description": "Adfree Phaser3 PWA Free-To-Play Browsergames by Dirk Hierold",
-  "start_url": "/index.html",
-  "background_color": "white",
-  "theme_color": "white",
-  "display": "fullscreen",
+  "name": "Games",
+  "short_name": "Games",
+  "description": "Adfree Phaser3 PWA Free-To-Play Browsergames",
+  "start_url": "/",
+  "scope": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "any",
   "icons": [
     {
       "src": "/images/hero.png",
-      "sizes": "64x64",
-      "type": "image/png"
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/hero.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/hero.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
