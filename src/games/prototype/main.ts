@@ -56,6 +56,7 @@ class PrototypeGame extends Phaser.Scene {
   slime1AttackHitbox: Phaser.GameObjects.Zone; // Upper half-circle
   slime2AttackHitbox: Phaser.GameObjects.Zone; // Forward dash circular
   slime3AttackHitbox: Phaser.GameObjects.Zone; // Area burn circular
+  playerSlimeCollider?: Phaser.Physics.Arcade.Collider; // Track player-slime body collision
   swingSounds: Phaser.Sound.BaseSound[];
   bloodSound: Phaser.Sound.BaseSound;
   footstepSound: Phaser.Sound.BaseSound;
@@ -128,9 +129,14 @@ class PrototypeGame extends Phaser.Scene {
   }
 
   create() {
+    // Reset all state variables for clean restart
     this.currentHealth = this.maxHealth;
     this.hearts = [];
     this.isDeadAndFrozen = false;
+    this.movementTarget = undefined;
+    this.isRunning = false;
+    this.playerState = PlayerState.IDLE;
+    this.facingDirection = Direction.DOWN;
     this.physics.world.bounds.width = this.scale.width;
     this.physics.world.bounds.height = this.scale.height;
 
@@ -145,6 +151,11 @@ class PrototypeGame extends Phaser.Scene {
     this.createSlime();
     this.createSlimeAttackHitboxes();
     this.createHearts();
+
+    // Clean up old input controller if exists
+    if (this.inputController) {
+      this.inputController.destroy();
+    }
     this.inputController = new InputController(this);
     this.inputController.initialize(
       (isMoving, isRunning) => {
@@ -152,6 +163,7 @@ class PrototypeGame extends Phaser.Scene {
         this.performAttack();
       }
     );
+
     this.createWorldBorder();
     this.setupCollisions();
     this.setupVisualEffects();
@@ -1279,11 +1291,20 @@ class PrototypeGame extends Phaser.Scene {
     if (this.playerState === PlayerState.DEATH) return;
 
     // Check if we have a movement target
-    if (!this.movementTarget) return;
+    if (!this.movementTarget) {
+      return;
+    }
 
     const dx = this.movementTarget.x - this.player.x;
     const dy = this.movementTarget.y - this.player.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Check if this is an attack movement (has onArrival callback)
+    const movementCommand = this.inputController.getMovementCommand();
+    const hasAttackCallback = !!movementCommand?.onArrival;
+
+    // Collision is ALWAYS enabled - the 85% safe distance in InputController
+    // ensures player stops before colliding with slime body
 
     // Check if arrived at target
     if (distance <= this.arrivalThreshold) {
@@ -1291,7 +1312,6 @@ class PrototypeGame extends Phaser.Scene {
       this.player.y = this.movementTarget.y;
 
       // Get arrival callback if exists
-      const movementCommand = this.inputController.getMovementCommand();
       const arrivalCallback = movementCommand?.onArrival;
 
       // Clear movement
@@ -1456,7 +1476,8 @@ class PrototypeGame extends Phaser.Scene {
     });
 
     // Player body collision with slime body (passive collision)
-    this.physics.add.overlap(this.player, this.slime, () => {
+    // Store the collider reference so we can enable/disable it during attack approach
+    this.playerSlimeCollider = this.physics.add.overlap(this.player, this.slime, () => {
       if (this.playerState !== PlayerState.ATTACKING &&
           this.playerState !== PlayerState.HURT) {
         this.hurtPlayer();
@@ -1540,6 +1561,14 @@ class PrototypeGame extends Phaser.Scene {
     const currentAnim = this.slime.anims.currentAnim?.key || `slime${this.slimeType}-idle-down`;
     if (currentAnim.includes('death')) return;
 
+    // CRITICAL: Immediately disable all attack hitboxes and set slime to IDLE state
+    // This prevents ghost hitboxes from hurting the player during death animation
+    this.disableAllSlimeAttackHitboxes();
+    this.slimeState = SlimeState.IDLE;
+
+    // Move all attack hitboxes off-screen to hide them in debug mode
+    this.hideAllSlimeAttackHitboxes();
+
     const direction = currentAnim.split('-')[2] || 'down';
     this.slime.anims.play(`slime${this.slimeType}-death-${direction}`);
     this.bloodSound.play({ volume: 0.3 });
@@ -1588,6 +1617,22 @@ class PrototypeGame extends Phaser.Scene {
     }
     if (this.slime3AttackHitbox?.body) {
       (this.slime3AttackHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
+    }
+  }
+
+  hideAllSlimeAttackHitboxes() {
+    // Move hitboxes far off-screen to hide them in debug mode
+    const offscreenX = -10000;
+    const offscreenY = -10000;
+
+    if (this.slime1AttackHitbox) {
+      this.slime1AttackHitbox.setPosition(offscreenX, offscreenY);
+    }
+    if (this.slime2AttackHitbox) {
+      this.slime2AttackHitbox.setPosition(offscreenX, offscreenY);
+    }
+    if (this.slime3AttackHitbox) {
+      this.slime3AttackHitbox.setPosition(offscreenX, offscreenY);
     }
   }
 
@@ -1817,7 +1862,7 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   physics: {
     default: 'arcade',
-    arcade: { gravity: { x: 0, y: 0 }, debug: false }
+    arcade: { gravity: { x: 0, y: 0 }, debug: true }
   },
   scale: {
     mode: Phaser.Scale.RESIZE,

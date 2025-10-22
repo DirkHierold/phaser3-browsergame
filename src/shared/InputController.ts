@@ -193,15 +193,33 @@ export class InputController {
       }
     } else {
       // Out of range - calculate position at safe distance from slime
-      const dx = target.slime.x - player.x;
-      const dy = target.slime.y - player.y;
+      // IMPORTANT: Calculate angle using body centers, but return sprite position
+      // Slime body has offset (26, 26) with radius 7
+      // Player body has offset (24, 32) with radius 8
+      const slimeBody = target.slime.body as Phaser.Physics.Arcade.Body;
+      const playerBody = player.body as Phaser.Physics.Arcade.Body;
+
+      // Calculate body centers for accurate angle
+      const slimeBodyX = target.slime.x + slimeBody.offset.x + slimeBody.halfWidth;
+      const slimeBodyY = target.slime.y + slimeBody.offset.y + slimeBody.halfHeight;
+      const playerBodyX = player.x + playerBody.offset.x + playerBody.halfWidth;
+      const playerBodyY = player.y + playerBody.offset.y + playerBody.halfHeight;
+
+      const dx = slimeBodyX - playerBodyX;
+      const dy = slimeBodyY - playerBodyY;
       const angle = Math.atan2(dy, dx);
 
-      // Calculate target position: stand at 70% of attack range from slime center
-      // This ensures we're safely in range but not too close
-      const safeDistance = attackRange * 0.7;
-      const targetX = target.slime.x - Math.cos(angle) * safeDistance;
-      const targetY = target.slime.y - Math.sin(angle) * safeDistance;
+      // Calculate target SPRITE position: Stop at 85% of attack range from slime BODY center
+      // At 60px range: 85% = 51px from body center
+      // With body radii of ~15px combined, this leaves ~36px clearance - much safer
+      const safeDistance = attackRange * 0.85;
+      const targetBodyX = slimeBodyX - Math.cos(angle) * safeDistance;
+      const targetBodyY = slimeBodyY - Math.sin(angle) * safeDistance;
+
+      // Convert from body center position to sprite position
+      // Target sprite position = body position - body offset
+      const targetX = targetBodyX - playerBody.offset.x - playerBody.halfWidth;
+      const targetY = targetBodyY - playerBody.offset.y - playerBody.halfHeight;
 
       // Always run
       const movementType = 'run';
