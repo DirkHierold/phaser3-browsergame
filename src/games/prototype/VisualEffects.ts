@@ -4,38 +4,47 @@ import Phaser from 'phaser';
  * Tap Indicator - Shows where the user tapped
  */
 export class TapIndicator extends Phaser.GameObjects.Graphics {
-  constructor(scene: Phaser.Scene, x: number, y: number, type: 'walk' | 'run' | 'attack') {
+  private centerX: number;
+  private centerY: number;
+  private color: number;
+  private lineWidth: number;
+  private currentRadius: number;
+  private maxRadius: number;
+
+  constructor(scene: Phaser.Scene, x: number, y: number, type: 'run' | 'attack') {
     super(scene);
 
     const config = {
-      walk: { color: 0x3498db, radius: 30, lineWidth: 3 },
       run: { color: 0xe67e22, radius: 40, lineWidth: 4 },
       attack: { color: 0xe74c3c, radius: 25, lineWidth: 3 }
     }[type];
 
-    this.lineStyle(config.lineWidth, config.color, 1);
-    this.strokeCircle(x, y, config.radius);
-    this.setAlpha(1);
-    this.setDepth(1000);
+    this.centerX = x;
+    this.centerY = y;
+    this.color = config.color;
+    this.lineWidth = config.lineWidth;
+    this.currentRadius = config.radius * 0.5; // Start smaller
+    this.maxRadius = config.radius * 1.3; // End larger
 
+    this.setDepth(1000);
     scene.add.existing(this);
 
-    // Fade out animation
-    scene.tweens.add({
-      targets: this,
-      alpha: 0,
-      duration: 300,
+    // Animate with manual update
+    scene.tweens.addCounter({
+      from: 0,
+      to: 1,
+      duration: 400,
       ease: 'Power2',
-      onComplete: () => this.destroy()
-    });
+      onUpdate: (tween) => {
+        const progress = tween.getValue();
+        this.currentRadius = this.currentRadius + (this.maxRadius - this.currentRadius) * 0.1;
+        const alpha = 1 - progress;
 
-    // Expand animation
-    scene.tweens.add({
-      targets: this,
-      scaleX: 1.2,
-      scaleY: 1.2,
-      duration: 300,
-      ease: 'Power2'
+        this.clear();
+        this.lineStyle(this.lineWidth, this.color, alpha);
+        this.strokeCircle(this.centerX, this.centerY, this.currentRadius);
+      },
+      onComplete: () => this.destroy()
     });
   }
 }

@@ -51,6 +51,12 @@ export class InputController {
   }
 
   private handlePointerDown(pointer: Phaser.Input.Pointer): void {
+    // Don't process input if player is dead
+    // @ts-ignore - accessing custom property from scene
+    if (this.scene.playerState === 'death' || this.scene.isDeadAndFrozen) {
+      return;
+    }
+
     const now = Date.now();
     const isDoubleTap = (now - this.lastTapTime) < this.doubleTapThreshold;
 
@@ -123,7 +129,8 @@ export class InputController {
 
 
   private executeGroundTap(target: TapTarget): void {
-    const movementType = target.isDoubleTap ? 'run' : 'walk';
+    // Always run, no more walking
+    const movementType = 'run';
 
     this.movementCommand = {
       targetPosition: target.position,
@@ -191,13 +198,13 @@ export class InputController {
       const dy = target.slime.y - player.y;
       const angle = Math.atan2(dy, dx);
 
-      // Calculate target position: attack range minus a small buffer
-      const stopDistance = attackRange - 5; // 5px buffer to ensure we're in range
+      // Calculate target position: attack range minus larger buffer to prevent accidental collision
+      const stopDistance = attackRange - 15; // Increased from 5px to 15px for safer distance
       const targetX = player.x + Math.cos(angle) * (distance - stopDistance);
       const targetY = player.y + Math.sin(angle) * (distance - stopDistance);
 
-      // Use run if double-tap, walk if single-tap
-      const movementType = target.isDoubleTap ? 'run' : 'walk';
+      // Always run
+      const movementType = 'run';
 
       this.movementCommand = {
         targetPosition: { x: targetX, y: targetY },

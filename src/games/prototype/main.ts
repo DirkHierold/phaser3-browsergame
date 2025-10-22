@@ -226,7 +226,7 @@ class PrototypeGame extends Phaser.Scene {
 
     // Event listeners for visual effects
     this.events.on('tap-ground', (position: { x: number; y: number }, movementType: string) => {
-      new TapIndicator(this, position.x, position.y, movementType as 'walk' | 'run');
+      new TapIndicator(this, position.x, position.y, 'run');
     });
 
     this.events.on('tap-slime', (slime: Phaser.GameObjects.Sprite) => {
