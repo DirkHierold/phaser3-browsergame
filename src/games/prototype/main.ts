@@ -1862,10 +1862,11 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   physics: {
     default: 'arcade',
-    arcade: { gravity: { x: 0, y: 0 }, debug: true }
+    arcade: { gravity: { x: 0, y: 0 }, debug: false }
   },
   scale: {
     mode: Phaser.Scale.RESIZE,
+    parent: 'game-container',
     width: '100%',
     height: '100%',
     orientation: 'landscape'

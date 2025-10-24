@@ -209,10 +209,10 @@ export class InputController {
       const dy = slimeBodyY - playerBodyY;
       const angle = Math.atan2(dy, dx);
 
-      // Calculate target SPRITE position: Stop at 85% of attack range from slime BODY center
-      // At 60px range: 85% = 51px from body center
-      // With body radii of ~15px combined, this leaves ~36px clearance - much safer
-      const safeDistance = attackRange * 0.85;
+      // Calculate target SPRITE position: Stop at 110% of attack range from slime BODY center
+      // This ensures player stops BEFORE reaching the slime and doesn't collide with it
+      // At 60px range: 110% = 66px from body center - safe distance with no collision
+      const safeDistance = attackRange * 1.1;
       const targetBodyX = slimeBodyX - Math.cos(angle) * safeDistance;
       const targetBodyY = slimeBodyY - Math.sin(angle) * safeDistance;
 
