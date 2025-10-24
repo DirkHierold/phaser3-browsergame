@@ -1845,8 +1845,6 @@ class PrototypeGame extends Phaser.Scene {
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  width: 900,
-  height: 600,
   parent: 'game-container',
   dom: {
     createContainer: true
@@ -1865,11 +1863,11 @@ const config: Phaser.Types.Core.GameConfig = {
     arcade: { gravity: { x: 0, y: 0 }, debug: false }
   },
   scale: {
-    mode: Phaser.Scale.RESIZE,
-    parent: 'game-container',
-    width: '100%',
-    height: '100%',
-    orientation: 'landscape'
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: 1920,
+    height: 1080,
+    orientation: Phaser.Scale.Orientation.LANDSCAPE
   },
   scene: [PrototypeGame],
 };
