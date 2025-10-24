@@ -1843,6 +1843,7 @@ class PrototypeGame extends Phaser.Scene {
 
 }
 
+// Always render in landscape dimensions (1920x1080) regardless of device orientation
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'game-container',
@@ -1866,8 +1867,7 @@ const config: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: 1920,
-    height: 1080,
-    orientation: Phaser.Scale.Orientation.LANDSCAPE
+    height: 1080
   },
   scene: [PrototypeGame],
 };
