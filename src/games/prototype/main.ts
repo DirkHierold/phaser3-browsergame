@@ -1867,7 +1867,8 @@ const config: Phaser.Types.Core.GameConfig = {
   scale: {
     mode: Phaser.Scale.RESIZE,
     width: '100%',
-    height: '100%'
+    height: '100%',
+    orientation: 'landscape'
   },
   scene: [PrototypeGame],
 };
