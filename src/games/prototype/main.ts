@@ -173,7 +173,8 @@ class PrototypeGame extends Phaser.Scene {
     const music = this.sound.add('backgroundMusic');
     SoundManager.getInstance().setBackgroundMusic(music);
 
-    // Don't use ResizeManager or OrientationManager - keep game locked in landscape
+    // Setup responsive handling for portrait mode
+    ResizeManager.getInstance().initialize(this, this.handleResize.bind(this));
   }
 
   showTitleOverlay(): void {
@@ -1842,8 +1843,7 @@ class PrototypeGame extends Phaser.Scene {
 
 }
 
-// Always render in landscape dimensions (1920x1080) regardless of device orientation
-// Use NONE mode to prevent any automatic scaling or rotation
+// Portrait mode game - fill screen in portrait orientation
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'game-container',
@@ -1864,9 +1864,10 @@ const config: Phaser.Types.Core.GameConfig = {
     arcade: { gravity: { x: 0, y: 0 }, debug: false }
   },
   scale: {
-    mode: Phaser.Scale.NONE,
-    width: 1920,
-    height: 1080
+    mode: Phaser.Scale.RESIZE,
+    parent: 'game-container',
+    width: '100%',
+    height: '100%'
   },
   scene: [PrototypeGame],
 };
@@ -1874,40 +1875,4 @@ const config: Phaser.Types.Core.GameConfig = {
 // Register service worker for offline support
 registerServiceWorker();
 
-const game = new Phaser.Game(config);
-
-// Force canvas to maintain landscape dimensions regardless of device orientation
-game.events.once('ready', () => {
-  const canvas = document.querySelector('canvas');
-  if (canvas) {
-    // Lock canvas dimensions
-    canvas.style.width = '1920px';
-    canvas.style.height = '1080px';
-
-    // Scale canvas to fit viewport while maintaining aspect ratio
-    const scaleCanvas = () => {
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
-      const scale = Math.min(windowWidth / 1920, windowHeight / 1080);
-
-      canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
-      canvas.style.position = 'absolute';
-      canvas.style.left = '50%';
-      canvas.style.top = '50%';
-    };
-
-    scaleCanvas();
-
-    // Prevent any resize handling
-    window.addEventListener('resize', (e) => {
-      e.stopImmediatePropagation();
-      scaleCanvas();
-    }, true);
-
-    window.addEventListener('orientationchange', (e) => {
-      e.stopImmediatePropagation();
-      e.preventDefault();
-      scaleCanvas();
-    }, true);
-  }
-});
+new Phaser.Game(config);
