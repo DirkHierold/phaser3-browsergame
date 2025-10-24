@@ -18,10 +18,3 @@ html, body {
     top: 0;
     left: 0;
 }
-
-#game-container canvas {
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-}
