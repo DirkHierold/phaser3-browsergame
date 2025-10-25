@@ -1,31 +1,23 @@
 {
-    "name": "Prototype",
-    "short_name": "Prototype",
-    "description": "Phaser3 PWA Free-To-Play Game",
-    "start_url": "/src/games/prototype/index.html",
-    "scope": "/src/games/prototype/",
-    "background_color": "#000000",
-    "theme_color": "#000000",
-    "display": "fullscreen",
-    "orientation": "portrait",
-    "icons": [
-        {
-            "src": "/images/prototype.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "any maskable"
-        },
-        {
-            "src": "/images/prototype.png",
-            "sizes": "256x256",
-            "type": "image/png",
-            "purpose": "any maskable"
-        },
-        {
-            "src": "/images/prototype.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any maskable"
-        }
-    ]
+  "name": "Prototype",
+  "short_name": "Prototype",
+  "description": "Phaser3 PWA Free-To-Play Game",
+  "start_url": "/src/games/prototype/index.html",
+  "scope": "/src/games/prototype/",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/pwa-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
